@@ -1,0 +1,385 @@
+﻿@{
+    ViewData["Title"] = "Nhắc nhở";
+}
+
+<div>
+
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    @*   <div class="demo-section wide title">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <nav id="breadcrumb"></nav>
+    </div> *@
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+
+<script type="text/x-kendo-template" id="template_form_header">
+    <div style="width:100%"  class="d-flex justify-content-between flex-wrap">
+        <div class="d-flex flex-wrap me-2">
+            <input id="txtSearch" class="" />
+            <input id="dateStart" class="" placeholder="Thời gian từ"  />
+            <input id="dateEnd" class="" placeholder="Thời gian đến"  />
+            <button id='search' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button me-2 mb-sm-2' ><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+
+            <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success me-2 mb-sm-2 ' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
+            <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
+
+        </div>
+        <button id='exportExcel' class='k-button k-button-md k-rounded-md k-button-outline k-button-outline-error  mb-sm-2 ' style=''><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Export Excel</span></button>
+    </div>
+</script>
+<script type="text/javascript">
+    let gridId = "#gridId";
+    let record = 0;
+    let monday = ModayInLastWeekNearlest();
+    let sunday = SundayInWeekNearlest();
+</script>
+<script type="text/javascript">
+    // $("#breadcrumb").kendoBreadcrumb({
+    //     items: [
+    //         {
+    //             type: "rootitem",
+    //             href: "https://demos.telerik.com/kendo-ui/",
+    //             text: "All Components",
+    //             showText: true,
+    //             icon: "home",
+    //             showIcon: true
+    //         },
+    //         {
+    //             type: "item",
+    //             href: "/breadcrumb",
+    //             text: "Breadcrumb",
+    //             showText: true
+    //         },
+    //         {
+    //             type: "item",
+    //             href: "/index",
+    //             text: "Basic Usage",
+    //             showText: true
+    //         }
+    //     ]
+    // });
+
+    // kendo.ui.icon($(".refresh"), { icon: 'arrow-rotate-cw' });
+</script>
+<script type="text/javascript">
+    function formCreateAndEdit(titles = "THÊM NHẮC NHỞ", id = "") {
+
+        let myWindow = $("#window");
+        $("#window").html("<form id='formCreateAndEdit'></form>");
+
+        let formData = {
+            id: "",
+            userId: -1,
+            remindDate: new Date(),
+            content: "",
+        };
+        let strSubmit = "Thêm";
+        let element;
+        if (id != "") {
+
+            let datas = $( gridId).data("kendoGrid").dataSource.data();
+            element = datas.find(e => e.id == Number(id));
+            formData.id = element.id;
+            formData.userId = element.userId;
+            formData.remindDate = element.remindDate;
+            formData.content = element.content;
+
+            strSubmit = "Sửa";
+        }
+
+
+        $("#formCreateAndEdit").kendoForm({
+            orientation: "vertical",
+            formData: formData,
+            type: "group",
+            items: [
+
+                {
+                    field: "remindDate",
+                    title: "Ngày nhắc nhở",
+                    label: "Ngày nhắc nhở (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập Ngày nhắc nhở",
+                        required: true
+                    },
+                    // editor: {
+
+                    // }
+                },
+                {
+                    field: "content",
+                    title: "Nội dung:",
+                    label: "Nội dung:",
+                    // editor: function (container, options) {
+                    //     $(`<textarea id="content" name = "${options.field}" style=""> </textarea>`)
+                    //         .appendTo(container)
+                    //         .kendoTextBox();
+                    // },
+                    editor: "TextArea",
+                    editorOptions: { rows: 5 },
+                    // validation: {
+                    //     validationMessage: "Vui lòng nhập Tài khoản",
+                    //     required: true,
+                    // },
+                },
+
+
+            ],
+            messages: {
+                submit: strSubmit, clear: "Xóa"
+            },
+            validateField: function (e) {
+
+            },
+            submit: function (e) {
+                e.preventDefault();
+                let dataitem = {};
+                let date = $("#remindDate").data("kendoDatePicker").value();
+                let content_ = $("#content").val();
+                if (formData.id != "") {
+                    dataitem = {
+                        id: formData.id,
+                        userId: formData.userId,
+                        remindDate: date != null ? date : null,
+                        content: content_
+                    }
+                }
+                else {
+                    dataitem = {
+                        id: 0,
+                        userId: -1,
+                        remindDate: date != null ? date : null,
+                        content: content_,
+                    }
+
+                }
+                
+                $.ajax({
+                    url: "/Reminder/CreateOrUpdateReminder",
+                    type: "POST",
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(dataitem),
+                    success: function (d) {
+                        if (d.isSuccess == true) {
+
+                            $( gridId).data("kendoGrid").dataSource.filter({});
+                            myWindow.data("kendoWindow").close();
+                            notification.show({
+                                title: "Thông báo",
+                                message: "Lưu thành công!"
+                            }, "success");
+                        }
+                        else {
+                            notification.show({
+                                title: "Thông báo",
+                                message: d.errorMessageList[0]
+                            }, "error");
+
+                        }
+                    }
+                })
+            },
+            close: function (e) {
+                $(this.element).empty();
+            },
+        });
+
+
+        setTimeout(() => {
+            $("input[title='remindDate']").focus();
+        }, 500);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $( gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "500px",
+            title: "",
+            visible: false,
+            actions: ["Close"],
+            resizable: false,
+            draggable: false,
+            modal: true,
+            close: function (e) {
+                //$("#window").empty();
+                remove();
+            },
+        }).data("kendoWindow").title(titles).center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function EditReminder(id) {
+        formCreateAndEdit(titles = "SỬA THÔNG TIN NHẮC NHỞ", id = id)
+    }
+    function DeleteReminder(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA NHẮC NHỞ",
+            content: "Bạn có chắc chắn Đồng ý xóa nhắc nhở này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            let dataitem = {
+                reminderId: Number(id),
+            }
+            $.ajax({
+                url: "/Reminder/DeleteReminderById",
+                type: "POST",
+                //datatype: "json",
+                //contentType: "application/json",
+                data: dataitem,
+                success: function (d) {
+                    $( gridId).data("kendoGrid").dataSource.filter({});
+                },
+                error: function (d) {
+                    // $( gridId).data("kendoGrid").dataSource.filter({});
+                },
+            })
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+    function InitGrid() {
+        $( gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Reminder/GetReminderList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+
+                        if (type == "read") {
+                            let fromDate = kendo.toString($("#dateStart")?.val() ? $("#dateStart").data("kendoDatePicker").value() : monday, "MM/dd/yyyy");
+                            let toDate = kendo.toString($("#dateEnd")?.val() ? $("#dateEnd").data("kendoDatePicker").value() : sunday, "MM/dd/yyyy");
+                            return {
+                                SearchString: $("#txtSearch")?.val().trim(),
+                                FromDate: fromDate,
+                                ToDate: toDate,
+                                DefaultPageSize: data.pageSize,
+                                PageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    model: {
+                        id: "id",
+                        fields: {
+                            remindDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
+                    },
+                    // parse: function (response) {
+                    //     try {
+                    //         let data = response.data.data;
+                    //         for (let i = 0; i < data.length; i++) {
+                    //             data[i].stt = (i + 1) + (response.pageNumber - 1) * response.pageSize;;
+                    //             // data[i].dateCreate = kendo.parseDate(data[i].dateCreate);
+                    //         }
+                    //     }
+                    //     catch { }
+                    //     return response;
+                    // },
+                    data: "data.data",
+                    total: "data.total"
+                },
+            },
+            // height: 662,
+            selectable: true,
+            pageable: {
+                // input: true,
+                // numeric: false,
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            toolbar: kendo.template($("#template_form_header").html()),
+            columns: [
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100
+                },
+                {
+                    field: "user.userName",
+                    title: "Người tạo ",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+
+
+                {
+                    field: "remindDate",
+                    title: "Ngày nhắc nhở",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(remindDate, "dd/MM/yyyy")#',
+                    width: 120
+                },
+                {
+                    field: "content",
+                    title: "Nội dung",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                },
+
+
+                {
+                    field: "", title: "", width: 90, attributes: { style: "text-align: center;" },
+                    template: "<button title='Chỉnh sửa' onclick=EditReminder(#=id#) class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-warning mr-2'><span class='k-icon k-i-pencil k-button-icon'></span><span class='k-button-text d-none'>Sửa</span></button>\
+                                        <button title='Xoá' onclick=DeleteReminder(#=id#) class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-error'><span class='k-icon k-i-delete k-button-icon'></span><span class='k-button-text d-none'>Xóa</span></button>"
+                }
+            ],
+
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+        $("#dateStart").kendoDatePicker({ value: monday });
+        $("#dateEnd").kendoDatePicker({ value: sunday });
+        $("#txtSearch").kendoTextBox({
+            placeholder: "Từ khoá tìm kiếm...",
+        });
+        $("#txtSearch").data("kendoTextBox").wrapper.addClass("mb-sm-0 mb-2")
+
+        $("#create").on('click', function () {
+            formCreateAndEdit();
+        });
+        $("#search").on('click', function () {
+            $( gridId).data("kendoGrid").dataSource.filter({});
+        });
+    }
+</script>
+<script type="text/javascript">
+    InitGrid();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+</script>

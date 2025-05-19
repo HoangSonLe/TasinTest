@@ -1,0 +1,513 @@
+﻿@{
+    ViewData["Title"] = "Sơ đồ lưu trữ";
+}
+
+<div>
+
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    @*   <div class="demo-section wide title">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <nav id="breadcrumb"></nav>
+    </div> *@
+    <div id="divContent">
+        <div id="gridId" class="w-100">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+<style type="text/css">
+    .storageMapImage {
+        width: 200px;
+        height: 120px;
+    }
+</style>
+
+<script type="text/x-kendo-template" id="template_form_header">
+    <div style="width:100%"   class="d-flex justify-content-between flex-wrap">
+        <div class="d-flex flex-wrap me-2">
+        <input id="txtSearch" class=" me-2"  />
+        <button id='search' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button me-2 mb-sm-0 mb-2' ><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+
+        <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success me-2 mb-sm-0 mb-2 _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
+        <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
+        </div>
+        <button id='exportExcel' class='k-button k-button-md k-rounded-md k-button-outline k-button-outline-error mb-sm-0 mb-2 me-sm-2 me-0 position-sm-absolute position-relative end-0' style=''><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Export Excel</span></button>
+    </div>
+</script>
+<script type="text/javascript">
+    let gridId = "#gridId";
+    let record = 0;
+    let now = new Date();
+</script>
+<script type="text/javascript">
+    // $("#breadcrumb").kendoBreadcrumb({
+    //     items: [
+    //         {
+    //             type: "rootitem",
+    //             href: "https://demos.telerik.com/kendo-ui/",
+    //             text: "All Components",
+    //             showText: true,
+    //             icon: "home",
+    //             showIcon: true
+    //         },
+    //         {
+    //             type: "item",
+    //             href: "/breadcrumb",
+    //             text: "Breadcrumb",
+    //             showText: true
+    //         },
+    //         {
+    //             type: "item",
+    //             href: "/index",
+    //             text: "Basic Usage",
+    //             showText: true
+    //         }
+    //     ]
+    // });
+
+    // kendo.ui.icon($(".refresh"), { icon: 'arrow-rotate-cw' });
+</script>
+<script type="text/javascript">
+    function formCreateAndEdit(titles = "THÊM SƠ ĐỒ LƯU TRỮ", id = "") {
+
+        let myWindow = $("#window");
+        $("#window").html("<form id='formCreateAndEdit'></form>");
+
+        let formData = {
+            id: 0,
+            location: "",
+            description: "",
+            image: "",
+        };
+        let strSubmit = "Thêm";
+        let element;
+        if (id != "") {
+
+            let datas = $(gridId).data("kendoGrid").dataSource.data();
+            element = datas.find(e => e.id == Number(id));
+            formData.id = element.id;
+
+            formData.location = element.location;
+            formData.description = element.description;
+            formData.image = element.image;
+
+            strSubmit = "Sửa";
+        }
+
+
+        $("#formCreateAndEdit").kendoForm({
+            orientation: "vertical",
+            formData: formData,
+            type: "group",
+            items: [
+
+                {
+                    field: "location",
+                    title: "Khu vực",
+                    label: "Khu vực (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập Khu vực",
+                        required: true
+                    },
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    label: "Mô tả:",
+                    editor: "TextArea",
+                    editorOptions: { rows: 5 },
+                },
+                {
+                    label: "Hình ảnh sơ đồ:",
+                    field: "image",
+                    editor: function (container, options) {
+                        $('<input type="file" accept="image/*" name="image" id="image" />')
+                            .appendTo(container)
+                            .kendoUpload({
+                                multiple: false,
+                                async: {
+                                    // saveUrl: "/StorageMap/Upload",
+                                    saveUrl: "/File/UploadFile",
+                                    autoUpload: true,
+                                },
+                                select: function (e) {
+                                    console.log("File selected:", e.files[0].name);
+                                },
+                                validation: {
+                                    //allowedExtensions: [".pdf"],
+                                },
+                                upload: function (request) {
+                                    request.data = {
+                                        file: request.files[0].rawFile,
+                                        prefixFolderPath: "StorageMap"
+                                    };
+                                    return request;
+                                },
+                                success: function (e) {
+                                    if (e.response.isSuccess) {
+                                        $("#formCreateAndEdit").getKendoForm().editable.options.model.set("image", e.response.data.path);
+                                    }
+                                }
+                                //template: kendo.template($('#fileTemplate').html())
+                            });
+                    },
+                },
+
+
+            ],
+            messages: {
+                submit: strSubmit, clear: "Xóa"
+            },
+            validateField: function (e) {
+
+            },
+            submit: function (e) {
+                e.preventDefault();
+                let location_ = $("#location").val();
+                let description_ = $("#description").val();
+
+                formData.location = location_;
+                formData.description = description_;
+                formData.image = e.model.image;
+
+
+                let dataitem = formData;
+                $.ajax({
+                    url: "/StorageMap/CreateOrUpdateStorageMap",
+                    type: "POST",
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(dataitem),
+                    success: function (d) {
+                        if (d.isSuccess == true) {
+
+                            $(gridId).data("kendoGrid").dataSource.filter({});
+                            myWindow.data("kendoWindow").close();
+                            notification.show({
+                                title: "Thông báo",
+                                message: "Lưu thành công!"
+                            }, "success");
+                        }
+                        else {
+                            notification.show({
+                                title: "Thông báo",
+                                message: d.errorMessageList[0]
+                            }, "error");
+
+                        }
+                    }
+                })
+            },
+            close: function (e) {
+                $(this.element).empty();
+            },
+        });
+
+        if (formData.image != null && formData.image != "") {
+            $("#image").closest(".k-form-field-wrap").append("<div class='notificationFile k-color-success mt-10 fl-r'><span class='k-icon k-i-check-outline k-button-icon'></span> Đã có hình ảnh</div>");
+
+            let image = `<img src="${formData.image}" width=200px; height=120px; style="padding-right: 5px;">`
+            $("#image").closest(".k-form-field-wrap").append("<div>" + image + "</div>");
+        }
+
+        setTimeout(() => {
+            $("input[title='remindDate']").focus();
+        }, 500);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "500px",
+            title: "",
+            visible: false,
+            actions: ["Close"],
+            resizable: false,
+            draggable: false,
+            modal: true,
+            close: function (e) {
+                //$("#window").empty();
+                remove();
+            },
+        }).data("kendoWindow").title(titles).center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function EditStorageMap(id) {
+        formCreateAndEdit(titles = "SỬA THÔNG TIN SƠ ĐỒ LƯU TRỮ", id = id)
+    }
+    function DeleteStorageMap(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA SƠ ĐỒ LƯU TRỮ",
+            content: "Bạn có chắc chắn Đồng ý xóa sơ đồ lưu trữ này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            let dataitem = {
+                storageMapId: Number(id),
+            }
+            $.ajax({
+                url: "/StorageMap/DeleteStorageMapById",
+                type: "POST",
+                //datatype: "json",
+                //contentType: "application/json",
+                data: dataitem,
+                success: function (d) {
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                },
+                error: function (d) {
+                    // $(gridId).data("kendoGrid").dataSource.filter({});
+                },
+            })
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+    function InitGrid() {
+        let htmlToolbar = `
+            <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                   <div class="row gx-0 row-gap-2 w-100">
+                        <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                            <div class="pe-1">
+                                <label for="txtSearch">Tìm kiếm:</label>
+                                <input type="text" class=" w-100" id="txtSearch"/>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                            <div class="pe-1">
+                                <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="d-flex mt-2 flex-row w-100">
+                        <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
+                    </div>
+            </div>
+        `;
+
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/StorageMap/GetStorageMapList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+
+                        if (type == "read") {
+                            return {
+                                SearchString: $("#txtSearch")?.val().trim(),
+                                FromDate: "",
+                                ToDate: "",
+                                DefaultPageSize: data.pageSize,
+                                PageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
+                    },
+                    data: "data.data",
+                    total: "data.total"
+                },
+            },
+            resizable: true,
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            // toolbar: kendo.template($("#template_form_header").html()),
+            toolbar: htmlToolbar,
+            columns: [
+               
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center;" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100,
+                },
+                {
+                    field: "createdDate",
+                    title: "Ngày tạo",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(createdDate, "dd/MM/yyyy")#',
+                    width: 200
+                },
+                {
+                    field: "location",
+                    title: "Khu vực",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    width: 200
+                },
+                {
+                    field: "image",
+                    title: "Sơ đồ",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: function (dataItem) {
+                        let html = "";
+                        if (dataItem.image) html = `<img class="storageMapImage" onclick="OpenImage('${dataItem.image}')" src="${dataItem.image}" />`
+                        return html;
+                    },
+                    width: 240
+                },
+                {
+                    field: "", title: "", width: 90, attributes: { style: "text-align: center;" },
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    template: "<button title='Chỉnh sửa' onclick=EditStorageMap(#=id#) class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-warning mr-2  _permission_' data-enum='18'><span class='k-icon k-i-pencil k-button-icon'></span><span class='k-button-text d-none'>Sửa</span></button>\
+                            <button title='Xoá' onclick=DeleteStorageMap(#=id#) class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-error  _permission_' data-enum='19'><span class='k-icon k-i-delete k-button-icon'></span><span class='k-button-text d-none'>Xóa</span></button>"
+                }
+            ],
+
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+
+        $("#txtSearch").kendoTextBox({
+            placeholder: "Từ khoá tìm kiếm..."
+        });
+        // $("#txtSearch").data("kendoTextBox").wrapper.addClass("mb-sm-0 mb-2")
+        
+
+        $("#create").on('click', function () {
+            formCreateAndEdit();
+        });
+        $("#search").on('click', function () {
+            $(gridId).data("kendoGrid").dataSource.filter({});
+        });
+
+        $("#exportExcel").click(function (e) {
+            ExportExcel();
+        });
+    }
+    function ExportExcel() {
+        let datas = {
+            pageNumber: 1,
+            pageSize: 99999999,
+        }
+        let height = 30;
+        $.ajax({
+            type: "GET",
+            url: "/StorageMap/GetStorageMapList",
+            data: (datas),
+            success: function (data) {
+                let dataSheet1 = [
+                    {
+                        cells: [
+                            {
+                                value: "STT", textAlign: "center", background: "#428dd8"
+                            },
+                            {
+                                value: "Ngày tạo", textAlign: "center", background: "#428dd8"
+                            },
+                            {
+                                value: "Khu vực", textAlign: "center", background: "#428dd8"
+                            },
+                            {
+                                value: "Mô tả", textAlign: "center", background: "#428dd8"
+                            },
+                            {
+                                value: "Sơ đồ", textAlign: "center", background: "#428dd8"
+                            }
+                        ]
+                    }];
+                let dataSoureSheet1 = data.data.data;
+                for (let i1 = 0; i1 < dataSoureSheet1.length; i1++) {
+                    dataSheet1.push({
+                        cells: [
+                            {
+                                value: (i1 + 1),
+                                wrap: true,
+                                verticalAlign: "top"
+                            },
+                            {
+                                value: `${kendo.toString(kendo.parseDate(dataSoureSheet1[i1].createdDate), "dd/MM/yyyy")}`,
+                                wrap: true,
+                                verticalAlign: "top",
+                            },
+                            {
+                                value: `${dataSoureSheet1[i1].location}`,
+                                verticalAlign: "top",
+                                textAlign: "center"
+                            },
+                            {
+                                value: `${dataSoureSheet1[i1].description}`,
+                                verticalAlign: "top",
+                                textAlign: "center"
+                            },
+                            {
+                                value: `${dataSoureSheet1[i1].image}`,
+                                verticalAlign: "top",
+                                textAlign: "center"
+                            },
+                        ],
+
+                        height: height,
+                    })
+                }
+
+                var workbook = new kendo.ooxml.Workbook({
+                    sheets: [
+                        {
+                            name: "Sheet",
+                            columns: [{ autoWidth: true }, { autoWidth: true }, { autoWidth: true }, { autoWidth: true }, { autoWidth: true }],
+                            rows: dataSheet1,
+                        },
+                    ],
+                });
+                kendo.saveAs({
+                    dataURI: workbook.toDataURL(),
+                    fileName: "Danh sách Sơ đồ lưu trữ " + kendo.toString(now, "dd_MM_yyyy") + ".xlsx",
+                });
+            }
+        })
+    }
+
+    
+</script>
+<script type="text/javascript">
+    InitGrid();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+</script>

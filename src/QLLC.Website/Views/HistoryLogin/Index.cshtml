@@ -1,0 +1,179 @@
+﻿@{
+    ViewData["Title"] = "Lịch sử đăng ký và đăng nhập";
+}
+
+<div>
+
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    @*   <div class="demo-section wide title">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <nav id="breadcrumb"></nav>
+    </div> *@
+    <div id="divContent">
+        <div id="gridId" class="w-100">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+<style type="text/css">
+    .storageMapImage {
+        width: 200px;
+        height: 120px;
+    }
+</style>
+
+<script type="text/x-kendo-template" id="template_form_header">
+    <div style="width:100%"   class="d-flex justify-content-between flex-wrap">
+        <div class="d-flex flex-wrap me-2">
+        <input id="txtSearch" class=" me-2"  />
+        <button id='search' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button me-2 mb-sm-0 mb-2' ><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+        </div>
+      
+    </div>
+</script>
+<script type="text/javascript">
+    let gridId = "#gridId";
+    let record = 0;
+    let now = new Date();
+</script>
+<script type="text/javascript">
+   
+</script>
+<script type="text/javascript">
+    
+
+ 
+ 
+    function InitGrid() {
+        let htmlToolbar = `
+                <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                       <div class="row gx-0 row-gap-2 w-100">
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                                <div class="pe-1">
+                                    <label for="txtSearch">Tìm kiếm:</label>
+                                    <input type="text" class=" w-100" id="txtSearch"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                                <div class="pe-1">
+                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                 
+                                </div>
+                            </div>
+                        </div>
+
+                         
+                </div>
+            `;
+
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/HistoryLogin/GetHistoryLoginList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+
+                        if (type == "read") {
+                            return {
+                                SearchString: $("#txtSearch")?.val().trim(),
+                                FromDate: "",
+                                ToDate: "",
+                                DefaultPageSize: data.pageSize,
+                                PageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
+                    },
+                    data: "data.data",
+                    total: "data.total"
+                },
+            },
+            resizable: true,
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+           
+            toolbar: htmlToolbar,
+            columns: [
+
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center;" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100,
+                },
+                {
+                    field: "phoneNumber",
+                    title: "Số điện thoại",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200
+                },
+                {
+                    field: "action",
+                    title: "Hành vi",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 100
+                },
+               
+                {
+                    field: "updatedDate",
+                    title: "Lần cuối thao tác",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(createdDate, "dd/MM/yyyy HH:mm:ss")#',
+                    width: 200
+                },
+             
+            ],
+
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+
+        $("#txtSearch").kendoTextBox({
+            placeholder: "Từ khoá tìm kiếm..."
+        });
+       
+      
+        $("#search").on('click', function () {
+            $(gridId).data("kendoGrid").dataSource.filter({});
+        });
+
+     
+    }
+   
+
+
+</script>
+<script type="text/javascript">
+    InitGrid();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+</script>

@@ -1,0 +1,1364 @@
+﻿@{
+    ViewData["Title"] = "Linh cốt";
+}
+<style>
+    .image-preview {
+        height: 100px;
+        width: 100px;
+        object-fit: contain;
+    }
+
+    .k-form-buttons {
+        /*   position: absolute;
+                                bottom: 0;
+                                right: 0; */
+        padding-right: 12px;
+        padding-bottom: 12px;
+    }
+
+
+    .k-toolbar .k-input{
+        width: 100%;
+    }
+</style>
+<div>
+    <h4 id="title" class="demo-section wide title">@ViewData["Title"]</h4>
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+<script type="text/javascript">
+    let gridId = "#gridId";
+    var genderDatasource = @Html.Raw(Json.Serialize(@ViewBag.GenderDatasource));
+    var urnTypeDatasource = @Html.Raw(Json.Serialize(@ViewBag.UrnTypeDatasource));
+    function renderCreateOrEditForm(isCreate = true, dataUrn = {}) {
+        let myWindow = $("#window");
+        $("#window").html("<form id='formCreateAndEdit'></form>");
+
+        let formData = {
+            id: 0,
+            tenantId: 0,
+            name: "",
+            dharmaName: "",
+            birthDate: null,
+            deathDate: null,
+            gender: "",
+            urnType: "",
+            note: "",
+            towerLocation: "",
+            cabinetName: "",
+            locationNumber: 1,
+            rowNumber: 1,
+            boxNumber: 1,
+            expiredDate: null,
+            fileImageUrl: "",
+            ...dataUrn
+        };
+        let strSubmit = "Thêm";
+        let title = "THÊM MỚI"
+        let element;
+        if (isCreate == false) {
+            strSubmit = "Sửa";
+            title = "CẬP NHẬT";
+        }
+        var formDom = $("#formCreateAndEdit");
+        var form = formDom.kendoForm({
+            orientation: "vertical",
+            formData: formData,
+            type: "group",
+            layout: "grid",
+            grid: {
+                cols: 2,
+                gutter: 20
+            },
+            items: [
+                {
+                    type: "group",
+                    label: "Thông tin linh cốt",
+                    layout: "grid",
+                    grid: { cols: 2, gutter: 10 },
+                    items: [
+                        {
+                            field: "name",
+                            title: "Họ tên",
+                            label: "Họ tên (*):",
+                            colSpan: 2,
+                            validation: {
+                                // validationMessage: "Vui lòng nhập họ tên",
+                                required: true
+                            },
+                        },
+                        {
+                            field: "dharmaName",
+                            title: "Pháp danh",
+                            label: "Pháp danh:",
+                            colSpan: 2,
+                            // validation: {
+                            //     validationMessage: "Vui lòng nhập pháp danh",
+                            //     required: true
+                            // },
+                        },
+                        {
+                            field: "birthDate",
+                            editor: "DatePicker",
+                            label: "Ngày sinh (Ngày âm)(*):",
+                            title: "Ngày sinh (Ngày âm)",
+                            colSpan: 1,
+                            validation: {
+                                // validationMessage: "Vui lòng nhập ngày sinh",
+                                required: true
+                            },
+                            editorOptions: {
+                                // dateInput: true,
+                                min: new Date(1600, 0, 1),
+                                // max: new Date(2099, 11, 31),
+                            }
+                        },
+                        {
+                            field: "deathDate",
+                            editor: "DatePicker",
+                            label: "Ngày mất (Ngày âm)(*):",
+                            title: "Ngày mất (Ngày âm)",
+                            colSpan: 1,
+                            validation: {
+                                // validationMessage: "Vui lòng nhập ngày mất",
+                                required: true
+                            },
+                            // editorOptions: {
+                            //     dateInput: true,
+                            //     min: new Date(1900, 0, 1),
+                            //     max: new Date(2099, 11, 31),
+                            // }
+                        },
+                        {
+                            field: "gender",
+                            editor: "DropDownList",
+                            label: "Giới tính (*):",
+                            title: "Giới tính",
+                            colSpan: 2,
+                            validation: {
+                                validationMessage: "Vui lòng chọn giới tính",
+                                required: true
+                            },
+                            editorOptions: {
+                                optionLabel: "Chọn giới tính",
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                filter: "contains",
+                                dataSource: genderDatasource,
+                            }
+                        },
+                        {
+                            field: "urnType",
+                            editor: "DropDownList",
+                            label: "Linh hoặc Cốt (*):",
+                            title: "Linh hoặc Cốt",
+                            colSpan: 2,
+                            validation: {
+                                validationMessage: "Vui lòng chọn Linh hoặc Cốt",
+                                required: true
+                            },
+                            editorOptions: {
+                                optionLabel: "Chọn Linh hoặc Cốt",
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                filter: "contains",
+                                dataSource: urnTypeDatasource,
+                            }
+                        },
+
+                        {
+                            field: "familyMemberIdList",
+                            editor: "MultiSelect",
+                            label: "Người ký gửi (*):",
+                            colSpan: 2,
+                            editorOptions: {
+                                optionLabel: "Chọn người ký gửi",
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                filter: "contains",
+                                tagMode: "single",
+                                messages: {
+                                    singleTag: "người được chọn",
+                                },
+                                dataSource: {
+                                    type: "json",
+                                    serverFiltering: true,
+                                    transport: {
+                                        read: {
+                                            url: "/User/GetUserDropdownList",
+                                            dataType: "json",
+                                            data: function () {
+                                                return {
+                                                    searchString: $("#familyMemberIdList").data("kendoMultiSelect").input.val(), // The search string
+                                                    selectedIdList: formData.familyMemberIdList?.join(",")
+                                                };
+                                            }
+                                        }
+                                    },
+                                    schema: {
+                                        type: 'json',
+                                        data: "data",
+                                    },
+
+                                }
+                            }
+                        }
+                     
+                    ]
+                },
+                {
+                    type: "group",
+                    label: "Thông tin vị trí",
+                    layout: "grid",
+                    grid: { cols: 2, gutter: 10 },
+                    items: [                       
+                        {
+                            field: "locationNumber",
+                            label: "STT:",
+                            title: "STT",
+                            editor: "NumericTextBox",
+                            colSpan: 3,
+                            editorOptions: {
+                                min: 1,  // Minimum value
+                                max: 10000, // Maximum value
+                                format: "n0", // Format as an integer
+                                decimals: 0, // No decimals allowed
+                            },
+
+                        },
+                        // {
+                        //     field: "towerLocation",
+                        //     title: "Vị trí tháp",
+                        //     label: "Vị trí tháp :",
+                        //     editor: "TextBox",
+                        //     colSpan: 2,
+                        //     validation: {
+                        //         validationMessage: "Vui lòng nhập vị trí tháp",
+                        //         required: true
+                        //     },
+                        // },
+                        {
+                            field: "cabinetName",
+                            title: "Tên tủ",
+                            label: "Tên tủ :",
+                            editor: "TextBox",
+                            // validation: {
+                            //     validationMessage: "Vui lòng nhập tên tủ",
+                            //     required: true
+                            // },
+                        },
+                        {
+                            field: "rowNumber",
+                            label: "Số hàng :",
+                            title: "Số hàng",
+                            editor: "NumericTextBox",
+                            editorOptions: {
+                                min: 0,  // Minimum value
+                                max: 10000, // Maximum value
+                                format: "n0", // Format as an integer
+                                decimals: 0, // No decimals allowed
+                            },
+                            // validation: {
+                            //     required: true
+                            // }
+                        },
+                        {
+                            field: "boxNumber",
+                            label: "Ô số :",
+                            title: "Ô số",
+                            editor: "NumericTextBox",
+                            editorOptions: {
+                                min: 0,  // Minimum value
+                                max: 10000, // Maximum value
+                                format: "n0", // Format as an integer
+                                decimals: 0, // No decimals allowed
+                            },
+                            // validation: {
+                            //     required: true
+                            // }
+                        },
+                      
+                        {
+                            field: "expiredDate",
+                            editor: "DatePicker",
+                            label: "Hạn ký gửi (*):",
+                            title: "Hạn ký gửi",
+                            colSpan: 3,
+                            validation: {
+                                required: true
+                            },
+                        },
+                        {
+                            field: "fileImageUrl",
+                            label: {
+                                text: "Hình ảnh",
+                                encoded: false
+                            },
+                            colSpan: 3,
+                            editor: function (container, options) {//accept="image/*"
+                                $('<input type="file" accept="image/png, image/gif, image/jpeg, image/jpg, image/bmp" name="file" id="file" />').appendTo(container)
+                                    .kendoUpload({
+                                        validation: {
+                                            allowedExtensions: [".png", ".jpg", ".jpeg", ".bmp", ".svg"],
+                                        },
+                                        localization: {
+                                            select: "Tải lên hình ảnh",
+                                            dropFilesHere: "<span class='k-icon k-i-upload k-button-icon' style='margin-right: 10px;'></span>",
+                                            encoded: false
+                                        },
+                                        multiple: false,
+                                        async: {
+                                            saveUrl: "/File/UploadFile",
+                                            autoUpload: false
+                                        },
+                                        select: function (e) {
+                                            var fileList = e.files;
+                                            var wrapper = this.wrapper;
+
+                                            // fileList.forEach(function (file) {
+                                            //     setTimeout(function () {
+                                            //         addPreview(file, wrapper);
+                                            //     });
+                                            // });
+                                        },
+                                        success: function (e) {
+                                            if (e.response.isSuccess == true) {
+                                                $("#formCreateAndEdit").getKendoForm().editable.options.model.set("fileImageUrl", e.response.data.path);
+                                            }
+                                        }
+                                    });
+                                $(".k-dropzone").css({ "padding": "0" });
+                            },
+                        },
+                        {
+                            field: "note",
+                            title: "Ghi chú:",
+                            label: "Ghi chú:",
+                            editor: "TextArea",
+                            colSpan: 3,
+                            editorOptions: { rows: 3 },
+                        },
+
+                    ]
+                },
+            ],
+            messages: {
+                submit: strSubmit, clear: "Đặt lại"
+            },
+            close: function (e) {
+                $(this.element).empty();
+            },
+        }).getKendoForm();
+
+
+        formDom.kendoValidator({
+            messages: {
+                validBirthDate: "Ngày sinh không đúng định dạng",
+                validDeathDate: "Ngày mất không đúng định dạng",
+                validExpiredDate: "Ngày hạn ký gửi không đúng định dạng",
+                validRow: "Số hàng ô phải lớn hơn 0",
+                validBox: "Số ô phải lớn hơn 0",
+                nameLengthRegex: "Họ tên phải có độ dài từ 3-100 kí tự.",
+                nameNumberRegex: "Họ tên không thể chứa chữ số.",
+                nameRegex: "Họ tên không thể chứa ký tự đặc biệt",
+                familyMemberListRegex: "Người ký gửi không thể để trống",
+            },
+            rules: {
+                validBirthDate: function (input) {
+                    if (input.is("[name='birthDate']")) {
+                        try {
+                            const date = moment(input.val(), "DD/MM/YYYY", true);
+
+                            // Check if the date is valid
+                            return date.isValid();
+                        }
+                        catch (error) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                validDeathDate: function (input) {
+                    if (input.is("[name='deathDate']")) {
+                        try {
+                            const date = moment(input.val(), "DD/MM/YYYY", true);
+
+                            // Check if the date is valid
+                            return date.isValid();
+                        }
+                        catch (error) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                validExpiredDate: function (input) {
+                    if (input.is("[name='expiredDate']")) {
+                        try {
+                            const date = moment(input.val(), "DD/MM/YYYY", true);
+
+                            // Check if the date is valid
+                            return date.isValid();
+                        }
+                        catch (error) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                validBox: function (input) {
+                    if (input.is("[name='boxNumber']") && input.val() == 0) {
+                        return false;
+                    }
+                    return true;
+                },
+                validRow: function (input) {
+                    if (input.is("[name='rowNumber']") && input.val() == 0) {
+                        return false;
+                    }
+                    return true;
+                },
+                validRow: function (input) {
+                    if (input.is("[name='locationNumber']") && input.val() == 0) {
+                        return false;
+                    }
+                    return true;
+                },
+                nameLengthRegex: function (input) {
+                    if (input.is("[name='name']")) {
+                        let newName = $("[name='name']").val();
+                        var regrex = /^(?=.{0,2}$)|(?=.{101,}$)/;
+                        return !regrex.test(newName)
+                    }
+                    return true;
+                },
+                nameNumberRegex: function (input) {
+                    if (input.is("[name='name']")) {
+                        let newName = $("[name='name']").val();
+                        var regrex = /^[^0-9]+$/;
+                        return regrex.test(newName)
+                    }
+                    return true;
+                },
+                nameRegex: function (input) {
+                    if (input.is("[name='name']")) {
+    @{
+        string pattern = @"[!@#\$%\^&\*\(\),\.\?""\:\{\}\|<>]";
+        string jsPattern = pattern.Replace("\\", "\\\\"); // Escape thêm cho JavaScript
+    }
+                                                var criteria = [
+                            { regex: /^[\p{L}\p{M}\p{N}\p{Zs}]+$/u, message: "Họ tên không thể chứa ký tự đặc biệt." }
+                        ];
+                        let newName = $("[name='name']").val();
+                        var errors = criteria.filter(function (criterion) {
+                            return !criterion.regex.test(newName);
+                        }).map(function (criterion) {
+                            return criterion.message;
+                        });
+
+                        if (errors.length > 0) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                familyMemberListRegex: function (input) {
+                    if (input.is("[name='familyMemberIdList']")) {
+                        var familyMemberIdList = $("[name='familyMemberIdList']").val();
+                        if (familyMemberIdList == null || familyMemberIdList?.length == 0) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+            }
+        });
+
+        form.bind("submit", function (e) {
+            e.preventDefault();
+            var validator = formDom.data("kendoValidator");
+
+            if (validator.validate()) {
+                e.preventDefault();
+                let dataItem = {
+                    ...formData,
+                    ...e.model,
+                    gender: Number(e.model.gender),
+                    urnType: Number(e.model.urnType),
+                    familyMemberIdList: $("#familyMemberIdList").data("kendoMultiSelect").value(),
+                };
+                var response = ajax("POST", "/Urn/CreateOrUpdateUrn", dataItem, () => {
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                    myWindow.data("kendoWindow").close();
+                });
+            }
+            else {
+                return false;
+            }
+        });
+        RegisterPreventInputCharOnInputEvent("boxNumber");
+        RegisterPreventInputCharOnInputEvent("rowNumber");
+        RegisterPreventInputCharOnInputEvent("locationNumber");
+
+
+
+        //Set ảnh khi edit
+        if (formData.fileImageUrl != null && formData.fileImageUrl != "" && formData.isHasImage) {
+            $("#file").closest(".k-form-field-wrap").append("<div class='notificationFile k-color-success mt-10 fl-r'><span class='k-icon k-i-check-outline k-button-icon'></span> Đã có hình ảnh</div>");
+            var srcUrl = formData.fileImageUrl == formData.fileImageUrlWithLowQuality ? formData.fileImageUrlWithLowQuality : formData.fileImageUrl;
+            let image = `<img src="${formData.fileImageUrlWithLowQuality}" width=100px; height=100px; style="padding-right: 5px;">`
+            $("#file").closest(".k-form-field-wrap").append("<div>" + image + "</div>");
+        }
+        setTimeout(() => {
+            $("input[title='name']").focus();
+        }, 500);
+
+        function addPreview(file, wrapper) {
+            var raw = file.rawFile;
+            var reader = new FileReader();
+
+            if (raw) {
+                reader.onload = function (event) {
+                    // var preview = $("<img class='image-preview'>").attr("src", this.result);
+                    var preview = $('<img>', {
+                        src: event.target.result,
+                        width: 100,
+                        height: 100
+                    });
+                    wrapper.find(".k-file[data-uid='" + file.uid + "'] .k-file-group-wrapper")
+                        .replaceWith(preview);
+                };
+                reader.readAsDataURL(raw);
+            }
+        }
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            title: "",
+            // minWidth:"20rem",
+            width: "80%",
+            height: "80%",
+            visible: false,
+            actions: ["Close"],
+            // resizable: false,
+            draggable: false,
+            modal: true,
+            close: function (e) {
+                //$("#window").empty();
+                remove();
+            },
+        }).data("kendoWindow").title(title).center();
+        myWindow.data("kendoWindow").open();
+    }
+    function RegisterPreventInputCharOnInputEvent(id) {
+        // Prevent non-numeric characters from being input
+        $(`#${id}`).on("keydown", function (e) {
+            // Allow: backspace, delete, tab, escape, enter, and .
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13]) !== -1 ||
+                // Allow: Ctrl/cmd+A, Ctrl/cmd+C, Ctrl/cmd+V, Ctrl/cmd+X
+                (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                (e.keyCode === 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+                (e.keyCode === 86 && (e.ctrlKey === true || e.metaKey === true)) ||
+                (e.keyCode === 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+                // Allow: home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                // let it happen, don't do anything
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+    }
+    async function ExportExcel() {
+        let dataSheet = [];
+        var searchModel = getSearchModel();
+        let postData = {
+            ...searchModel,
+            pageSize: 999999999,
+            pageNumber: 1
+        }
+      
+        let height = 100;
+        
+        let dataSourceUrn = null;
+        var response = await ajax("GET", "/Urn/GetUrnList", postData, (urnResponse) => {
+            dataSourceUrn = urnResponse.data.data;
+        }, null, false);
+        if (dataSourceUrn == null) return;
+        for (let index = 0; index < dataSourceUrn.length; index++) {
+            dataSheet.push({
+                stt: index + 1,               
+                ngayKyGoi: kendo.toString(kendo.parseDate(dataSourceUrn[index].createdDate), "dd/MM/yyyy"),
+                nguoiGoi: dataSourceUrn[index].familyMemberList.map(i => i.name).join("\n"),
+                diaChi: dataSourceUrn[index].familyMemberList.map(i => i.address).join("\n"),
+                soDienThoai: dataSourceUrn[index].familyMemberList.map(i => i.phone).join("\n"),
+                soTTLinh: dataSourceUrn[index].locationNumber,
+                huonglinh: dataSourceUrn[index].name,
+                phapdanh: (dataSourceUrn[index].dharmaName != "" ? dataSourceUrn[index].dharmaName : ""),
+                linhcot: dataSourceUrn[index].urnTypeName,
+                gioitinh: dataSourceUrn[index].gender != 0 ? (dataSourceUrn[index].gender == 1 ? "Nam" : "Nữ" )  : "",
+                sinh: kendo.toString(kendo.parseDate(dataSourceUrn[index].birthDate), "dd/MM/yyyy"),
+                tu: kendo.toString(kendo.parseDate(dataSourceUrn[index].deathDate), "dd/MM/yyyy"),
+                // nam: dataSourceUrn[index].gender == 1 ? "X" : "",
+                // nu: dataSourceUrn[index].gender == 2 ? "Y" : "",
+                tenTu: dataSourceUrn[index].cabinetName,
+                soHang: dataSourceUrn[index].rowNumber,
+                oSo: dataSourceUrn[index].boxNumber,
+                ghiChu: dataSourceUrn[index].note,
+            });
+        }
+
+        let columns = [
+            { field: "stt", title: "Stt", width: 50 },
+        
+            { field: "ngayKyGoi", title: "Ngày ký gửi", width: 100 },
+            { field: "nguoiGoi", title: "Người Gởi\nHọ Và Tên\nPháp Danh", width: 150 },
+            { field: "diaChi", title: "Địa Chỉ", width: 200 },           
+            { field: "soDienThoai", title: "Số Điện Thoại", width: 150 },
+            { field: "soTTLinh", title: "STT linh cốt", width: 100 },
+            { field: "huonglinh", title: "Hương linh", width: 150 },
+            { field: "phapdanh", title: "Pháp danh", width: 150 },
+            { field: "linhcot", title: "Linh/Cốt", width: 70 },
+            { field: "gioitinh", title: "Giới tính", width: 70 },
+            { field: "sinh", title: "Sanh", width: 100 },
+            { field: "tu", title: "Tử", width: 100 },
+            // { field: "nam", title: "Nam", width: 70 },
+            // { field: "nu", title: "Nữ", width: 70 },
+            { field: "tenTu", title: "Tên Tủ", width: 150 },
+            { field: "soHang", title: "Số Hàng", width: 70 },
+            { field: "oSo", title: "Ô Số", width: 50 },
+            { field: "ghiChu", title: "Ghi chú", width: 80 }
+         
+        ];
+
+        function createHeaderRow(columns) {
+            return {
+                height: 30, // Điều chỉnh độ cao của hàng theo ý bạn
+                cells: columns.map(col => ({
+                    value: col.title,
+                    background: "#428dd8",
+                    textAlign: "center",
+                    color: "#000000",
+                    bold: true,
+                    fontSize: 12,
+                    //wrap: true,
+                    verticalAlign: "center",
+                    border: {
+                        top: { style: "thin", color: "#FF0000" },
+                        bottom: { style: "thin", color: "#FF0000" },
+                        left: { style: "thin", color: "#FF0000" },
+                        right: { style: "thin", color: "#FF0000" }
+                    }
+                }))
+            };
+        }
+
+       
+        let dayCreate = "lập ngày "  + kendo.toString(new Date(), "dd/MM/yyyy");
+        var workbook = new kendo.ooxml.Workbook({
+            sheets: [
+                {
+                    name: "Danh sách linh cốt ngày",
+                    columns: columns,
+                  
+                    //mergedCells: ["C3:C4","H3:H4"],
+                    rows: [
+                        {
+                            cells: [
+                                { value: "DANH SÁCH LINH CỐT " + `${dayCreate}`, fontSize: 16, bold: true, textAlign: "center", colSpan: columns.length }
+                            ]
+                        },
+                        // {
+                        //     cells: [
+                        //         {
+                        //             value: `${dayCreate}`, fontSize: 14, bold: true, textAlign: "center", colSpan: columns.length
+                        //         }
+                        //     ]
+                        // },
+                        // createHeaderRow(columns),
+                        {
+                            height: 30,
+                            cells: [
+                                { value: "STT", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                // { value: "Linh hoặc Cốt", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Ngày ký gửi", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Người ký gửi", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                // { value: "Người Gởi\nHọ Và Tên\nPháp Danh", background: "#428dd8", color: "#000000", bold: true, textAlign: "center", verticalAlign: "center", wrap: true },
+                              
+                                { value: "Địa chỉ", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Số điện thoại", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "STT linh cốt", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                //{ value: "Hương linh", background: "#428dd8", color: "#000000", bold: true, textAlign: "center", verticalAlign: "center", wrap: true },
+                                { value: "Hương linh", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Pháp danh", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Linh/Cốt", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Giới tính", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Sanh", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Tử", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                // { value: "Nam", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                // { value: "Nữ", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Tủ", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Hàng", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Số", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                { value: "Ghi chú", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                                // { value: "Vị Trí Tháp", background: "#428dd8", color: "#000000", bold: true, textAlign: "center", verticalAlign: "center", colSpan: 3 }
+                            ],
+                            // mergeCells: [
+                            //     { colSpan: 1, rowSpan: 2, index: 1 },
+                            // ]
+                        },
+                        // {
+                        //     cells: [
+                        //         { value: "", background: "#428dd8" }, // STT empty cell
+                        //         { value: "", background: "#428dd8" }, // STT empty cell
+                        //         { value: "", background: "#428dd8" }, // Ngày Ký Gởi empty cell
+                        //         { value: "", background: "#428dd8" }, // Người Gởi empty cell
+                        //         { value: "", background: "#428dd8" }, // Quan Hệ empty cell
+                        //         { value: "", background: "#428dd8" }, // Địa chỉ empty cell
+                        //         { value: "", background: "#428dd8" }, // Số Điện Thoại empty cell
+                        //         { value: "", background: "#428dd8" }, // Số TT empty cell
+                        //         { value: "", background: "#428dd8" }, // Hương Linh empty cell
+                        //         { value: "", background: "#428dd8" }, // Sinh empty cell
+                        //         { value: "", background: "#428dd8" }, // Tử empty cell
+                        //         { value: "", background: "#428dd8" }, // Tử empty cell
+                        //         { value: "", background: "#428dd8" }, // Tử empty cell
+                        //         { value: "", background: "#428dd8" }, // Tử empty cell
+                            
+                        //         // { value: "Tên Tủ", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                        //         // { value: "Số Hàng", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" },
+                        //         // { value: "Ô Số", background: "#428dd8", color: "#000000", bold: true, textAlign: "center" }
+                        //     ]
+                        // },
+
+
+
+
+                        ...dataSheet.map(item => ({
+                            cells: columns.map(col => ({
+                                value: item[col.field], 
+                                wrap: true,
+                                textAlign: "center",
+                                border: {
+                                    top: { style: "thick", color: "#FF0000", size: 12 },
+                                    bottom: { style: "thick", color: "#FF0000", size: 12 },
+                                    left: { style: "thick", color: "#FF0000", size: 2 },
+                                    right: { style: "thick", color: "#FF0000" }
+                                }
+                            }))
+                           
+                        }))
+                    ]
+                }
+            ]
+        });
+
+        kendo.saveAs({
+            dataURI: workbook.toDataURL(),
+            fileName: "Danh sách linh cốt _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
+        });
+    }
+
+    async function editUrn(id) {
+        var response = ajax("GET", "/Urn/GetUrnById", { urnId: id }, (urnResponse) => {
+            renderCreateOrEditForm(false, urnResponse.data);
+        }, null, false);
+    }
+    function deleteUrn(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA LINH CỐT",
+            content: "Bạn có chắc chắn xóa linh cốt này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            var response = ajax("GET", "/Urn/DeleteUrnById", {
+                urnId: id
+            }, () => {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            });
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+    function getSearchModel() {
+        var birthAndDeathDateRangepicker = $("#birthAndDeathDateRangepicker").data("kendoDateRangePicker")?.range();
+        var expiredDateRangepicker = $("#expiredDateRangepicker").data("kendoDateRangePicker")?.range();
+        let searchString = $("#searchString").val();
+        let gender = $("#genderSearch").val();
+        let urnType = $("#urnTypeSearch").val();
+        return {
+            searchString,
+            fromBirthAndDeathDate: birthAndDeathDateRangepicker ? kendo.toString(kendo.parseDate(birthAndDeathDateRangepicker.start), "MM/dd/yyyy") : null,
+            toBirthAndDeathDate: birthAndDeathDateRangepicker ? kendo.toString(kendo.parseDate(birthAndDeathDateRangepicker.end), "MM/dd/yyyy") : null,
+            fromExpiredDate: expiredDateRangepicker ? kendo.toString(kendo.parseDate(expiredDateRangepicker.start), "MM/dd/yyyy") : null,
+            toExpiredDate: expiredDateRangepicker ? kendo.toString(kendo.parseDate(expiredDateRangepicker.end), "MM/dd/yyyy") : null,
+            gender,
+            urnType,
+        }
+    }
+    function InitGrid() {
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Urn/GetUrnList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    model: {
+                        id: "id",
+                        fields: {
+                            remindDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
+                    },
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            toolbar: "<div id='toolbars' style='width:100%' class='w-100 d-flex flex-column'></div>",
+            // toolbar: kendo.template($("#template_form_header").html()),
+            columns: [
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 50
+                },
+                {
+                    field: "urnTypeName",
+                    title: "Loại",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 50
+                },
+                {
+                    title: "Hình ảnh",
+                    field: "",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: 'text-align: center' },
+                    template: function (data) {
+                        return `<img style='width:120px;height:80px;' onclick="OpenImage('${data.fileImageUrl}','Ảnh chi tiết', 'max-width: 50rem; max-height:40rem;')" src="${data.fileImageUrlWithLowQuality}?width=120&height=80" />`;
+                        // return `<img src='${data.fileImageUrl}' style='width:120px;height:80px;'/>`;
+                    },
+                    width: 150,
+                },
+                {
+                    field: "name",
+                    title: "Thông tin ",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 220,
+                    template: function (data) {
+                        return `<div>
+                                                            <div class="infor-container">
+                                                                <div class="title">Họ tên:</div>
+                                                                <div class="content">${data.name}</div>
+                                                            </div>
+                                                            <div class="infor-container">
+                                                                <div class="title">Pháp danh:</div>
+                                                                <div class="content">${data.dharmaName}</div>
+                                                            </div>
+                                                            <div class="infor-container">
+                                                                <div class="title">Giới tính:</div>
+                                                                <div class="content">${data.genderName}</div>
+                                                            </div>
+                                                       </div>`
+                    }
+                },
+                {
+                    field: "birthDate",
+                    title: "Ngày sinh - mất (Ngày âm)",
+                    width: 200,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: function (data) {
+                        var birthDateString = kendo.toString(kendo.parseDate(data.birthDate), "dd/MM/yyyy")
+                        var deathDateString = kendo.toString(kendo.parseDate(data.deathDate), "dd/MM/yyyy")
+                        return `${birthDateString} - ${deathDateString}`
+                    },
+                },
+                {
+                    field: "expiredDate",
+                    title: "Thời hạn ký gửi",
+                    width: 150,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(kendo.parseDate(expiredDate), "dd/MM/yyyy")#',
+                },
+                {
+                    field: "familyMemberList",
+                    title: "Người ký gửi",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 270,
+                    template: function (data) {
+                        var html = "";
+                        for (let i = 0; i < data.familyMemberList.length; i++) {
+                            html += `<li>${data.familyMemberList[i].name} - ${data.familyMemberList[i].phone}</li>`;
+                        }
+                        return `<ul>${html}</ul>`
+                    },
+
+                },
+                {
+                    field: "locationNumber",
+                    title: "STT linh cốt",
+                    width: 100,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                },
+                {
+                    field: "location",
+                    title: "Vị trí linh cốt",
+                    width: 130,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    template: function (data) {
+                        return `<div>
+                                                                <div class="infor-container">
+                                                                    <div class="title">Tên tủ:</div>
+                                                                    <div class="content">${data.cabinetName}</div>
+                                                                </div>
+                                                                <div class="infor-container">
+                                                                    <div class="title">Số hàng:</div>
+                                                                    <div class="content">${data.rowNumber}</div>
+                                                                </div>
+                                                                 <div class="infor-container">
+                                                                    <div class="title">Ô số:</div>
+                                                                    <div class="content">${data.boxNumber}</div>
+                                                                </div>
+                                                           </div>`
+                    }
+                },
+               
+                {
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
+                    width: 150,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: function (data) {
+                        var updatedDateString = kendo.toString(kendo.parseDate(data.updatedDate), "dd/MM/yyyy")
+                        return `${updatedDateString}`;
+                    },
+                },
+                {
+                    field: "updatedByName",
+                    title: "Người cập nhật",
+                    width: 170,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                },
+                {
+                    title: "Thao tác",
+                    width: 200,
+                    field: "",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: 'text-align: center;' },
+                    template: "<button style='margin-right:5px;' onclick=editUrn(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum= '4' > <span class='k-icon k-i-track-changes k-button-icon'> </span></button >\
+                                                                       <button onclick=deleteUrn(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error  _permission_' data-enum= '5' ><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                }
+            ],
+
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+
+    }
+    function InitKendoToolBar() {
+            let html =`
+    <div class="search-container">
+            <div class="row gx-0 row-gap-2 w-100">
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12">
+                    <div class="pe-1">
+                        <label for="searchString">Tìm kiếm:</label>
+                        <input type="text" class="w-100" id="searchString" />
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                    <div class="px-1">
+                        <label for="genderSearch">Giới tính</label>
+                        <input type="text" class="w-100" id="genderSearch" />
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                    <div class="px-1">
+                        <label for="urnTypeSearch">Linh hoặc Cốt</label>
+                        <input type="text" class="w-100" id="urnTypeSearch" />
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12">
+                    <div class="px-1">
+                        <label for="birthAndDeathDateRangepickerLabel">Ngày sinh-mất (Ngày âm):</label>
+                        <div
+                            id="birthAndDeathDateRangepicker"
+                            class="gap-1 justify-content-between w-100"
+                            title="Ngày sinh-mất (Ngày âm)"
+                        ></div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12">
+                    <div class="pe-1">
+                        <label for="expiredDateRangepickerLabel">Hạn ký gửi:</label>
+                        <div
+                            id="expiredDateRangepicker"
+                            class="gap-1 justify-content-between w-100"
+                            title="Hạn ký gửi"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex mt-2 flex-row">
+                <button
+                    id="search"
+                    title="Tìm kiếm"
+                    class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary me-2 k-button-solid-base k-icon-button"
+                ></button>
+                <button
+                    id="create"
+                    style=""
+                    class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success me-2"
+                >
+                    <span class="k-icon k-i-plus k-button-icon _permission_" data-enum="2"> </span
+                    ><span class="k-button-text">Thêm</span>
+                </button>
+                <button
+                    id="exportExcel"
+                    class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"
+                >
+                    <span class="k-icon k-i-file-excel k-button-icon"></span
+                    ><span class="k-button-text">Export Excel</span>
+                </button>
+
+                 <button
+                    type="button"
+                    id="toggleSearch"
+                    class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                     style="margin-left: 5px;"
+                >
+                    <span class="k-icon k-i-arrow-chevron-up"></span>
+                    <span class="k-button-text">Ẩn tìm kiếm</span>
+                </button>
+            </div>
+    </div>
+        `;
+        $("#toolbars").html(html);
+
+        $("#genderSearch").kendoDropDownList({
+            optionLabel: "Tất cả",
+            dataSource: genderDatasource,
+            dataTextField: "text",
+            dataValueField: "value",
+        });
+        $("#urnTypeSearch").kendoDropDownList({
+            optionLabel: "Tất cả",
+            dataSource: urnTypeDatasource,
+            dataTextField: "text",
+            dataValueField: "value",
+        });
+        $("#search").kendoButton({
+            icon: "search"
+        });
+        $("#search").click(async function (e) {
+            var grid = $(gridId).data("kendoGrid");
+            grid.dataSource.page(1);
+            grid.dataSource.filter({});
+        });
+        $("#exportExcel").click(async function (e) {
+            ExportExcel();
+        });
+        $("#searchString").kendoTextBox({
+            icon: {
+                type: "search",
+                position: "end"  // Có thể là "start" hoặc "end"
+            },
+            placeholder: "Họ tên, pháp danh, tủ, hàng, ô"
+        });
+        $("#searchString").attr("title", "Nhập thông tin cần tìm: Họ tên, pháp danh, tủ, hàng, ô");
+        // $("#searchNoteString").kendoTextBox({
+        //     icon: {
+        //         type: "search",
+        //         position: "end"  // Có thể là "start" hoặc "end"
+        //     },
+        // });
+        $("#birthAndDeathDateRangepicker").kendoDateRangePicker({
+            calendarButton: true,
+            min: new Date(1800, 0, 1),
+            format: "dd-MM-yyyy",
+            labels: false
+        });
+        let options = {
+            messages: {
+                "year": "yyyy",
+                "month": "MM",
+                "day": "dd",
+            }
+        }
+        $("#birthAndDeathDateRangepicker").data("kendoDateRangePicker")._startDateInput.setOptions(options);
+        $("#birthAndDeathDateRangepicker").data("kendoDateRangePicker")._endDateInput.setOptions(options);
+
+        $("#expiredDateRangepicker").kendoDateRangePicker({
+            calendarButton: true,
+            min: new Date(2023, 0, 1),
+            format: "dd-MM-yyyy",
+            labels: false
+        });
+        $("#expiredDateRangepicker").data("kendoDateRangePicker")._startDateInput.setOptions(options);
+        $("#expiredDateRangepicker").data("kendoDateRangePicker")._endDateInput.setOptions(options);
+
+        $("#create").kendoButton({
+            icon: "plus"
+        });
+
+        $("#export").click(async function (e) {
+            let grid = $(gridId).data("kendoGrid");
+            grid.saveAsExcel();
+        });
+
+
+        $("#create").on('click', function () {
+            renderCreateOrEditForm();
+        });
+
+
+        // UPLOAD EXCEL
+        $("#uploadExcel").on("click", function () {
+            $("#fileUpload").click();
+        });
+
+        $("#fileUpload").kendoUpload({
+            async: {
+                saveUrl: "/Urn/ImportExcelFile",
+            },
+            success: function (e) {
+                let data = e?.response;
+                notification.show({
+                    title: "Thông báo",
+                    message: data.successMessageList[0],
+                    allowHideAfter: 1000
+                }, data.isSuccess == true ? "success":"error");
+                if (data.isSuccess == true) onReloadGrid("#grid");
+                else if (data.isSuccess == false && data.data != null) {
+                    // $("#ExcelErrors").html("<div id='gridExcelMedicineErrors'></form>");
+                    // $("#ExcelErrors").kendoWindow({
+                    //     title: "Danh sách thuốc lỗi ",
+                    //     minWidth: "600px",
+                    //     maxWidth: "80%",
+                    //     maxHeight: "80%",
+                    //     visible: false,
+                    //     resizable: false,
+                    //     modal: true,
+                    //     actions: [
+                    //         "Close"
+                    //     ],
+                    //     // close: onClose
+                    // });
+                    // $("#ExcelErrors").data("kendoWindow").center().open();
+                    console.log(data.data)
+                    onLoadExcelMedicineErrors(data.data);
+
+                }
+            }
+        });
+    };
+
+    function handleToggleFormSearch(){
+        const toggleBtn = document.getElementById('toggleSearch');
+        const iconElement = toggleBtn.querySelector('.k-icon');
+        const searchForm = document.querySelector('.row.gx-0');
+        const otherButtons = document.querySelectorAll('.d-flex.mt-2 > :not(#toggleSearch)');
+        if(_isMobile){
+            searchForm.style.display = 'none';
+            otherButtons.forEach(btn => btn.style.display = 'none');
+            toggleBtn.querySelector('.k-button-text').textContent = 'Hiện tìm kiếm';
+            document.getElementById('create').querySelector('.k-button-text').textContent = '';
+            document.getElementById('exportExcel').querySelector('.k-button-text').textContent = '';
+            toggleBtn.querySelector('.k-icon').classList.toggle('k-i-arrow-chevron-down');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+        
+       
+        toggleBtn.addEventListener('click', function() {
+            const isVisible = searchForm.style.display !== 'none';
+
+            // Toggle visibility
+            searchForm.style.display = isVisible ? 'none' : 'flex';
+            otherButtons.forEach(btn => btn.style.display = isVisible ? 'none' : 'block');
+
+            // Update button
+            toggleBtn.querySelector('.k-button-text').textContent = isVisible ? 'Hiện tìm kiếm' : 'Ẩn tìm kiếm';
+            iconElement.classList.remove('k-i-arrow-chevron-down', 'k-i-arrow-chevron-up');
+            iconElement.classList.add(isVisible ? 'k-i-arrow-chevron-down' : 'k-i-arrow-chevron-up');
+            resizeGrid();
+            resizeWrapper();
+        });
+    });
+    }
+    function onLoadExcelMedicineErrors(data) {
+        // $("#gridExcelMedicineErrors").kendoGrid({
+        //     dataSource: {
+        //         data: data,
+        //         pageSize: pagesize,
+        //     },
+        //     pageable: {
+        //         pageSizes: true,
+        //         buttonCount: 5
+        //     },
+        //     columns: [
+        //         {
+        //             title: "Tên thuốc",
+        //             field: "medicine_name",
+        //             headerAttributes: { style: "text-align: center; justify-content: center" },
+        //             attributes: { style: 'text-align: center' },
+        //             width: "15%",
+        //         },
+        //         {
+        //             title: "Mã thuốc",
+        //             field: "medicine_code",
+        //             headerAttributes: { style: "text-align: center; justify-content: center" },
+        //             attributes: { style: 'text-align: center' },
+        //         },
+        //         {
+        //             title: "Giá thuốc",
+        //             field: "medicine_cost",
+        //             headerAttributes: { style: "text-align: center; justify-content: center" },
+        //             template: "#: kendo.toString(medicine_cost,'n0') #",
+        //             attributes: { style: 'text-align: center' },
+        //         },
+        //         {
+        //             title: "Lý do",
+        //             field: "error_message",
+        //             headerAttributes: { style: "text-align: center; justify-content: center" },
+        //             attributes: { style: 'text-align: center' },
+        //         },
+        //     ],
+        //  });
+
+        ExportExcelErrors(data);
+    }
+
+    function ExportExcelErrors(dataSoureSheet1) {
+        let dataSheet1 = [
+            {
+                cells: [
+                    {
+                        value: "Họ Và Tên", textAlign: "center", background: "#428dd8"
+                    },
+                    {
+                        value: "Số điện thoại", textAlign: "center", background: "#428dd8"
+                    },
+                   
+                ]
+            }];
+        // let dataSoureSheet1 = $("#gridDrugStore").data("kendoGrid").dataSource.data();
+        for (let i1 = 0; i1 < dataSoureSheet1.length; i1++) {
+            dataSheet1.push({
+                cells: [
+                    { value: dataSoureSheet1[i1].name },
+                    { value: dataSoureSheet1[i1].phone },
+                ]
+            })
+        }
+        /////sheet.range("A1").format(kendo.spreadsheet.formats.currency)
+        var workbook = new kendo.ooxml.Workbook({
+            sheets: [
+                {
+                    name: "Danh sách lỗi",
+                    columns: [{ autoWidth: true }, { autoWidth: true }],
+                    rows: dataSheet1,
+                },
+            ],
+        });
+        kendo.saveAs({
+            dataURI: workbook.toDataURL(),
+            fileName: "Danh sách người dùng lỗi _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
+        });
+    }
+
+
+    function resizeGrid() {
+        var gridElement = $(gridId),
+            dataArea = gridElement.find(".k-grid-content"),
+            gridHeight = gridElement.innerHeight(),
+            otherElements = gridElement.children().not(".k-grid-content"),
+            otherElementsHeight = 0;
+        otherElements.each(function () {
+            otherElementsHeight += $(this).outerHeight();
+        });
+        dataArea.height(gridHeight - otherElementsHeight);
+    }
+
+    function resizeWrapper() {
+        // $("#tenant-panel").height($('#body').innerHeight() - $('#header').height());
+        $(gridId).height($("main").height() - $('#title').height() - 32 - 8);
+    }
+</script>
+</script>
+<script type="text/javascript">
+    InitGrid();
+    InitKendoToolBar();
+    handleToggleFormSearch();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+
+</script>
+<style>
+    .k-form-buttons {
+        justify-content: flex-end;
+    }
+</style>

@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Quản lý chùa";
+}
+
+
+
+<div id="tenant-panel" class="report-panel">
+    <div id="tenant-title" class="demo-section wide title">
+        <span style="font-size: 30px;">Quản lý chùa</span>
+    </div>
+    <div class="formDisplay">
+        <div id="tenantListGrid" class="report-grid"></div>
+    </div>
+    <div id="tenant-bottom" class="report-bottom"></div>
+    <div id="NotificationDelete" style="display:none;"></div>
+    <div id="window" style="display:none;"></div>
+</div>
+
+<script>
+
+    $(window).resize(function () {
+        resizeWrapper();
+        resizeGrid();
+    });
+    function resizeGrid() {
+        var gridElement = $("#tenantListGrid"),
+            dataArea = gridElement.find(".k-grid-content"),
+            gridHeight = gridElement.innerHeight(),
+            otherElements = gridElement.children().not(".k-grid-content"),
+            otherElementsHeight = 0;
+        otherElements.each(function () {
+            otherElementsHeight += $(this).outerHeight();
+        });
+        dataArea.height(gridHeight - otherElementsHeight);
+    }
+
+    function resizeWrapper() {
+        // $("#tenant-panel").height($('#body').innerHeight() - $('#header').height());
+        $("#tenantListGrid").height($("main").height() - $('#tenant-title').height() - 32 - 8);
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+</script>
+<script src="~/js/Tenant/index.js"></script>
