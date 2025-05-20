@@ -149,33 +149,21 @@ try
     //builder.Services.AddSingleton<IChatHub, ChatHub>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
-    builder.Services.AddScoped<IUrnService, UrnService>();
-    builder.Services.AddScoped<IStorageMapService, StorageMapService>();
-    builder.Services.AddScoped<IReminderService, ReminderService>();
-    builder.Services.AddScoped<ITenantService, TenantService>();
-    builder.Services.AddScoped<IProvincesService, ProvincesService>();
-    builder.Services.AddScoped<IConfigService, ConfigService>();
-    builder.Services.AddScoped<IHistoryLoginService, HistoryLoginService>();
+
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-    builder.Services.AddScoped<IUrnRepository, UrnRepository>();
-    builder.Services.AddScoped<IStorageMapRepository, StorageMapRepository>();
-    builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
-    builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-    builder.Services.AddScoped<IProvincesRepository, ProvincesRepository>();
-    builder.Services.AddScoped<IConfigRepository, ConfigRepository>();
-    builder.Services.AddScoped<ITelegramChatRepository, TelegramChatRepository>();
+
 
     #endregion
 
     builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
     builder.Services.AddTransient<EmailService>();
 
-    builder.Services.AddHttpClient<TelegramService>();
-    builder.Services.AddHostedService<BotHostedBackgroundService>();
-    builder.Services.AddHostedService<TelegramNotiUrnInfoBackgroundService>();
+    // builder.Services.AddHttpClient<TelegramService>();
+    // builder.Services.AddHostedService<BotHostedBackgroundService>();
+    // builder.Services.AddHostedService<TelegramNotiUrnInfoBackgroundService>();
 
 
 
@@ -221,17 +209,6 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
-
-
-    //app.UseEndpoints(endpoints =>
-    //{
-    //    endpoints.MapControllerRoute(
-    //        name: "default",
-    //        pattern: "{controller=Home}/{action=Index}/{id?}");
-
-    //    //endpoints.MapHub<ChatHub>("/chatHub");
-    //    endpoints.MapRazorPages();
-    //});
 
     app.MapControllerRoute(
             name: "default",

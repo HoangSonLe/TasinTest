@@ -36,32 +36,9 @@ namespace Tasin.Website.Common.Util
             return words;
         }
 
-        public static string GenerateTenantCode(Tenant tenant)
+        public static string UserNameGenerator(string userName)
         {
-            // Tách các từ dựa trên khoảng trắng, chữ hoa, và dấu
-            var words = tenant.NameNonUnicode.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                                  .SelectMany(SplitCamelCase)
-                                  .SelectMany(SplitVietnameseWords);
-
-            // Lấy chữ cái đầu tiên của mỗi từ
-            string code = string.Join("", words.Select(w => w.First()));
-
-            return $"{tenant.Code}_{code.ToUpper()}";
-        }
-
-        //public static string CodeTenentGenerator(string tenantName)
-        //{
-        //    // Split the input string into words based on whitespace
-        //    var words = tenantName.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-        //    // Extract the first letter of each word and concatenate them
-        //    var name = string.Concat(words.Select(word => word[0]));
-
-        //    return name.ToUpper(); // Convert the generated name to uppercase (optional)
-        //}
-        public static string UserNameGenerator(string userName, Tenant tenant)
-        {
-            return $"{tenant.Code}_{userName}";
+            return $"RANDOM_{userName}";
         }
     }
 }

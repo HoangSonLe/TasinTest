@@ -23,10 +23,5 @@ namespace Tasin.Website.Domains.Entitites
         [NotMapped]
         public List<RoleViewModel> RoleList { get; set; } = new List<RoleViewModel>();
         public int TypeAccount { get; set; } // loại tk : admin - người dùng
-        //public int RoleId { get; set; } // loại quyền : admin - chỉ xem
-        public Tenant? Tenant { get; set; }
-        //public TelegramChat? TelegramChat { get; set; }
-        public ICollection<User_Urn> UrnList { get; set; }
-        public ICollection<Reminder> Reminders { get; set; }
     }
 } 

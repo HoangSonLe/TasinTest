@@ -71,9 +71,7 @@ namespace Tasin.Website.DAL.Services
                     var user = null as Domains.Entitites.User;
                     if (isRequiredLoginLink)
                     {
-                        var telegramConversation = _context.TelegramChats.FirstOrDefault(i => i.TelegramChatId == update.Message.Chat.Id.ToString());
-                        if (telegramConversation == null) return;
-                        user = _context.Users.FirstOrDefault(j => j.Id == telegramConversation.UserId);
+                        
                     }
                     else
                     {
@@ -184,24 +182,7 @@ namespace Tasin.Website.DAL.Services
                         response.AddMessage($"Người dùng với số điện thoại {phoneNumber} chưa được đăng ký trong phần mềm quản lý Linh Cốt.Vui lòng đăng ký tài khoản người dùng với số điện thoại này.");
                         return response;
                     }
-                    var existChat = await _context.TelegramChats.FirstOrDefaultAsync(i=> i.UserId == user.Id);
-                    if (existChat != null)
-                    {
-                        existChat.TelegramChatId = telegramChatId;
-                        _context.TelegramChats.Update(existChat);
-                    }
-                    else
-                    {
-                        var newChat = new TelegramChat()
-                        {
-                            UserId = user.Id,
-                            PhoneNumber = phoneNumber,
-                            Action = "Đăng ký thành công",
-                            TelegramChatId = telegramChatId,
-                        };
-                        await _context.TelegramChats.AddAsync(newChat);
-                    }
-                    
+                  
                     await _context.SaveChangesAsync();
                     response.IsSuccess = true;
                     return response;

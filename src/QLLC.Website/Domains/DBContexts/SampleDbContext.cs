@@ -36,16 +36,8 @@ namespace Tasin.Website.Domains.DBContexts
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
-        public virtual DbSet<Reminder> Reminders { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
-        public virtual DbSet<StorageMap> StorageMaps { get; set; }
-        public virtual DbSet<Tenant> Tenants { get; set; }
-        public virtual DbSet<Urn> Urns { get; set; }
-        public virtual DbSet<User_Urn> User_Urns { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Provinces> Provincess { get; set; }
-        public virtual DbSet<TelegramChat> TelegramChats { get; set; }
-        public virtual DbSet<Config> Configs { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -56,28 +48,9 @@ namespace Tasin.Website.Domains.DBContexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<User_Urn>().HasKey(sc => new { sc.UserId, sc.UrnId });
-
-            modelBuilder.Entity<User_Urn>()
-                .HasOne<User>(sc => sc.User)
-                .WithMany(s => s.UrnList)
-                .HasForeignKey(sc => sc.UserId);
-
-
-            modelBuilder.Entity<User_Urn>()
-                .HasOne<Urn>(sc => sc.Urn)
-                .WithMany(s => s.FamilyMembers)
-                .HasForeignKey(sc => sc.UrnId);
-
 
             modelBuilder.ApplyConfiguration(new UserEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new ReminderEntityConfigurations());
             modelBuilder.ApplyConfiguration(new RoleEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new StorageMapEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new TenantEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new ProvincesEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new TelegramChatEntityConfigurations());
-            modelBuilder.ApplyConfiguration(new ConfigEntityConfigurations());
 
             //Default value for column entity models
 
@@ -105,20 +78,6 @@ namespace Tasin.Website.Domains.DBContexts
                     NameNonUnicode = "Dev"
                 }
             );
-            modelBuilder.Entity<Tenant>().HasData(
-               new Tenant()
-               {
-                   Id = 1,
-                   Name = "Admin",
-                   NameNonUnicode = "Admin",
-                   Address = "Địa chỉ chùa",
-                   AddressNonUnicode = "Đia chi chua",
-                   CreatedBy = 1,
-                   CreatedDate = DateTime.Now,
-                   State = (int)EState.Active,
-                   Code="TEST"
-               }
-           );
             modelBuilder.Entity<User>().HasData(
                 new User()
                 {

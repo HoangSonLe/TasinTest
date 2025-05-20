@@ -26,7 +26,6 @@ namespace Tasin.Website.Controllers
     public class AccountController : BaseController<AccountController>
     {
         private readonly IUserService _userService;
-        private readonly ITelegramChatRepository _telegramChatRepository;
 
         private readonly IConfiguration _configuration;
         //private readonly IEmailSender _emailSender; TODO
@@ -36,7 +35,6 @@ namespace Tasin.Website.Controllers
 
         public AccountController(
             IUserService userService,
-            ITelegramChatRepository telegramChatRepository,
             ILogger<AccountController> logger,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment
@@ -44,7 +42,6 @@ namespace Tasin.Website.Controllers
         {
             _userService = userService;
             _configuration = configuration;
-            _telegramChatRepository = telegramChatRepository;
             //_emailSender = emailSender;
         }
 
@@ -327,10 +324,6 @@ namespace Tasin.Website.Controllers
 
                 var userId = claimsPrincipal.Claims.FirstOrDefault(c=>c.Type == "UserID").Value;
 
-                var entity = await _telegramChatRepository.ReadOnlyRespository.FirstOrDefaultAsync(p => p.UserId == Int32.Parse(userId));
-                entity.Action = "Tài khoản đăng nhập";
-                entity.UpdatedDate = DateTime.Now;
-                await _telegramChatRepository.Repository.UpdateAsync(entity);
                 return Redirect("/"); // Redirect to home or another page
             }
             catch (SecurityTokenException)

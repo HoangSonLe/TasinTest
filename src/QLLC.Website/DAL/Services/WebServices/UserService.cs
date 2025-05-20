@@ -21,7 +21,6 @@ namespace Tasin.Website.DAL.Services.WebServices
     public class UserService : BaseService<UserService>, IUserService
     {
         private readonly IMapper _mapper;
-        private readonly ITenantRepository _tenantRepository;
         //private readonly TelegramService _telegramService;
         public UserService(
             ILogger<UserService> logger,
@@ -29,12 +28,10 @@ namespace Tasin.Website.DAL.Services.WebServices
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
             IConfiguration configuration,
-            ITenantRepository tenantRepository,
             IMapper mapper
             //TelegramService telegramService
             ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor)
         {
-            _tenantRepository = tenantRepository;
             _mapper = mapper;
             //_telegramService = telegramService;
         }
@@ -157,8 +154,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var searchStringNonUnicode = Utils.NonUnicode(searchModel.SearchString.Trim().ToLower());
                     predicate = predicate.And(i => (i.UserName.Trim().ToLower().Contains(searchStringNonUnicode) ||
                                                     i.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode)) ||
-                                                    (string.IsNullOrEmpty(i.Phone) == false && i.Phone.Trim().ToLower().Contains(searchStringNonUnicode)) ||
-                                                    i.Tenant.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode)
+                                                    (string.IsNullOrEmpty(i.Phone) == false && i.Phone.Trim().ToLower().Contains(searchStringNonUnicode))
                                              );
                 }
                 if(searchModel.RoleIdList.Count > 0)
@@ -245,7 +241,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return ack;
             }
             postData.Password = Utils.EncodePassword(postData.Password, EEncodeType.SHA_256);
-            var currentTenant = await _tenantRepository.ReadOnlyRespository.FindAsync(_currentTenantId);
             var checkSameUserNameItem = await _userRepository.Repository.FirstOrDefaultAsync( i=> i.UserName == postData.UserName && i.State == (int)EState.Active);
             if (checkSameUserNameItem != null && postData.Id == 0)
             {
@@ -255,7 +250,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
             if (postData.Id == 0)
             {
-                postData.UserName = Generator.UserNameGenerator(postData.UserName, currentTenant);
+                postData.UserName = Generator.UserNameGenerator(postData.UserName);
                 var newUser = _mapper.Map<User>(postData);
                 newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
                 newUser.Password = postData.Password;
@@ -276,10 +271,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 }
                 else
                 {
-                    if (!postData.UserName.StartsWith(currentTenant.Code))
-                    {
-                        postData.UserName = Generator.UserNameGenerator(postData.UserName, currentTenant);
-                    }
                     existItem.Name = postData.Name;
                     existItem.Phone = postData.Phone;
                     existItem.Email = postData.Email;
@@ -301,13 +292,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 ack.AddMessage("Không tìm thấy người dùng");
                 return ack;
             }
-            #region AUTHOR
-            if (user.UrnList.Any(i=> i.Urn.ExpiredDate > DateTime.Now))
-            {
-                ack.AddMessage("Không thể xóa người dùng (Linh cốt của người dùng vẫn đang còn hiệu lực)");
-                return ack;
-            }
-            #endregion
             user.State = (int)EState.Delete;
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
             return ack;
@@ -344,11 +328,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     ack.AddMessages("Không tìm thấy user");
                     return ack;
                 }
-                var tenAnt = await _tenantRepository.ReadOnlyRespository.FindAsync(user.TenantId);
                 
                 ack.Data = _mapper.Map<UserViewModel>(user);
                 ack.IsSuccess = true;
-                ack.Data.TenantName = tenAnt.Name;
                 if (user.RoleIdList.Count > 0)
                 {
                     var predicate = PredicateBuilder.New<Role>(i => i.State == (int)EState.Active);
