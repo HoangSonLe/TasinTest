@@ -8,7 +8,6 @@ namespace Tasin.Website.Domains.Entitites
     {
         [Key]
         public int Id { get; set; }
-        public int? TenantId { get; set; }
         public required string UserName { get; set; }
         public required string Password { get; set; }
 
@@ -19,7 +18,7 @@ namespace Tasin.Website.Domains.Entitites
         [Column(TypeName = "varchar")]
         public required string NameNonUnicode { get; set; }
         public required string Phone { get; set; } = "";
-        public List<int> RoleIdList { get; set; }
+        public string RoleIdList { get; set; }
         [NotMapped]
         public List<RoleViewModel> RoleList { get; set; } = new List<RoleViewModel>();
         public int TypeAccount { get; set; } // loại tk : admin - người dùng

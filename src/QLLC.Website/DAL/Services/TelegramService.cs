@@ -92,7 +92,7 @@ namespace Tasin.Website.DAL.Services
                     var roleDBList = _context.Roles.ToList();
                     if (user != null)
                     {
-                        var enumActionList = roleDBList.Where(i => user.RoleIdList.Contains(i.Id)).SelectMany(i => i.EnumActionList).Distinct().ToList();
+                        var enumActionList = roleDBList.Where(i => user.RoleIdList.Contains(i.Id.ToString())).SelectMany(i => i.EnumActionList.Split(",")).Select(i=> Int32.Parse(i)).Distinct().ToList();
                         var tokenSecretKey = Utils.DecodePassword(_configuration.GetSection("JWT:SecretKey").Value, EEncodeType.SHA_256);
                         var decodePassword = Utils.DecodePassword(user.Password, EEncodeType.SHA_256);
                         var handlingClaimModel = Helper.GenerateLoginClaim(new Helper.LoginClaim()
@@ -101,7 +101,6 @@ namespace Tasin.Website.DAL.Services
                             RoleIdList = user.RoleIdList,
                             UserId = user.Id,
                             IsMobile = false,
-                            TenantId = user.TenantId,
                             UserName = user.UserName,
                             Password = decodePassword,
                             RememberMe = false
@@ -176,7 +175,7 @@ namespace Tasin.Website.DAL.Services
                 try
                 {
                     var _context = serviceScope.ServiceProvider.GetRequiredService<SampleDBContext>();
-                    var user = await _context.Users.FirstOrDefaultAsync(i => i.Phone == phoneNumber && i.State == (int)EState.Active);
+                    var user = await _context.Users.FirstOrDefaultAsync(i => i.Phone == phoneNumber && i.IsActived == true);
                     if (user == null)
                     {
                         response.AddMessage($"Người dùng với số điện thoại {phoneNumber} chưa được đăng ký trong phần mềm quản lý Linh Cốt.Vui lòng đăng ký tài khoản người dùng với số điện thoại này.");

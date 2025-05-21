@@ -20,7 +20,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         // Properties to access user context information
         public int CurrentUserId => _currentUserContext.UserId ?? throw new InvalidOperationException("User is not authenticated");
         public List<ERoleType> CurrentUserRoles => _currentUserContext.UserRoles;
-        public int? CurrentTenantId => _currentUserContext.TenantId;
         public bool IsAuthenticated => _currentUserContext.IsAuthenticated;
 
         // For backward compatibility - will be deprecated
@@ -29,9 +28,6 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         [Obsolete("Use CurrentUserRoles property instead")]
         public List<ERoleType> _currentUserRoleId => CurrentUserRoles;
-
-        [Obsolete("Use CurrentTenantId property instead")]
-        public int? _currentTenantId => CurrentTenantId;
 
         public BaseService(
             ILogger<T> logger,

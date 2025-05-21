@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Tasin.Website.Domains.Entitites
 {
-    public class Role : BaseAuditableEntity
+    public class Role
     {
         [Key]
         public int Id { get; set; }
@@ -13,6 +13,6 @@ namespace Tasin.Website.Domains.Entitites
         public required string NameNonUnicode { get; set; }
         public int Level { get; set; }
 
-        public List<int> EnumActionList { get; set; }
+        public string EnumActionList { get; set; }
     }
 }

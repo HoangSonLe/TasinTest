@@ -9,14 +9,7 @@
     {
         SHA_256
     }
-    /// <summary>
-    /// State of row of database
-    /// </summary>
-    public enum EState
-    {
-        Active = 1,
-        Delete = 2,
-    }
+ 
     /// <summary>
     /// Enum file type
     /// </summary>

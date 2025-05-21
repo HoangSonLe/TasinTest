@@ -12,7 +12,6 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.HasKey(p => p.Id);
 
             // Properties
-            builder.Property(p => p.TenantId).HasColumnName("TenantId");
             builder.Property(p => p.UserName).HasColumnName("UserName");
             builder.Property(p => p.Password).HasColumnName("Password");
             builder.Property(p => p.Name).HasColumnName("Name");
@@ -24,14 +23,14 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.RoleIdList).HasColumnName("RoleIdList");
 
 
-            builder.Property(p => p.State).HasColumnName("State");
+            //builder.Property(p => p.IsActived).HasColumnName("IsActived");
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate");
             builder.Property(p => p.CreatedBy).HasColumnName("CreatedBy");
             builder.Property(p => p.UpdatedDate).HasColumnName("UpdatedDate");
             builder.Property(p => p.UpdatedBy).HasColumnName("UpdatedBy");
 
             // Table
-            builder.ToTable("Users");
+            builder.ToTable("User");
         }
     }
 }

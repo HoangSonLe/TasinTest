@@ -14,7 +14,7 @@ namespace Tasin.Website.Domains.Entitites
         /// <summary>
         /// EState
         /// </summary>
-        public int State { get; set; } = (int)EState.Active;
+        public bool IsActived { get; set; } = true;
 
     }
 }

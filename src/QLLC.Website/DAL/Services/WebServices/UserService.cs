@@ -42,7 +42,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<User>();
 
             var hashPassword = Utils.EncodePassword(password, EEncodeType.SHA_256);
-            var userDB = (await _userRepository.ReadOnlyRespository.GetAsync(u => u.UserName.ToLower() == userName.ToLower() && u.State == (short)EState.Active,null,null,"Tenant")).FirstOrDefault();
+            var userDB = (await _userRepository.ReadOnlyRespository.GetAsync(u => u.UserName.ToLower() == userName.ToLower() && u.IsActived == true, null, null, "Tenant")).FirstOrDefault();
 
 
             if (userDB == null)
@@ -72,10 +72,10 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (userResponse.IsSuccess)
                 {
                     var userDB = userResponse.Data;
-                    var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => userDB.RoleIdList.Contains(i.Id));
+                    var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => userDB.RoleIdList.Contains(i.Id.ToString()));
                     UserViewModel userViewModel = _mapper.Map<UserViewModel>(userDB);
                     userViewModel.RoleName = string.Join(",", roleDBList.Select(i => i.Description));
-                    userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList).Distinct().ToList();
+                    userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i=> Int32.Parse(i)).Distinct().ToList();
                     response.Data = userViewModel;
                 }
                 else
@@ -97,12 +97,12 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 var user = await _userRepository.Repository.FirstOrDefaultAsync(u =>
                     u.UserName.ToLower() == userName.ToLower()
-                    && u.State == (short)EState.Delete
+                    && u.IsActived == false
                     );
 
                 if (user != null)
                 {
-                    user.State = (short)EState.Active;
+                    user.IsActived = true;
                     await response.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
                 }
                 response.IsSuccess = true;
@@ -117,10 +117,11 @@ namespace Tasin.Website.DAL.Services.WebServices
         }
         public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetUserDataDropdownList(string searchString, List<int> selectedIdList)
         {
-            var predicate = PredicateBuilder.New<User>(i=> i.State == (int)EState.Active);
-            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentTenantId, _currentUserId);
+            var predicate = PredicateBuilder.New<User>(i => i.IsActived == true);
+            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
             var selectedUserList = new List<User>();
-            if (selectedIdList.Count > 0 && string.IsNullOrEmpty(searchString)) {
+            if (selectedIdList.Count > 0 && string.IsNullOrEmpty(searchString))
+            {
                 var tmpPredicate = PredicateBuilder.New<User>(predicate);
                 tmpPredicate = tmpPredicate.And(i => selectedIdList.Contains(i.Id));
                 selectedUserList = (await _userRepository.ReadOnlyRespository.GetAsync(tmpPredicate, i => i.OrderBy(p => p.Name))).ToList();
@@ -133,7 +134,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                                          );
             }
             var userDbList = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(new PagingParameters(1, 50 - selectedUserList.Count()), predicate, i => i.OrderBy(p => p.Name));
-            var data = userDbList.Data.Concat(selectedUserList).Select(i=> new KendoDropdownListModel<int>()
+            var data = userDbList.Data.Concat(selectedUserList).Select(i => new KendoDropdownListModel<int>()
             {
                 Value = i.Id.ToString(),
                 Text = $"{i.Name} - {i.Phone}",
@@ -149,7 +150,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<JsonResultPaging<List<UserViewModel>>>();
             try
             {
-                var predicate = PredicateBuilder.New<User>(i=> i.State == (int)EState.Active);
+                var predicate = PredicateBuilder.New<User>(i => i.IsActived == true);
 
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
                 {
@@ -159,17 +160,18 @@ namespace Tasin.Website.DAL.Services.WebServices
                                                     (string.IsNullOrEmpty(i.Phone) == false && i.Phone.Trim().ToLower().Contains(searchStringNonUnicode))
                                              );
                 }
-                if(searchModel.RoleIdList.Count > 0)
+                if (searchModel.RoleIdList.Count > 0)
                 {
-                    predicate = predicate.And(p => p.RoleIdList.Intersect(searchModel.RoleIdList).Any());
+                    //TODO
+                    //predicate = predicate.And(p => p.RoleIdList.Intersect(searchModel.RoleIdList).Any());
                 }
 
                 var userList = new List<UserViewModel>();
-                predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentTenantId, _currentUserId);
+                predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
                 var userDbQuery = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(
                     new PagingParameters(searchModel.PageNumber, searchModel.PageSize),
                     predicate,
-                    i=> i.OrderByDescending(u=> u.UpdatedDate)
+                    i => i.OrderByDescending(u => u.UpdatedDate)
                     );
                 var userDBList = _mapper.Map<List<UserViewModel>>(userDbQuery.Data);
                 var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync();
@@ -177,10 +179,10 @@ namespace Tasin.Website.DAL.Services.WebServices
                 var updateByUserList = await _userRepository.ReadOnlyRespository.GetAsync(i => updateByUserIdList.Contains(i.Id));
                 foreach (var user in userDBList)
                 {
-                    var roles = roleDBList.Where(j => user.RoleIdList.Contains(j.Id)).ToList();
+                    var roles = roleDBList.Where(j => user.RoleIdList.Contains(j.Id.ToString())).ToList();
                     user.RoleViewList = _mapper.Map<List<RoleViewModel>>(roles);
 
-                    var updateUser = updateByUserList.First(i=> i.Id == user.UpdatedBy);
+                    var updateUser = updateByUserList.First(i => i.Id == user.UpdatedBy);
                     user.UpdatedByName = updateUser.Name;
                 }
                 response.Data = new JsonResultPaging<List<UserViewModel>>()
@@ -204,7 +206,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement> CreateOrUpdateUser(UserViewModel postData)
         {
             var ack = new Acknowledgement();
-            postData.TenantId = _currentTenantId;
             if (string.IsNullOrWhiteSpace(postData.Name))
             {
                 ack.AddMessage("Vui lòng nhập họ tên");
@@ -222,7 +223,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             var phone = postData.Phone;
             var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
-            if(validatePhoneMessage != null)
+            if (validatePhoneMessage != null)
             {
                 ack.AddMessage(validatePhoneMessage);
                 return ack;
@@ -243,7 +244,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return ack;
             }
             postData.Password = Utils.EncodePassword(postData.Password, EEncodeType.SHA_256);
-            var checkSameUserNameItem = await _userRepository.Repository.FirstOrDefaultAsync( i=> i.UserName == postData.UserName && i.State == (int)EState.Active);
+            var checkSameUserNameItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.UserName == postData.UserName && i.IsActived == true);
             if (checkSameUserNameItem != null && postData.Id == 0)
             {
                 ack.AddMessage("Đã tồn tại tài khoản với tên đăng nhập này");
@@ -264,7 +265,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             else
             {
-                var existItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == postData.Id && i.State == (int)EState.Active);
+                var existItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == postData.Id && i.IsActived == true);
                 if (existItem == null)
                 {
                     ack.AddMessage("Không tìm thấy người dùng");
@@ -288,32 +289,32 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement> DeleteUserById(int userId)
         {
             var ack = new Acknowledgement();
-            var user = await _userRepository.Repository.FirstOrDefaultAsync(i=> i.Id == userId, "UrnList,UrnList.Urn");
+            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId, "UrnList,UrnList.Urn");
             if (user == null)
             {
                 ack.AddMessage("Không tìm thấy người dùng");
                 return ack;
             }
-            user.State = (int)EState.Delete;
+            user.IsActived = false;
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
             return ack;
         }
         public async Task<Acknowledgement> ResetUserPasswordById(int userId)
         {
             var ack = new Acknowledgement();
-            var user = await _userRepository.Repository.FirstOrDefaultAsync(i=> i.Id == userId, "UrnList,UrnList.Urn");
+            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId, "UrnList,UrnList.Urn");
             if (user == null)
             {
                 ack.AddMessage("Không tìm thấy người dùng");
                 return ack;
             }
             var defaultResetPassword = Configuration.GetSection("DefaultResetPassword").Value;
-            if(string.IsNullOrEmpty(defaultResetPassword))
+            if (string.IsNullOrEmpty(defaultResetPassword))
             {
                 ack.AddMessage("Lỗi thiếu setting mật khẩu mặc định");
                 return ack;
             }
-            user.Password = Utils.EncodePassword(defaultResetPassword,EEncodeType.SHA_256);
+            user.Password = Utils.EncodePassword(defaultResetPassword, EEncodeType.SHA_256);
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
             return ack;
         }
@@ -333,16 +334,16 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 ack.Data = _mapper.Map<UserViewModel>(user);
                 ack.IsSuccess = true;
-                if (user.RoleIdList.Count > 0)
+                if (user.RoleIdList.Length > 0)
                 {
-                    var predicate = PredicateBuilder.New<Role>(i => i.State == (int)EState.Active);
-                    predicate = predicate.And(e => user.RoleIdList.Contains(e.Id));
+                    var predicate = PredicateBuilder.New<Role>();
+                    predicate = predicate.And(e => user.RoleIdList.Contains(e.Id.ToString()));
 
                     var listRole = await _roleRepository.ReadOnlyRespository.GetAsync(predicate);
                     if (listRole != null)
                     {
                         var listPermission = new List<int>();
-                        listPermission = listRole.SelectMany(e => e.EnumActionList).Distinct().ToList();
+                        listPermission = listRole.SelectMany(e => e.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
                         ack.Data.EnumActionList = listPermission;
                     }
                 }
@@ -361,7 +362,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         {
             var ack = new Acknowledgement();
             #region Validate
-            if(postData.NewPassword != postData.RepeatPassword)
+            if (postData.NewPassword != postData.RepeatPassword)
             {
                 ack.AddMessage("Xác nhận mật khẩu không giống mật khẩu mới.");
                 return ack;
@@ -376,12 +377,12 @@ namespace Tasin.Website.DAL.Services.WebServices
             postData.OldPassword = Utils.EncodePassword(postData.OldPassword, EEncodeType.SHA_256);
             postData.NewPassword = Utils.EncodePassword(postData.NewPassword, EEncodeType.SHA_256);
             var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == _currentUserId);
-            if(user == null)
+            if (user == null)
             {
                 ack.AddMessage("Không tìm thấy người dùng.");
                 return ack;
             }
-            if(user.Password != postData.OldPassword)
+            if (user.Password != postData.OldPassword)
             {
                 ack.AddMessage("Mật khẩu cũ không chính xác.");
                 return ack;

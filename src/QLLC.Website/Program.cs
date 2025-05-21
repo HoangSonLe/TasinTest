@@ -135,7 +135,55 @@ try
     //    hubOptions.ClientTimeoutInterval = TimeSpan.FromHours(24);
     //    hubOptions.KeepAliveInterval = TimeSpan.FromHours(8);
     //});
-    builder.Services.AddSwaggerGen();
+
+    // Configure Swagger
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = "Tasin API",
+            Version = "v1",
+            Description = "API for Tasin Website",
+            Contact = new Microsoft.OpenApi.Models.OpenApiContact
+            {
+                Name = "Support Team",
+                Email = "support@example.com"
+            }
+        });
+
+        // Add JWT Authentication to Swagger
+        c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+            Name = "Authorization",
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
+
+        c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+
+        // Include XML comments if available
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            c.IncludeXmlComments(xmlPath);
+        }
+    });
     #region NLog: Setup NLog for Dependency injection
     logger.Debug("Running...");
     builder.Logging.ClearProviders();
@@ -182,12 +230,18 @@ try
         var appAssembly = Assembly.Load(new AssemblyName(environment.ApplicationName));
         if (appAssembly != null)
             config.AddUserSecrets(appAssembly, optional: true);
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Test1 Api v1");
-        });
     }
+
+    // Configure Swagger UI for all environments
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tasin API v1");
+        c.RoutePrefix = "swagger";
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1); // Hide schemas section
+        c.DisplayRequestDuration();
+    });
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
@@ -199,7 +253,8 @@ try
     app.UseHttpsRedirection();
     app.UseStaticFiles();
 
-    app.MapSwagger().RequireAuthorization();
+    // Allow Swagger without authorization
+    app.MapSwagger();
 
     app.UseCors(x => x
          .SetIsOriginAllowed(origin => true)

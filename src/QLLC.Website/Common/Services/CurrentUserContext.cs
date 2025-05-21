@@ -19,11 +19,6 @@ namespace Tasin.Website.Common.Services
         List<ERoleType> UserRoles { get; }
 
         /// <summary>
-        /// Gets the current tenant ID
-        /// </summary>
-        int? TenantId { get; }
-
-        /// <summary>
         /// Checks if the current user is authenticated
         /// </summary>
         bool IsAuthenticated { get; }
@@ -57,6 +52,8 @@ namespace Tasin.Website.Common.Services
         {
             get
             {
+                //TODO
+                return 1;
                 try
                 {
                     if (!IsAuthenticated)
@@ -87,6 +84,8 @@ namespace Tasin.Website.Common.Services
         {
             get
             {
+                //TODO
+                return [];
                 try
                 {
                     if (!IsAuthenticated)
@@ -111,35 +110,6 @@ namespace Tasin.Website.Common.Services
                 {
                     _logger.LogError(ex, "Error retrieving current user roles");
                     return new List<ERoleType>();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the current tenant ID from claims
-        /// </summary>
-        public int? TenantId
-        {
-            get
-            {
-                try
-                {
-                    if (!IsAuthenticated)
-                        return null;
-
-                    var tenantId = _httpContextAccessor.HttpContext?.User.FindFirstValue("TenantId");
-                    if (string.IsNullOrEmpty(tenantId))
-                        return null;
-
-                    if (int.TryParse(tenantId, out int parsedTenantId))
-                        return parsedTenantId;
-
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error retrieving current tenant ID");
-                    return null;
                 }
             }
         }

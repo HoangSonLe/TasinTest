@@ -100,11 +100,10 @@ namespace Tasin.Website.Common.Helper
             public int UserId { get; set; }
             public string Password { get; set; }
             public int AccountType { get; set; }
-            public int? TenantId { get; set; }
             public string UserName { get; set; }
             public bool RememberMe { get; set; }
             public bool IsMobile { get; set; }
-            public List<int> RoleIdList { get; set; }
+            public string RoleIdList { get; set; }
             public List<int> EnumActionList { get; set; }
 
         }
@@ -121,7 +120,6 @@ namespace Tasin.Website.Common.Helper
                 {
                     new Claim("UserID", model.UserId.ToString()),
                     new Claim("IsMobile", model.IsMobile.ToString()),
-                    new Claim("TenantId", model.TenantId.HasValue ? model.TenantId.Value.ToString() : ""),
                     new Claim(ClaimTypes.Name, model.UserName),
                     new Claim("RoleIds", string.Join(",",model.RoleIdList)),
                     new Claim("Actions", string.Join(",", model.EnumActionList)),

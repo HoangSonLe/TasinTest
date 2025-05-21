@@ -39,6 +39,23 @@ namespace Tasin.Website.Domains.DBContexts
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
+        // New entities from InitDatabase.sql
+        public virtual DbSet<Vendor> Vendors { get; set; }
+        public virtual DbSet<Unit> Units { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<ProcessingType> ProcessingTypes { get; set; }
+        public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<SpecialProductTaxRate> SpecialProductTaxRates { get; set; }
+        public virtual DbSet<TaxRateConfig> TaxRateConfigs { get; set; }
+        public virtual DbSet<Material> Materials { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Product_Vendor> ProductVendors { get; set; }
+        public virtual DbSet<Purchase_Order> PurchaseOrders { get; set; }
+        public virtual DbSet<Purchase_Order_Item> PurchaseOrderItems { get; set; }
+        public virtual DbSet<Purchase_Agreement> PurchaseAgreements { get; set; }
+        public virtual DbSet<Purchase_Agreement_Item> PurchaseAgreementItems { get; set; }
+        public virtual DbSet<CodeVersion> CodeVersions { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -52,6 +69,23 @@ namespace Tasin.Website.Domains.DBContexts
             modelBuilder.ApplyConfiguration(new UserEntityConfigurations());
             modelBuilder.ApplyConfiguration(new RoleEntityConfigurations());
 
+            // Apply configurations for new entities
+            modelBuilder.ApplyConfiguration(new VendorEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new UnitEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new CategoryEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new ProcessingTypeEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new CustomerEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new SpecialProductTaxRateEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new TaxRateConfigEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new MaterialEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new ProductEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new Product_VendorEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new Purchase_OrderEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new Purchase_Order_ItemEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new Purchase_AgreementEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new Purchase_Agreement_ItemEntityConfigurations());
+            modelBuilder.ApplyConfiguration(new CodeVersionEntityConfigurations());
+
             //Default value for column entity models
 
             modelBuilder.Entity<Role>().HasData(
@@ -60,10 +94,7 @@ namespace Tasin.Website.Domains.DBContexts
                     Id = 1,
                     Name = "Admin",
                     Description = "Admin",
-                    CreatedBy = 1,
-                    CreatedDate = DateTime.Now,
-                    State = (int)EState.Active,
-                    EnumActionList = new List<int> { 1, 2 },
+                    EnumActionList = "1,2",
                     NameNonUnicode = "Admin",
                 },
                 new Role()
@@ -71,10 +102,7 @@ namespace Tasin.Website.Domains.DBContexts
                     Id = 2,
                     Name = "Dev",
                     Description = "Dev",
-                    CreatedBy = 1,
-                    CreatedDate = DateTime.Now,
-                    State = (int)EState.Active,
-                    EnumActionList = new List<int> { 1, 2 },
+                    EnumActionList = "1,2",
                     NameNonUnicode = "Dev"
                 }
             );
@@ -82,17 +110,16 @@ namespace Tasin.Website.Domains.DBContexts
                 new User()
                 {
                     Id = 1,
-                    TenantId = 1,//tk admin
                     UserName = "Admin",
                     NameNonUnicode = "Admin",
                     Password = "/cA7ZZQqtyOGVwe1kEbPSg==", //123456
                     Name = "Admin",
                     Phone = "",
                     TypeAccount = 1,
-                    RoleIdList = new List<int>() { 1,2,3,4},
+                    RoleIdList = "1,2,3,4",
                     CreatedBy = 1,
                     CreatedDate = DateTime.Now,
-                    State = (int)EState.Active,
+                    IsActived = true,
                     Email = ""
                 }
             );

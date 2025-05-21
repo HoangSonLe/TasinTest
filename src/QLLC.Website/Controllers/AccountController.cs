@@ -168,7 +168,6 @@ namespace Tasin.Website.Controllers
                     RoleIdList = userDB.RoleIdList,
                     UserId = userDB.Id,
                     IsMobile = model.IsMobile,
-                    TenantId = userDB.TenantId,
                     UserName = userDB.UserName,
                     Password = model.Password,
                     RememberMe = model.RememberMe
@@ -188,12 +187,6 @@ namespace Tasin.Website.Controllers
                         Expires = DateTime.Now.AddDays(30)
                     });
                 }
-                #endregion
-                #region Redirect after Login
-                if (returnUrl != null && Url.IsLocalUrl(returnUrl) && returnUrl != "/")
-                    return Redirect(returnUrl);
-                if(userDB.RoleIdList.Count == 1 && userDB.RoleIdList.Contains((int)ERoleType.User)) return RedirectToAction("Index", "Urn");
-                return RedirectToAction("Index", "Home");
                 #endregion
             }
             else
