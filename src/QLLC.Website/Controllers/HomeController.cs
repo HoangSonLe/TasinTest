@@ -27,15 +27,15 @@ namespace Tasin.Website.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var _user = await UserService.GetUserById(int.Parse(_currentUserId));
-            if (_user != null && _user.IsSuccess)
-            {
-                if (_user.Data.RoleIdList.Count == 1 && _user.Data.RoleIdList.Contains((int)ERoleType.User)) return Redirect("/Urn");
-                if (_user.Data.RoleIdList.Contains((int)ERoleType.Admin) || _user.Data.RoleIdList.Contains((int)ERoleType.Reporter))
-                {
-                    return Redirect("/Urn");
-                }
-            }
+            //var _user = await UserService.GetUserById(int.Parse(_currentUserId));
+            //if (_user != null && _user.IsSuccess)
+            //{
+            //    if (_user.Data.RoleIdList.Count == 1 && _user.Data.RoleIdList.Contains((int)ERoleType.User)) return Redirect("/Urn");
+            //    if (_user.Data.RoleIdList.Contains((int)ERoleType.Admin) || _user.Data.RoleIdList.Contains((int)ERoleType.Reporter))
+            //    {
+            //        return Redirect("/Urn");
+            //    }
+            //}
             return View();
         }
 

@@ -414,7 +414,7 @@ header, footer, nav, section {
         .topnav .dropdown .dropdown-menu {
             width: auto;
             min-width: 14rem;
-            right: 0;
+            right: 10px;
             left: auto;
         }
 }
