@@ -11,6 +11,7 @@ using Tasin.Website.BackgroundServices;
 using Tasin.Website.Common.AutoMapper;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Repository;
@@ -147,6 +148,7 @@ try
     #region ConfigurationRepositoryAndUnitOfWorkSettings
     // REGISTER SERVICES HERE
     //builder.Services.AddSingleton<IChatHub, ChatHub>();
+    builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
 

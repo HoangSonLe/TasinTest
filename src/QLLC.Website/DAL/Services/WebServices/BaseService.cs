@@ -1,4 +1,6 @@
-﻿using Tasin.Website.Common.Enums;
+﻿using System;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.Domains.DBContexts;
 using System.Security.Claims;
@@ -11,46 +13,40 @@ namespace Tasin.Website.DAL.Services.WebServices
         public readonly IUserRepository _userRepository;
         public readonly IRoleRepository _roleRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserContext _currentUserContext;
         private readonly IConfiguration _configuration;
         public IConfiguration Configuration => _configuration;
-        public int _currentUserId;
-        public List<ERoleType> _currentUserRoleId;
-        public int? _currentTenantId;
+
+        // Properties to access user context information
+        public int CurrentUserId => _currentUserContext.UserId ?? throw new InvalidOperationException("User is not authenticated");
+        public List<ERoleType> CurrentUserRoles => _currentUserContext.UserRoles;
+        public int? CurrentTenantId => _currentUserContext.TenantId;
+        public bool IsAuthenticated => _currentUserContext.IsAuthenticated;
+
+        // For backward compatibility - will be deprecated
+        [Obsolete("Use CurrentUserId property instead")]
+        public int _currentUserId => CurrentUserId;
+
+        [Obsolete("Use CurrentUserRoles property instead")]
+        public List<ERoleType> _currentUserRoleId => CurrentUserRoles;
+
+        [Obsolete("Use CurrentTenantId property instead")]
+        public int? _currentTenantId => CurrentTenantId;
 
         public BaseService(
             ILogger<T> logger,
             IConfiguration configuration,
             IUserRepository userRepository,
             IRoleRepository roleRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserContext currentUserContext)
         {
             _logger = logger;
             _configuration = configuration;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue("UserID");
-            if(_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == true && userId == null)
-            {
-                throw new ArgumentException("Claim must have UserID.");
-            }
-            if(_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == true && !Int32.TryParse(userId, out _currentUserId))
-            {
-                throw new ArgumentException("Claim UserID is correct format.");
-            }
-            var roleListClaim = _httpContextAccessor.HttpContext.User.FindFirstValue("RoleIds");
-            if(!string.IsNullOrEmpty(roleListClaim))
-            {
-                _currentUserRoleId = roleListClaim.Split(",").Select(i=>(ERoleType)Int32.Parse(i)).ToList();
-            }
-            if (_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == true)
-            {
-                var tenantId = _httpContextAccessor.HttpContext.User.FindFirstValue("TenantId");
-                if (!string.IsNullOrWhiteSpace(tenantId))
-                {
-                    _currentTenantId = Int32.Parse(tenantId);
-                }
-            }
+            _currentUserContext = currentUserContext ?? throw new ArgumentNullException(nameof(currentUserContext));
         }
         private SampleDBContext _DbContext;
         public SampleDBContext DbContext
@@ -80,15 +76,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         /// <returns></returns>
         public bool _IsHasAdminRole()
         {
-            if(_currentUserRoleId == null)
-            {
-                throw new NullReferenceException("Không tìm thấy roleId in context");
-            }
-            if(_currentUserRoleId.Contains(ERoleType.Admin) || _currentUserRoleId.Contains(ERoleType.SystemAdmin))
-            {
-                return true;
-            }
-            return false;
+            return _currentUserContext.IsAdmin;
         }
         #endregion
 

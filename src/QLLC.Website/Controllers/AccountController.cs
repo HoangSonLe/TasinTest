@@ -19,6 +19,7 @@ using Tasin.Website.Models.ViewModels.AccountViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
@@ -37,8 +38,9 @@ namespace Tasin.Website.Controllers
             IUserService userService,
             ILogger<AccountController> logger,
             IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment
-            ) : base(logger, userService)
+            IWebHostEnvironment webHostEnvironment,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, userService, currentUserContext)
         {
             _userService = userService;
             _configuration = configuration;
@@ -158,7 +160,7 @@ namespace Tasin.Website.Controllers
                     return View(model);
                 }
 
-                #region Claims and set Cookies 
+                #region Claims and set Cookies
                 var handlingClaimModel = Helper.GenerateLoginClaim(new Helper.LoginClaim()
                 {
                     AccountType = model.AccountType,

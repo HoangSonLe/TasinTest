@@ -4,6 +4,7 @@ using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Helper;
+using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -15,8 +16,10 @@ namespace Tasin.Website.Controllers
     [Authorize]
     public class UserController : BaseController<UserController>
     {
-        public UserController(IUserService userService,
-             ILogger<UserController> logger) : base(logger, userService)
+        public UserController(
+            IUserService userService,
+            ILogger<UserController> logger,
+            ICurrentUserContext currentUserContext) : base(logger, userService, currentUserContext)
         {
         }
 
@@ -29,9 +32,9 @@ namespace Tasin.Website.Controllers
         public async Task<IActionResult> Authentication()
         {
             var response = new Acknowledgement();
-            if(User.Identity.IsAuthenticated)
+            if(CurrentUserContext.IsAuthenticated && CurrentUserContext.UserId.HasValue)
             {
-                var userAck = await UserService.GetUserById(Int32.Parse(_currentUserId));
+                var userAck = await UserService.GetUserById(CurrentUserContext.UserId.Value);
                 return Json(userAck);
             }
             return Json(response);
@@ -56,7 +59,7 @@ namespace Tasin.Website.Controllers
         public async Task<Acknowledgement> DeleteUserById(int userId)
         {
             return await UserService.DeleteUserById(userId);
-        } 
+        }
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
         [HttpGet]
         public async Task<Acknowledgement> ResetUserPasswordById(int userId)
@@ -68,7 +71,7 @@ namespace Tasin.Website.Controllers
         public async Task<Acknowledgement> CreateOrUpdateUser([FromBody] UserViewModel postData)
         {
             return await UserService.CreateOrUpdateUser(postData);
-        }      
+        }
         [HttpPost]
         public async Task<Acknowledgement> ChangePassword([FromBody] ChangePasswordModel postData)
         {

@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\CustomSystem\**" />
     <Compile Remove="Domains\DBContexts\Migrations\**" />
     <Compile Remove="Pages\**" />
+    <Content Remove="Common\CustomSystem\**" />
     <Content Remove="Domains\DBContexts\Migrations\**" />
     <Content Remove="Pages\**" />
+    <EmbeddedResource Remove="Common\CustomSystem\**" />
     <EmbeddedResource Remove="Domains\DBContexts\Migrations\**" />
     <EmbeddedResource Remove="Pages\**" />
+    <None Remove="Common\CustomSystem\**" />
     <None Remove="Domains\DBContexts\Migrations\**" />
     <None Remove="Pages\**" />
   </ItemGroup>
@@ -42,7 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\CustomSystem\" />
     <Folder Include="wwwroot\js\kendoGridResize\" />
     <Folder Include="wwwroot\js\Permission\" />
 	<Folder Include="wwwroot\js\NotificationForUser\" />

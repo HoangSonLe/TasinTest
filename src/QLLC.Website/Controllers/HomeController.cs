@@ -8,6 +8,7 @@ using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.ViewModels;
 using System.Diagnostics;
+using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
@@ -19,21 +20,25 @@ namespace Tasin.Website.Controllers
             ILogger<HomeController> logger,
             IUserService userService,
             IRoleService roleService,
-              IConfiguration configuration
-            ) : base(logger, userService)
+            IConfiguration configuration,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, userService, currentUserContext)
         {
             _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
         {
-            var _user = await UserService.GetUserById(int.Parse(_currentUserId));
-            if (_user != null && _user.IsSuccess)
+            if (CurrentUserContext.UserId.HasValue)
             {
-                if (_user.Data.RoleIdList.Count == 1 && _user.Data.RoleIdList.Contains((int)ERoleType.User)) return Redirect("/Urn");
-                if (_user.Data.RoleIdList.Contains((int)ERoleType.Admin) || _user.Data.RoleIdList.Contains((int)ERoleType.Reporter))
+                var _user = await UserService.GetUserById(CurrentUserContext.UserId.Value);
+                if (_user != null && _user.IsSuccess)
                 {
-                    return Redirect("/Urn");
+                    if (_user.Data.RoleIdList.Count == 1 && _user.Data.RoleIdList.Contains((int)ERoleType.User)) return Redirect("/Urn");
+                    if (_user.Data.RoleIdList.Contains((int)ERoleType.Admin) || _user.Data.RoleIdList.Contains((int)ERoleType.Reporter))
+                    {
+                        return Redirect("/Urn");
+                    }
                 }
             }
             return View();

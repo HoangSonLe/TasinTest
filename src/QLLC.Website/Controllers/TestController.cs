@@ -11,6 +11,7 @@ using Tasin.Website.DAL.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.ViewModels.AccountViewModels;
 using System.Security.Claims;
+using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
@@ -29,8 +30,9 @@ namespace Tasin.Website.Controllers
             IUserService userService,
             ILogger<TestController> logger,
             IConfiguration configuration,
-            EmailService emailService
-            ) : base(logger, userService)
+            EmailService emailService,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, userService, currentUserContext)
         {
             _userService = userService;
             _configuration = configuration;

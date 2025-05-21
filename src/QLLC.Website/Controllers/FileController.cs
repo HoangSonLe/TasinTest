@@ -6,6 +6,7 @@ using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using System.Drawing;
 using System.Drawing.Imaging;
+using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
@@ -21,8 +22,9 @@ namespace Tasin.Website.Controllers
         public FileController(
             IUserService userService,
             ILogger<FileController> logger,
-            IConfiguration configuration
-            ) : base(logger, userService)
+            IConfiguration configuration,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, userService, currentUserContext)
         {
             _userService = userService;
             _configuration = configuration;
@@ -166,7 +168,7 @@ namespace Tasin.Website.Controllers
                 return NotFound(); // Return 404 if the file is not found
             }
         }
-       
+
 
 
         private string GetMimeType(string filePath)

@@ -5,6 +5,7 @@ using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Helper;
+using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Repository;
@@ -28,9 +29,10 @@ namespace Tasin.Website.DAL.Services.WebServices
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
             IConfiguration configuration,
+            ICurrentUserContext currentUserContext,
             IMapper mapper
             //TelegramService telegramService
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor)
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
         {
             _mapper = mapper;
             //_telegramService = telegramService;
@@ -148,7 +150,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             try
             {
                 var predicate = PredicateBuilder.New<User>(i=> i.State == (int)EState.Active);
-                
+
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
                 {
                     var searchStringNonUnicode = Utils.NonUnicode(searchModel.SearchString.Trim().ToLower());
@@ -161,11 +163,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     predicate = predicate.And(p => p.RoleIdList.Intersect(searchModel.RoleIdList).Any());
                 }
-                
+
                 var userList = new List<UserViewModel>();
                 predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentTenantId, _currentUserId);
                 var userDbQuery = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(
-                    new PagingParameters(searchModel.PageNumber, searchModel.PageSize), 
+                    new PagingParameters(searchModel.PageNumber, searchModel.PageSize),
                     predicate,
                     i=> i.OrderByDescending(u=> u.UpdatedDate)
                     );
@@ -225,7 +227,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 ack.AddMessage(validatePhoneMessage);
                 return ack;
             }
-            postData.Phone = phone; 
+            postData.Phone = phone;
             if (!string.IsNullOrWhiteSpace(postData.Email))
             {
                 var isValidEmail = Validate.ValidEmail(postData.Email);
@@ -315,7 +317,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
             return ack;
         }
-        
+
         public async Task<Acknowledgement<UserViewModel>> GetUserById(int userId)
         {
             var ack = new Acknowledgement<UserViewModel>();
@@ -328,7 +330,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     ack.AddMessages("Không tìm thấy user");
                     return ack;
                 }
-                
+
                 ack.Data = _mapper.Map<UserViewModel>(user);
                 ack.IsSuccess = true;
                 if (user.RoleIdList.Count > 0)

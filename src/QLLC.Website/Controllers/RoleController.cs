@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 
 namespace Tasin.Website.Controllers
@@ -12,8 +13,9 @@ namespace Tasin.Website.Controllers
         public RoleController(
             ILogger<RoleController> logger,
             IUserService userService,
-            IRoleService roleService
-            ) : base(logger, userService)
+            IRoleService roleService,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, userService, currentUserContext)
         {
             _roleService = roleService;
         }

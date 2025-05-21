@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Services.WebInterfaces;
@@ -16,8 +17,9 @@ namespace Tasin.Website.DAL.Services.WebServices
             IConfiguration configuration,
             IUserRepository userRepository,
             IRoleRepository roleRepository,
-            IHttpContextAccessor httpContextAccessor
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserContext currentUserContext
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
         {
         }
 
