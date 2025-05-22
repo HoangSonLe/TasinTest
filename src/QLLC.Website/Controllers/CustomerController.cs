@@ -19,7 +19,7 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetCustomerList")]
+    //[Route("api/[controller]/GetCustomerList")]
     public class CustomerController : BaseController<CustomerController>
     {
         private ICustomerService _customerService;
@@ -33,14 +33,14 @@ namespace Tasin.Website.Controllers
         }
 
         //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
-        //[HttpGet]
-        //[Route("Customer/Index")]
-        //public IActionResult Index()
-        //{
-        //    ViewBag.RoleDatasource = EnumHelper.ToDropdownList<ERoleType>();
-        //    return View();
-        //}
-       
+        [HttpGet]
+        [Route("Customer/Index")]
+        public IActionResult Index()
+        {
+            ViewBag.CustomerTypeDatasource = EnumHelper.ToDropdownList<ECustomerType>();
+            return View();
+        }
+
 
         /// <summary>
         /// Get a list of users with pagination and filtering

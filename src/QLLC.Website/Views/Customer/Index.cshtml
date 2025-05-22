@@ -26,23 +26,22 @@
 </script>
 <script type="text/javascript">
     let gridId = "#gridId";
-    var genderDatasource = @Html.Raw(Json.Serialize(@ViewBag.GenderDatasource));
+    var customerTypeDatasource = @Html.Raw(Json.Serialize(@ViewBag.CustomerTypeDatasource));
     var roleDatasource = @Html.Raw(Json.Serialize(@ViewBag.RoleDatasource));
-    function renderCreateOrEditForm(isCreate = true, dataUser = {}) {
+    function renderCreateOrEditForm(isCreate = true, dataCustomer = {}) {
         let myWindow = $("#window");
         $("#window").html("<form id='formCreateAndEdit'></form>");
 
         let formData = {
             id: 0,
-            tenantId: 0,
+            code: "",
             name: "",
-            userName: "",
+            type: "",
+            phoneContact: "",
             email:"",
+            taxCode:"",
             address:"",
-            password: null,
-            phone: null,
-            roleIdList:[],
-            ...dataUser
+            ...dataCustomer
         };
         let strSubmit = "Thêm";
         let title = "THÊM MỚI"
@@ -58,6 +57,15 @@
             items: [
 
                 {
+                    field: "code",
+                    title: "Mã khách hàng",
+                    label: "Mã khách hàng (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập mã khách hàng",
+                        required: true
+                    },
+                },
+                {
                     field: "name",
                     title: "Họ tên",
                     label: "Họ tên (*):",
@@ -67,21 +75,48 @@
                     },
                 },
                 {
-                    field: "userName",
-                    title: "Tên đăng nhập",
-                    label: "Tên đăng nhập (*):",
+                    field: "type",
+                    title: "Loại tài khoản",
+                    label: "Loại tài khoản (*):",
+                    editor: "DropDownList",
+                    editorOptions: {
+                                optionLabel: "Chọn loại tài khoản",
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                filter: "contains",
+                                dataSource: customerTypeDatasource,
+                            },
                     validation: {
-                        validationMessage: "Vui lòng nhập tên đăng nhập",
+                        validationMessage: "Vui lòng chọn loại tài khoản",
                         required: true
                     },
+                },
+                {
+                    field: "phoneContact",
+                    title: "Số điện thoại",
+                    label: "Số điện thoại:",
+                    // validation: {
+                    //     validationMessage: "Vui lòng nhập số điện thoại",
+                    //     required: true
+                    // },
                 },
                 {
                     field: "email",
                     title: "Email",
                     label: "Email:",
-                    validation: {
-                        email: true
-                    },
+                    // validation: {
+                    //     validationMessage: "Vui lòng nhập email",
+                    //     required: true
+                    // },
+                },
+                {
+                    field: "taxCode",
+                    title: "Mã số thuế",
+                    label: "Mã số thuế:",
+                    // validation: {
+                    //     validationMessage: "Vui lòng nhập Mã số thuế",
+                    //     required: true
+                    // },
                 },
                 {
                     field: "address",
@@ -91,15 +126,7 @@
                         address: true
                     },
                 },
-                {
-                    field: "password",
-                    label: "Mật khẩu (*):",
-                    title: "Mật khẩu",
-                    validation: {
-                        validationMessage: "Vui lòng nhập mật khẩu",
-                        required: true
-                    },
-                },
+
                 {
                     field: "phone",
                     label: "Số điện thoại(*):",
@@ -109,37 +136,6 @@
                         required: true
                     }
                 },
-                {
-                    field: "roleIdList",
-                    editor: "MultiSelect",
-                    label: "Danh sách vai trò:",
-                    editorOptions: {
-                        optionLabel: "Chọn người vai trò",
-                        dataTextField: "text",
-                        dataValueField: "value",
-                        filter: "contains",
-                        dataSource: {
-                            type: "json",
-                            serverFiltering: true,
-                            transport: {
-                                read: {
-                                    url: "/Role/GetRoleDropdownList",
-                                    dataType: "json",
-                                    data: function () {
-                                        return {
-                                            searchString: $("#roleIdList").data("kendoMultiSelect").input.val(), // The search string
-                                        };
-                                    }
-                                }
-                            },
-                            schema: {
-                                type: 'json',
-                                data: "data",
-                            },
-
-                        }
-                    }
-                }
             ],
             messages: {
                 submit: strSubmit, clear: "Đặt lại"
@@ -149,9 +145,8 @@
                 let dataItem = {
                     ...formData,
                     ...e.model,
-                    roleIdList: $("#roleIdList").data("kendoMultiSelect").value(),
                 };
-                var response = ajax("POST", "/User/CreateOrUpdateUser", dataItem, () => {
+                var response = ajax("POST", "/Customer/CreateOrUpdateCustomer", dataItem, () => {
                     $(gridId).data("kendoGrid").dataSource.filter({});
                     myWindow.data("kendoWindow").close();
                 });
@@ -161,28 +156,13 @@
             },
         });
         if(!isCreate){
-            $("#password").closest("div").hide();
-            $("#password-form-label").closest("div").hide();
+
         }
-        $('#password').on('keypress', function (event) {
-            if (event.which === 32) { // 32 is the ASCII code for space
-                event.preventDefault(); // Prevent the default action (space input)
-            }
-        });
+
         if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
             $("#userName").data("kendoTextBox").enable(false);
-            $("#roleIdList").data("kendoMultiSelect").enable(false);
         }
-        var multiSelect = $("#roleIdList").data("kendoMultiSelect");
-        // Apply debounce to the filter input
-        multiSelect.input.on("input", debounce(function () {
-            multiSelect.dataSource.filter({
-                logic: "or",
-                filters: [
-                    { field: multiSelect.options.dataTextField, operator: "contains", value: multiSelect.input.val() }
-                ]
-            });
-        }, debounceDelay));
+       
 
         setTimeout(() => {
             $("input[title='name']").focus();
@@ -214,15 +194,15 @@
         myWindow.data("kendoWindow").open();
     }
 
-    async function editUser(id) {
-        var response = ajax("GET", "/User/GetUserById", { userId: id }, (response) => {
+    async function editCustomer(id) {
+        var response = ajax("GET", "/Customer/GetCustomerById", { userId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
-    function deleteUser(id) {
+    function deleteCustomer(id) {
         $('#dialog').kendoConfirm({
-            title: "THÔNG BÁO XÓA TÀI KHOẢN",
-            content: "Bạn có chắc chắn xóa người dùng này không?",
+            title: "THÔNG BÁO XÓA KHÁCH HÀNG",
+            content: "Bạn có chắc chắn xóa khách hàng này không?",
             size: "medium",
             messages: {
                 okText: "Đồng ý",
@@ -230,7 +210,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/User/DeleteUserById", {
+            var response = ajax("GET", "/Customer/DeleteCustomerById", {
                 userId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -239,50 +219,32 @@
 
         $("#window").after("<div id='dialog'></div>");
     }
-    function resetPassword(id) {
-        $('#dialog').kendoConfirm({
-            title: "XÓA",
-            content: "Bạn có chắc chắn đặt lại mật khẩu cho tài khoản này không?",
-            messages: {
-                okText: "Đồng ý",
-                cancel: "Hủy"
 
-            },
-        }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/User/ResetUserPasswordById", {
-                userId: id
-            }, () => {
-                $(gridId).data("kendoGrid").dataSource.filter({});
-            });
-        })
-
-        $("#window").after("<div id='dialog'></div>");
-    }
 
     async function ExportExcel() {
         let dataSheet1 = [
             {
                 cells: [
                     {
+                        value: "Mã khách hàng", textAlign: "center", background: "#428dd8"
+                    },
+                    {
                         value: "Họ tên", textAlign: "center", background: "#428dd8"
+                    },
+                    {
+                        value: "Loại khách hàng", textAlign: "center", background: "#428dd8"
                     },
                     {
                         value: "Số điện thoại", textAlign: "center", background: "#428dd8"
                     },
                     {
-                        value: "Tên đăng nhập", textAlign: "center", background: "#428dd8"
-                    },
-                    {
                         value: "Email", textAlign: "center", background: "#428dd8"
                     },
                     {
+                        value: "Mã số thuế", textAlign: "center", background: "#428dd8"
+                    },
+                    {
                         value: "Địa chỉ", textAlign: "center", background: "#428dd8"
-                    },
-                    {
-                        value: "Ngày cập nhật", textAlign: "center", background: "#428dd8"
-                    },
-                    {
-                        value: "Vai trò", textAlign: "center", background: "#428dd8"
                     },
                 ]
             }];
@@ -293,22 +255,22 @@
             pageSize: 999999999,
             pageNumber: 1
         }
-        let dataSourceUser = null;
-        var response = await ajax("GET", "/User/GetUserList", postData, (urnResponse) => {
-            dataSourceUser = urnResponse.data.data;
+        let dataSourceCustomer = null;
+        var response = await ajax("GET", "/Customer/GetCustomerList", postData, (urnResponse) => {
+            dataSourceCustomer = urnResponse.data.data;
         }, null, false);
-        if (dataSourceUser == null) return;
+        if (dataSourceCustomer == null) return;
 
-        for (let index = 0; index < dataSourceUser.length; index++) {
+        for (let index = 0; index < dataSourceCustomer.length; index++) {
             dataSheet1.push({
                 cells: [
-                    { value: dataSourceUser[index].name },
-                    { value: dataSourceUser[index].phone },
-                    { value: dataSourceUser[index].userName },
-                    { value: dataSourceUser[index].email },
-                    { value: dataSourceUser[index].address },
-                    { value: kendo.toString(kendo.parseDate(dataSourceUser[index].updatedDate), "dd/MM/yyyy") },
-                    { value: dataSourceUser[index].roleViewList.map(i => i.description).join(",") },
+                    { value: dataSourceCustomer[index].code },
+                    { value: dataSourceCustomer[index].name },
+                    { value: dataSourceCustomer[index].type },
+                    { value: dataSourceCustomer[index].phone },
+                    { value: dataSourceCustomer[index].email },
+                    { value: dataSourceCustomer[index].taxCode },
+                    { value: dataSourceCustomer[index].address },
                 ]
             })
         }
@@ -317,7 +279,7 @@
         var workbook = new kendo.ooxml.Workbook({
             sheets: [
                 {
-                    name: "Danh sách người dùng",
+                    name: "Danh sách khách hàng",
                     columns: [
                         { width: 200 }, { autoWidth: true }, { autoWidth: true },
                         { autoWidth: true }, { autoWidth: true }, { autoWidth: true }
@@ -328,7 +290,7 @@
         });
         kendo.saveAs({
             dataURI: workbook.toDataURL(),
-            fileName: "Danh sách người dùng _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
+            fileName: "Danh sách khách hàng _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
         });
     }
 
@@ -378,7 +340,7 @@
             dataSource: {
                 transport: {
                     read: {
-                        url: "/User/GetUserList",
+                        url: "/Customer/GetCustomerList",
                         datatype: "json",
                     },
                     parameterMap: function (data, type) {
@@ -431,11 +393,25 @@
                     width: 100
                 },
                 {
+                    field: "code",
+                    title: "Mã khách hàng",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
                     field: "name",
                     title: "Họ tên",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 200,
+                },
+                {
+                    field: "type",
+                    title: "Số điện thoại",
+                    width: 150,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
                 },
                 {
                     field: "phone",
@@ -445,15 +421,15 @@
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "userName",
-                    title: "Tên đăng nhập",
-                    width: 250,
+                    field: "email",
+                    title: "Email",
+                    width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "email",
-                    title: "Email",
+                    field: "taxCode",
+                    title: "Mã số thuế",
                     width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
@@ -481,27 +457,10 @@
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "RoleNameList",
-                    title: "Vai trò",
-                    headerAttributes: { style: "text-align: center; justify-content: center" },
-                    attributes: { style: "text-align:center;" },
-                    width: 120,
-                    template: function (data) {
-                        var html = "";
-                        for (let i = 0; i < data.roleViewList.length; i++) {
-                            html += `<li>${data.roleViewList[i].description}</li>`;
-                        }
-                        return `<ul>${html}</ul>`
-                    },
-
-                },
-
-                {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=editUser(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                                                               <button style='margin-right:5px;' onclick=deleteUser(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>\
-                                                               <button onclick=resetPassword(#=id#) title='Reset mật khẩu' class='k-button k-button-md k-rounded-md k-button-solid-primary _permission_' data-enum='8'><span class='k-icon k-i-lock k-button-icon'></span></button>",
+                    template: "<button style='margin-right:5px;' onclick=editCustomer(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                                                               <button style='margin-right:5px;' onclick=deleteCustomer(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
                 }
             ],
             dataBound: function (e) {
@@ -545,12 +504,12 @@
             },
             placeholder: "Nhập từ khóa tìm kiếm..."
         });
-        $("#roleDropdownList").kendoMultiSelect({
-            dataTextField: "text",
-            dataValueField: "value",
-            optionLabel: 'Lọc vai trò...',
-            dataSource: roleDatasource,
-        });
+        // $("#roleDropdownList").kendoMultiSelect({
+        //     dataTextField: "text",
+        //     dataValueField: "value",
+        //     optionLabel: 'Lọc vai trò...',
+        //     dataSource: roleDatasource,
+        // });
         $("#create").kendoButton({
             icon: "plus"
         });
