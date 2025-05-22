@@ -1,4 +1,6 @@
-﻿namespace Tasin.Website.Common.Enums
+﻿using System.ComponentModel;
+
+namespace Tasin.Website.Common.Enums
 {
     /// Rule for naming : E + Noun  
 
@@ -17,5 +19,17 @@
     {
         Excel,
         //Word,...
+    }
+
+    public enum ECategoryType
+    {
+        CustomerType
+    }
+    public enum ECustomerType
+    {
+        [Description("Doanh nghiệp")]
+        Company,
+        [Description("Cá nhân")]
+        Individual,
     }
 }

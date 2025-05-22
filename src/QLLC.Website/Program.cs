@@ -199,6 +199,7 @@ try
     builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 
