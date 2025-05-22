@@ -32,12 +32,13 @@ namespace Tasin.Website.DAL.Services.WebServices
             IHttpContextAccessor httpContextAccessor,
             IConfiguration configuration,
             ICurrentUserContext currentUserContext,
+            SampleDBContext dbContext,
             IMapper mapper
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
             _mapper = mapper;
             _customerRepository = customerRepository;
-        }       
+        }
 
 
         public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetCustomerDataDropdownList(string searchString)
@@ -80,17 +81,17 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var userList = new List<CustomerViewModel>();
                 predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
-                var userDbQuery = await _customerRepository.ReadOnlyRespository.GetWithPagingAsync(
+                var customerQuery = await _customerRepository.ReadOnlyRespository.GetWithPagingAsync(
                     new PagingParameters(searchModel.PageNumber, searchModel.PageSize),
                     predicate,
                     i => i.OrderByDescending(u => u.UpdatedDate)
                     );
-                var customerDBList = _mapper.Map<List<CustomerViewModel>>(userDbQuery.Data);
+                var customerDBList = _mapper.Map<List<CustomerViewModel>>(customerQuery.Data);
                 var updateByUserIdList = customerDBList.Select(i => i.UpdatedBy).ToList();
                 var updateByUserList = await _userRepository.ReadOnlyRespository.GetAsync(i => updateByUserIdList.Contains(i.Id));
                 foreach (var user in customerDBList)
                 {
-                    var updateUser = updateByUserList.First(i => i.Id == user.UpdatedBy);
+                    var updateUser = updateByUserList.FirstOrDefault(i => i.Id == user.UpdatedBy);
                     user.UpdatedByName = updateUser.Name;
                 }
                 response.Data = new JsonResultPaging<List<CustomerViewModel>>()
@@ -98,7 +99,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     Data = customerDBList,
                     PageNumber = searchModel.PageNumber,
                     PageSize = searchModel.PageSize,
-                    Total = userDbQuery.TotalRecords
+                    Total = customerQuery.TotalRecords
                 };
                 response.IsSuccess = true;
                 return response;
@@ -147,19 +148,19 @@ namespace Tasin.Website.DAL.Services.WebServices
                 ack.AddMessage("Vui lòng nhập họ tên");
                 return ack;
             }
-            if (postData.TypeAccount == ECustomerType.Company && string.IsNullOrWhiteSpace(postData.TaxCode))
+            if (postData.Type == ECustomerType.Company && string.IsNullOrWhiteSpace(postData.TaxCode))
             {
                 ack.AddMessage("Vui lòng nhập mã số thuế");
                 return ack;
             }
-            var phone = postData.Phone;
+            var phone = postData.PhoneContact;
             var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
             if (validatePhoneMessage != null)
             {
                 ack.AddMessage(validatePhoneMessage);
                 return ack;
             }
-            postData.Phone = phone;
+            postData.PhoneContact = phone;
             if (!string.IsNullOrWhiteSpace(postData.Email))
             {
                 var isValidEmail = Validate.ValidEmail(postData.Email);
@@ -169,7 +170,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
             }
-           
+
             if (postData.Id == 0)
             {
                 var newCustomer = _mapper.Map<Customer>(postData);
@@ -194,9 +195,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     existItem.Name = postData.Name;
                     existItem.NameNonUnicode = Utils.NonUnicode(postData.Name);
-                    existItem.PhoneContact = postData.Phone;
+                    existItem.PhoneContact = postData.PhoneContact;
                     existItem.Email = postData.Email;
-                    existItem.TaxCode = postData.TaxCode    ;
+                    existItem.TaxCode = postData.TaxCode;
                     existItem.Address = postData.Address;
                     existItem.UpdatedDate = DateTime.Now;
                     existItem.UpdatedBy = _currentUserId;

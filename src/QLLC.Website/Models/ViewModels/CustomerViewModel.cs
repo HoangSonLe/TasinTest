@@ -47,14 +47,14 @@ namespace Tasin.Website.Models.ViewModels
         /// Phone number
         /// </summary>
         [Phone]
-        [Display(Name = "Phone")]
-        public string Phone { get; set; } 
+        [Display(Name = "PhoneContact")]
+        public string PhoneContact { get; set; } 
         
-        [Display(Name = "TypeCode")]
-        public ECustomerType TypeAccount { get; set; }
+        [Display(Name = "Type")]
+        public ECustomerType Type { get; set; }
 
         [Display(Name = "TypeName")]
-        public string TypeName => EnumHelper.GetEnumDescription(TypeAccount);
+        public string TypeName => EnumHelper.GetEnumDescription(Type);
 
         [Display(Name = "TaxCode")]
         public string TaxCode { get; set; }

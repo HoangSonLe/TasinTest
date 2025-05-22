@@ -194,6 +194,12 @@ try
     #endregion
 
     #region ConfigurationRepositoryAndUnitOfWorkSettings
+    // Register DbContext
+    //builder.Services.AddDbContext<SampleDBContext>(options =>
+    //    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    //builder.Services.AddDbContext<SampleReadOnlyDBContext>(options =>
+    //    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
     // REGISTER SERVICES HERE
     //builder.Services.AddSingleton<IChatHub, ChatHub>();
     builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();

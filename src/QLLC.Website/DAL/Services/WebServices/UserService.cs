@@ -11,6 +11,7 @@ using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services.AuthorPredicates;
 using Tasin.Website.DAL.Services.WebInterfaces;
+using Tasin.Website.Domains.DBContexts;
 using Tasin.Website.Domains.Entitites;
 using Tasin.Website.Models.SearchModels;
 using Tasin.Website.Models.ViewModels;
@@ -30,9 +31,10 @@ namespace Tasin.Website.DAL.Services.WebServices
             IHttpContextAccessor httpContextAccessor,
             IConfiguration configuration,
             ICurrentUserContext currentUserContext,
+            SampleDBContext dbContext,
             IMapper mapper
             //TelegramService telegramService
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
             _mapper = mapper;
             //_telegramService = telegramService;
@@ -75,7 +77,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => userDB.RoleIdList.Contains(i.Id.ToString()));
                     UserViewModel userViewModel = _mapper.Map<UserViewModel>(userDB);
                     userViewModel.RoleName = string.Join(",", roleDBList.Select(i => i.Description));
-                    userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i=> Int32.Parse(i)).Distinct().ToList();
+                    userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
                     response.Data = userViewModel;
                 }
                 else
@@ -254,7 +256,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             if (postData.Id == 0)
             {
                 var newUser = _mapper.Map<User>(postData);
-                newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User,DbContext);
+                newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User, DbContext);
                 newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
                 newUser.Password = postData.Password;
                 newUser.CreatedDate = DateTime.Now;

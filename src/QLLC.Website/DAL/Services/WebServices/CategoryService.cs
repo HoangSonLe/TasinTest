@@ -9,6 +9,7 @@ using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Services.AuthorPredicates;
 using Tasin.Website.DAL.Services.WebInterfaces;
+using Tasin.Website.Domains.DBContexts;
 using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.DAL.Services.WebServices
@@ -21,11 +22,12 @@ namespace Tasin.Website.DAL.Services.WebServices
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
-            ICurrentUserContext currentUserContext
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
+            ICurrentUserContext currentUserContext,
+            SampleDBContext dbContext
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
         }
-        
+
 
         private List<KendoDropdownListModel<string>> GetCustomerType(string? searchString)
         {
@@ -50,7 +52,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     case ECategoryType.CustomerType:
                         response.Data = GetCustomerType(searchString);
                         break;
-                    
+
                     default: break;
                 }
                 return response;

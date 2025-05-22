@@ -8,8 +8,8 @@
     "IsActived" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100)
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL
 )
 
 CREATE TABLE "Unit" (
@@ -59,8 +59,8 @@ CREATE TABLE "Customer" (
     "Address" TEXT,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     "IsActived" BOOLEAN default true
 )
 
@@ -84,8 +84,8 @@ CREATE TABLE "TaxRateConfig" (
     "IsActived" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     CONSTRAINT "fk_special_product_taxrate" FOREIGN KEY ("SpecialProductTaxRate_ID") REFERENCES "SpecialProductTaxRate"("ID") ON DELETE SET NULL
 )
 
@@ -123,8 +123,8 @@ CREATE TABLE "Product" (
     "IsActived" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID"),
     CONSTRAINT "fk_category" FOREIGN KEY ("Category_ID") REFERENCES "Category"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID"),
@@ -154,8 +154,8 @@ CREATE TABLE "Purchase_Order" (
     "IsActived" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     CONSTRAINT "fk_customer" FOREIGN KEY ("Customer_ID") REFERENCES "Customer"("ID")
 )
 
@@ -189,8 +189,8 @@ CREATE TABLE "Purchase_Agreement" (
     "IsActived" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     CONSTRAINT "fk_vendor" FOREIGN KEY ("Vendor_ID") REFERENCES "Vendor"("ID")
 )
 
@@ -239,8 +239,11 @@ CREATE TABLE "User" (
     "TypeAccount" INTEGER NOT NULL,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NULL,
+    "UpdatedBy" INT4 NULL,
     "IsActived" BOOLEAN default true,
 
 )
+INSERT INTO public."User"
+("Id", "UserName", "Password", "Name", "NameNonUnicode", "Code", "Email", "Address", "Phone", "RoleIdList", "TypeAccount", "CreatedDate", "UpdatedDate", "CreatedBy", "UpdatedBy", "IsActived")
+VALUES(1, 'ADMIN', '/cA7ZZQqtyOGVwe1kEbPSg==', 'ADMIN', 'ADMIN', 'ADMIN', NULL, NULL, '', '', 1, '2025-05-23 00:31:13.516', NULL, 1, 1, true);

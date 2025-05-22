@@ -15,7 +15,9 @@ namespace Tasin.Website.DAL.Services.WebServices
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICurrentUserContext _currentUserContext;
         private readonly IConfiguration _configuration;
+        private readonly SampleDBContext _dbContext;
         public IConfiguration Configuration => _configuration;
+        public SampleDBContext DbContext => _dbContext;
 
         // Properties to access user context information
         public int CurrentUserId => _currentUserContext.UserId ?? throw new InvalidOperationException("User is not authenticated");
@@ -35,7 +37,8 @@ namespace Tasin.Website.DAL.Services.WebServices
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
-            ICurrentUserContext currentUserContext)
+            ICurrentUserContext currentUserContext,
+            SampleDBContext dbContext)
         {
             _logger = logger;
             _configuration = configuration;
@@ -43,23 +46,12 @@ namespace Tasin.Website.DAL.Services.WebServices
             _roleRepository = roleRepository;
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _currentUserContext = currentUserContext ?? throw new ArgumentNullException(nameof(currentUserContext));
-        }
-        private SampleDBContext _DbContext;
-        public SampleDBContext DbContext
-        {
-            get
-            {
-
-                if (_DbContext == null)
-                {
-                    _DbContext = new SampleDBContext();
-                }
-                return _DbContext;
-            }
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
         public void Dispose()
         {
             DbContext.Dispose();
+            GC.SuppressFinalize(this);
         }
         ~BaseService()
         {

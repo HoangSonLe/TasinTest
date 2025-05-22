@@ -56,20 +56,28 @@ namespace Tasin.Website.Controllers
             var result = await _customerService.GetCustomerList(searchModel);
             return Json(result);
         }
-        [HttpGet]
+        [HttpDelete]
         [Route("Customer/DeleteCustomerById")]
-        public async Task<Acknowledgement> DeleteCustomerById(int userId)
+        public async Task<Acknowledgement> DeleteCustomerById(int customerId)
         {
-            return await _customerService.DeleteCustomerById(userId);
+            return await _customerService.DeleteCustomerById(customerId);
         }
        
         [HttpPost]
-        [Route("Customer/CreateOrUpdateCustomer")]
-        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromBody] CustomerViewModel postData)
+        [Route("Customer/Create")]
+        public async Task<Acknowledgement> Create([FromBody] CustomerViewModel postData)
         {
             return await _customerService.CreateOrUpdateCustomer(postData);
         }
-       
+
+        [HttpPut]
+        [Route("Customer/UpdateCustomer/{customerId}")]
+        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute]int customerId, [FromBody] CustomerViewModel postData)
+        {
+            postData.Id = customerId;
+            return await _customerService.CreateOrUpdateCustomer(postData);
+        }
+
         /// <summary>
         /// Get a specific user by ID
         /// </summary>
