@@ -14,10 +14,8 @@ using Tasin.Website.Models.ViewModels.AccountViewModels;
 
 namespace Tasin.Website.Controllers
 {
-    /// <summary>
-    /// Controller for managing users
-    /// </summary>
-    [Authorize]
+
+    //[Authorize]
     [ApiController]
     [Produces("application/json")]
     public class UserController : BaseController<UserController>
@@ -29,7 +27,7 @@ namespace Tasin.Website.Controllers
         {
         }
 
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
         [HttpGet]
         [Route("User/Index")]
         public IActionResult Index()

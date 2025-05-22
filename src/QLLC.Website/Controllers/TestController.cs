@@ -15,7 +15,7 @@ using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class TestController : BaseController<TestController>
     {
         private readonly IUserService _userService;

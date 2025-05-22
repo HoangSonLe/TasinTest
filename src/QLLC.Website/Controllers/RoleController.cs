@@ -5,7 +5,7 @@ using Tasin.Website.DAL.Services.WebInterfaces;
 
 namespace Tasin.Website.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class RoleController : BaseController<RoleController>
     {
         private readonly IRoleService _roleService;
