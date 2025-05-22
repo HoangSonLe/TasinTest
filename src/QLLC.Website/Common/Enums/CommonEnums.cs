@@ -25,6 +25,7 @@ namespace Tasin.Website.Common.Enums
     {
         CustomerType
     }
+    
     public enum ECustomerType
     {
         [Description("Doanh nghiệp")]

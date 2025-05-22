@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Tasin.Website.Common.CommonModels
 {
@@ -62,6 +63,12 @@ namespace Tasin.Website.Common.CommonModels
         /// Search Model
         /// </summary>
         //public T SearchModel { get; set; }
+
+        /// <summary>
+        /// Search string to filter users by name, username, or phone
+        /// </summary>
+        [Display(Name = "Search")]
+        public string? SearchString { get; set; }
     }
     #endregion
     #region RESPONSE SERVICE

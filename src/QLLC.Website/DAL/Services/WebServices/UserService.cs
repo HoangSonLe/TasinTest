@@ -253,8 +253,8 @@ namespace Tasin.Website.DAL.Services.WebServices
 
             if (postData.Id == 0)
             {
-                postData.UserName = Generator.UserNameGenerator(postData.UserName);
                 var newUser = _mapper.Map<User>(postData);
+                newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User,DbContext);
                 newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
                 newUser.Password = postData.Password;
                 newUser.CreatedDate = DateTime.Now;

@@ -10,7 +10,7 @@ namespace Tasin.Website.Domains.Entitites
         public required string Code { get; set; }
         public required string Name { get; set; }
         [Column(TypeName = "varchar")]
-        public string? NameNonUnicode { get; set; }
+        public string NameNonUnicode { get; set; } = "";
         public string? Type { get; set; }
         public string? PhoneContact { get; set; }
         public string? Email { get; set; }

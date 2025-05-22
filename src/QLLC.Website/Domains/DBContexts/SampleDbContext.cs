@@ -88,41 +88,41 @@ namespace Tasin.Website.Domains.DBContexts
 
             //Default value for column entity models
 
-            modelBuilder.Entity<Role>().HasData(
-                new Role()
-                {
-                    Id = 1,
-                    Name = "Admin",
-                    Description = "Admin",
-                    EnumActionList = "1,2",
-                    NameNonUnicode = "Admin",
-                },
-                new Role()
-                {
-                    Id = 2,
-                    Name = "Dev",
-                    Description = "Dev",
-                    EnumActionList = "1,2",
-                    NameNonUnicode = "Dev"
-                }
-            );
-            modelBuilder.Entity<User>().HasData(
-                new User()
-                {
-                    Id = 1,
-                    UserName = "Admin",
-                    NameNonUnicode = "Admin",
-                    Password = "/cA7ZZQqtyOGVwe1kEbPSg==", //123456
-                    Name = "Admin",
-                    Phone = "",
-                    TypeAccount = 1,
-                    RoleIdList = "1,2,3,4",
-                    CreatedBy = 1,
-                    CreatedDate = DateTime.Now,
-                    IsActived = true,
-                    Email = ""
-                }
-            );
+            //modelBuilder.Entity<Role>().HasData(
+            //    new Role()
+            //    {
+            //        Id = 1,
+            //        Name = "Admin",
+            //        Description = "Admin",
+            //        EnumActionList = "1,2",
+            //        NameNonUnicode = "Admin",
+            //    },
+            //    new Role()
+            //    {
+            //        Id = 2,
+            //        Name = "Dev",
+            //        Description = "Dev",
+            //        EnumActionList = "1,2",
+            //        NameNonUnicode = "Dev"
+            //    }
+            //);
+            //modelBuilder.Entity<User>().HasData(
+            //    new User()
+            //    {
+            //        Id = 1,
+            //        UserName = "Admin",
+            //        NameNonUnicode = "Admin",
+            //        Password = "/cA7ZZQqtyOGVwe1kEbPSg==", //123456
+            //        Name = "Admin",
+            //        Phone = "",
+            //        TypeAccount = 1,
+            //        RoleIdList = "1,2,3,4",
+            //        CreatedBy = 1,
+            //        CreatedDate = DateTime.Now,
+            //        IsActived = true,
+            //        Email = ""
+            //    }
+            //);
 
 
 

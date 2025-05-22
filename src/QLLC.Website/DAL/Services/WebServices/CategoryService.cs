@@ -7,6 +7,7 @@ using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
+using Tasin.Website.DAL.Services.AuthorPredicates;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Domains.Entitites;
 
@@ -24,6 +25,8 @@ namespace Tasin.Website.DAL.Services.WebServices
             ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
         {
         }
+        
+
         private List<KendoDropdownListModel<string>> GetCustomerType(string? searchString)
         {
             var options = EnumHelper.ToDropdownList<ECustomerType>();
@@ -45,9 +48,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 switch (type)
                 {
                     case ECategoryType.CustomerType:
-
                         response.Data = GetCustomerType(searchString);
                         break;
+                    
                     default: break;
                 }
                 return response;

@@ -2,6 +2,7 @@
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Address" TEXT,
     "Status" VARCHAR(50),
     "IsActived" BOOLEAN DEFAULT TRUE,
@@ -15,6 +16,7 @@ CREATE TABLE "Unit" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
     "Status" VARCHAR(50),
@@ -25,6 +27,7 @@ CREATE TABLE "Category" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Parent_ID" INTEGER,
     "Description" TEXT,
@@ -37,6 +40,7 @@ CREATE TABLE "ProcessingType" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
     "Status" VARCHAR(50),
@@ -47,6 +51,7 @@ CREATE TABLE "Customer" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Type" VARCHAR(50),
     "PhoneContact" VARCHAR(50),
     "Email" VARCHAR(255),
@@ -55,13 +60,15 @@ CREATE TABLE "Customer" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100)
+    "UpdatedBy" VARCHAR(100),
+    "IsActived" BOOLEAN default true
 )
 
 CREATE TABLE "SpecialProductTaxRate" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
     "Status" VARCHAR(50),
@@ -86,6 +93,7 @@ CREATE TABLE "Material" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Parent_ID" INTEGER,
     "Description" TEXT,
@@ -98,6 +106,7 @@ CREATE TABLE "Product" (
     "ID" SERIAL PRIMARY KEY,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Name" VARCHAR(255) NOT NULL,
+    "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Unit_ID" INTEGER,
     "Category_ID" INTEGER,
@@ -207,24 +216,6 @@ CREATE TABLE "CodeVersion" (
 )
 
 
-ALTER TABLE "Vendor" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "Unit" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "Category" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "ProcessingType" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "Customer" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "SpecialProductTaxRate" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "Material" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-ALTER TABLE "Product" ADD COLUMN "NameNonUnicode" VARCHAR(255)
-
-
-
 CREATE TABLE "Role" (
     "Id" SERIAL PRIMARY KEY,
     "Name" VARCHAR(255) NOT NULL,
@@ -240,6 +231,7 @@ CREATE TABLE "User" (
     "Password" VARCHAR(255) NOT NULL,
     "Name" VARCHAR(255) NOT NULL,
     "NameNonUnicode" VARCHAR(255) NOT NULL,
+    "Code" VARCHAR(50) NOT NULL UNIQUE,
     "Email" VARCHAR(255),
     "Address" TEXT,
     "Phone" VARCHAR(50) NOT NULL DEFAULT '',
@@ -248,7 +240,7 @@ CREATE TABLE "User" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100)
-)
+    "UpdatedBy" VARCHAR(100),
+    "IsActived" BOOLEAN default true,
 
-ALTER TABLE "User" ADD COLUMN "IsActived" BOOLEAN default true
+)
