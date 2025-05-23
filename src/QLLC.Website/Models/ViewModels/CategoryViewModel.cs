@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations;
 namespace Tasin.Website.Models.ViewModels
 {
     /// <summary>
-    /// View model for vendor information
+    /// View model for category information
     /// </summary>
-    public class VendorViewModel : BaseViewModel
+    public class CategoryViewModel : BaseViewModel
     {
         /// <summary>
-        /// Vendor ID
+        /// Category ID
         /// </summary>
         public int Id { get; set; }
 
@@ -20,10 +20,10 @@ namespace Tasin.Website.Models.ViewModels
         public string Code { get; set; }
 
         /// <summary>
-        /// Full name of the vendor
+        /// Name of the category
         /// </summary>
         [Required]
-        [Display(Name = "Full Name")]
+        [Display(Name = "Name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -33,16 +33,27 @@ namespace Tasin.Website.Models.ViewModels
         public string? NameNonUnicode { get; set; }
 
         /// <summary>
-        /// Physical address
+        /// English name
         /// </summary>
-        [Display(Name = "Address")]
-        public string? Address { get; set; }
-
+        [Display(Name = "Name_EN")]
+        public string? Name_EN { get; set; }
 
         /// <summary>
-        /// Name of the user who last updated this record
+        /// Parent category ID
         /// </summary>
-        [Display(Name = "Updated By")]
-        public string UpdatedByName { get; set; }
+        [Display(Name = "Parent_ID")]
+        public int? Parent_ID { get; set; }
+
+        /// <summary>
+        /// Description
+        /// </summary>
+        [Display(Name = "Description")]
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Parent category name (for display purposes)
+        /// </summary>
+        [Display(Name = "ParentName")]
+        public string? ParentName { get; set; }
     }
 }

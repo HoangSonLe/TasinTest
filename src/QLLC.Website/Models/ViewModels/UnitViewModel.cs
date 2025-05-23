@@ -1,14 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
+using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.Models.ViewModels
 {
     /// <summary>
-    /// View model for vendor information
+    /// View model for unit information
     /// </summary>
-    public class VendorViewModel : BaseViewModel
+    public class UnitViewModel : BaseViewModel
     {
         /// <summary>
-        /// Vendor ID
+        /// Unit ID
         /// </summary>
         public int Id { get; set; }
 
@@ -20,10 +23,10 @@ namespace Tasin.Website.Models.ViewModels
         public string Code { get; set; }
 
         /// <summary>
-        /// Full name of the vendor
+        /// Name of the unit
         /// </summary>
         [Required]
-        [Display(Name = "Full Name")]
+        [Display(Name = "Name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -33,16 +36,15 @@ namespace Tasin.Website.Models.ViewModels
         public string? NameNonUnicode { get; set; }
 
         /// <summary>
-        /// Physical address
+        /// English name
         /// </summary>
-        [Display(Name = "Address")]
-        public string? Address { get; set; }
-
+        [Display(Name = "Name_EN")]
+        public string? Name_EN { get; set; }
 
         /// <summary>
-        /// Name of the user who last updated this record
+        /// Description
         /// </summary>
-        [Display(Name = "Updated By")]
-        public string UpdatedByName { get; set; }
+        [Display(Name = "Description")]
+        public string? Description { get; set; }
     }
 }

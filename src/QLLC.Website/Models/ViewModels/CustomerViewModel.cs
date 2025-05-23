@@ -9,7 +9,7 @@ namespace Tasin.Website.Models.ViewModels
     /// <summary>
     /// View model for user information
     /// </summary>
-    public class CustomerViewModel : BaseAuditableEntity
+    public class CustomerViewModel : BaseViewModel
     {
         /// <summary>
         /// User ID

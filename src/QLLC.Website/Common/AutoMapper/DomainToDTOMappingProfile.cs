@@ -17,6 +17,36 @@ namespace Tasin.Website.Common.AutoMapper
             CreateMap<Vendor, VendorViewModel>();
             CreateMap<VendorViewModel, Vendor>();
             CreateMap<Role, RoleViewModel>();
+
+            // Unit mapping
+            CreateMap<Unit, UnitViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<UnitViewModel, Unit>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+
+            // Category mapping
+            CreateMap<Category, CategoryViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<CategoryViewModel, Category>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+
+            // ProcessingType mapping
+            CreateMap<ProcessingType, ProcessingTypeViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<ProcessingTypeViewModel, ProcessingType>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+
+            // Material mapping
+            CreateMap<Material, MaterialViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<MaterialViewModel, Material>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+
+            // SpecialProductTaxRate mapping
+            CreateMap<SpecialProductTaxRate, SpecialProductTaxRateViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<SpecialProductTaxRateViewModel, SpecialProductTaxRate>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
         }
     }
 }

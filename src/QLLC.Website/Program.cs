@@ -208,12 +208,22 @@ try
     builder.Services.AddScoped<ICommonService, CommonService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
     builder.Services.AddScoped<IVendorService, VendorService>();
+    builder.Services.AddScoped<IUnitService, UnitService>();
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<IProcessingTypeService, ProcessingTypeService>();
+    builder.Services.AddScoped<IMaterialService, MaterialService>();
+    builder.Services.AddScoped<ISpecialProductTaxRateService, SpecialProductTaxRateService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IRoleRepository, RoleRepository>();
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
     builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+    builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<IProcessingTypeRepository, ProcessingTypeRepository>();
+    builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
+    builder.Services.AddScoped<ISpecialProductTaxRateRepository, SpecialProductTaxRateRepository>();
 
 
     #endregion

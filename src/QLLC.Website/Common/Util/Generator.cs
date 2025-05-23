@@ -263,6 +263,8 @@ namespace Tasin.Website.Common.Util
                 "CATEGORY" => "CAT",
                 "UNIT" => "UNT",
                 "MATERIAL" => "MAT",
+                "PROCESSING_TYPE" => "PRT",
+                "SPECIAL_PRODUCT_TAX_RATE" => "SPT",
                 "PURCHASE_ORDER" => "PO",
                 "PURCHASE_AGREEMENT" => "PA",
                 // For unknown entity types, use the first three letters
