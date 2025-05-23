@@ -14,10 +14,10 @@ using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.DAL.Services.WebServices
 {
-    public class CategoryService : BaseService<CategoryService>, ICategoryService
+    public class CommonService : BaseService<CommonService>, ICommonService
     {
-        public CategoryService(
-            ILogger<CategoryService> logger,
+        public CommonService(
+            ILogger<CommonService> logger,
             IConfiguration configuration,
             IUserRepository userRepository,
             IRoleRepository roleRepository,

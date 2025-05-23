@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Tasin.Website.Authorizations;
+﻿using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
-using Tasin.Website.Common.Enums;
-using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
-using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
 using Tasin.Website.Models.ViewModels;
-using Tasin.Website.Models.ViewModels.AccountViewModels;
 
 namespace Tasin.Website.Controllers
 {

@@ -205,7 +205,7 @@ try
     builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
-    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<ICommonService, CommonService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 
