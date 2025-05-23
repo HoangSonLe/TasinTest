@@ -43,7 +43,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetCustomerDataDropdownList(string searchString)
         {
-            var predicate = PredicateBuilder.New<Customer>(i => i.IsActived == true);
+            var predicate = PredicateBuilder.New<Customer>(i => i.IsActive == true);
             predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
             var selectedUserList = new List<User>();
             if (!string.IsNullOrEmpty(searchString))
@@ -69,7 +69,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>();
             try
             {
-                var predicate = PredicateBuilder.New<Customer>(i => i.IsActived == true);
+                var predicate = PredicateBuilder.New<Customer>(i => i.IsActive == true);
 
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
                 {
@@ -184,7 +184,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             else
             {
-                var existItem = await _customerRepository.Repository.FirstOrDefaultAsync(i => i.ID == postData.Id && i.IsActived == true);
+                var existItem = await _customerRepository.Repository.FirstOrDefaultAsync(i => i.ID == postData.Id && i.IsActive == true);
                 if (existItem == null)
                 {
                     ack.AddMessage("Không tìm thấy khách hàng");
@@ -216,7 +216,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 ack.AddMessage("Không tìm thấy khách hàng");
                 return ack;
             }
-            customer.IsActived = false;
+            customer.IsActive = false;
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(customer), _customerRepository.Repository);
             return ack;
         }

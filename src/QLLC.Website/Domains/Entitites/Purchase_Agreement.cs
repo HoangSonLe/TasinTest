@@ -11,14 +11,12 @@ namespace Tasin.Website.Domains.Entitites
         public string? Note { get; set; }
         public required string Code { get; set; }
         public decimal TotalPrice { get; set; }
-        public string? Status { get; set; }
-        public bool IsActived { get; set; } = true;
 
         // Navigation properties
         [ForeignKey("Vendor_ID")]
         [NotMapped]
         public virtual Vendor? Vendor { get; set; }
-        
+
         [NotMapped]
         public virtual ICollection<Purchase_Agreement_Item>? PurchaseAgreementItems { get; set; }
     }

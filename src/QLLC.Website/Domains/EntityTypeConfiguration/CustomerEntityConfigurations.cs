@@ -20,7 +20,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.Email).HasColumnName("Email").HasMaxLength(255);
             builder.Property(p => p.TaxCode).HasColumnName("TaxCode").HasMaxLength(100);
             builder.Property(p => p.Address).HasColumnName("Address").HasColumnType("TEXT");
-            builder.Property(p => p.IsActived).HasColumnName("IsActived").HasDefaultValue(true);
+            builder.Property(p => p.IsActive).HasColumnName("IsActived").HasDefaultValue(true);
 
             // Audit properties
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("CURRENT_TIMESTAMP");

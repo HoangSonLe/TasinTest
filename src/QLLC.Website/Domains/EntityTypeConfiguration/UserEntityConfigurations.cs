@@ -22,7 +22,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.TypeAccount).HasColumnName("TypeAccount");
             builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode");
             builder.Property(p => p.RoleIdList).HasColumnName("RoleIdList");
-            builder.Property(p => p.IsActived).HasColumnName("IsActived").HasDefaultValue(true);
+            builder.Property(p => p.IsActive).HasColumnName("IsActived").HasDefaultValue(true);
 
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate");
             builder.Property(p => p.CreatedBy).HasColumnName("CreatedBy");

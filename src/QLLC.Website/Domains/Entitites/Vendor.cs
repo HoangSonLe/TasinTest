@@ -12,8 +12,6 @@ namespace Tasin.Website.Domains.Entitites
         [Column(TypeName = "varchar")]
         public string? NameNonUnicode { get; set; }
         public string? Address { get; set; }
-        public string? Status { get; set; }
-        public bool IsActived { get; set; } = true;
 
         // Navigation properties
         [NotMapped]

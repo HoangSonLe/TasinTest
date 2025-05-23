@@ -13,8 +13,6 @@ namespace Tasin.Website.Domains.Entitites
         public string? NameNonUnicode { get; set; }
         public string? Name_EN { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }
-        public bool IsActived { get; set; } = true;
 
         // Navigation properties
         [NotMapped]
