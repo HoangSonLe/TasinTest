@@ -134,7 +134,7 @@ namespace Tasin.Website.Controllers
                     return View(model);
                 }
 
-                //if (!userDB.IsActived)
+                //if (!userDB.IsActive)
                 //{
                 //    SetViewBagDataForLoginView(loginFailedTimes);
                 //    ModelState.AddModelError("", "Tài khoản chưa kích hoạt, vui lòng kiểm tra lại");

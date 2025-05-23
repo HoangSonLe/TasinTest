@@ -4,17 +4,22 @@ namespace Tasin.Website.Domains.Entitites
 {
     public abstract class BaseAuditableEntity
     {
-        public DateTime CreatedDate { get; set; }  = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public int CreatedBy { get; set; } = 1;
 
-        public DateTime? UpdatedDate { get; set; } = DateTime.Now;
+        public DateTime? UpdatedDate { get; set; } = null;
 
-        public int? UpdatedBy { get; set; } = 1;
+        public int? UpdatedBy { get; set; } = null;
+
         /// <summary>
-        /// EState
+        /// Entity status
         /// </summary>
-        public bool IsActived { get; set; } = true;
+        public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// Status string for additional status information
+        /// </summary>
+        public string? Status { get; set; }
     }
 }

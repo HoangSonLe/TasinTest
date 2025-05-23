@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Tasin.Website.Authorizations;
+﻿using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
-using Tasin.Website.Common.Enums;
-using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
-using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
 using Tasin.Website.Models.ViewModels;
-using Tasin.Website.Models.ViewModels.AccountViewModels;
 
 namespace Tasin.Website.Controllers
 {
@@ -56,20 +50,28 @@ namespace Tasin.Website.Controllers
             var result = await _customerService.GetCustomerList(searchModel);
             return Json(result);
         }
-        [HttpGet]
+        [HttpDelete]
         [Route("Customer/DeleteCustomerById")]
-        public async Task<Acknowledgement> DeleteCustomerById(int userId)
+        public async Task<Acknowledgement> DeleteCustomerById(int customerId)
         {
-            return await _customerService.DeleteCustomerById(userId);
+            return await _customerService.DeleteCustomerById(customerId);
         }
        
         [HttpPost]
-        [Route("Customer/CreateOrUpdateCustomer")]
-        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromBody] CustomerViewModel postData)
+        [Route("Customer/Create")]
+        public async Task<Acknowledgement> Create([FromBody] CustomerViewModel postData)
         {
             return await _customerService.CreateOrUpdateCustomer(postData);
         }
-       
+
+        [HttpPut]
+        [Route("Customer/UpdateCustomer/{customerId}")]
+        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute]int customerId, [FromBody] CustomerViewModel postData)
+        {
+            postData.Id = customerId;
+            return await _customerService.CreateOrUpdateCustomer(postData);
+        }
+
         /// <summary>
         /// Get a specific user by ID
         /// </summary>

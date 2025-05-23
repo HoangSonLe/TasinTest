@@ -6,6 +6,7 @@ using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Services.WebInterfaces;
+using Tasin.Website.Domains.DBContexts;
 using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.DAL.Services.WebServices
@@ -18,8 +19,9 @@ namespace Tasin.Website.DAL.Services.WebServices
             IUserRepository userRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
-            ICurrentUserContext currentUserContext
-            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext)
+            ICurrentUserContext currentUserContext,
+            SampleDBContext dbContext
+            ) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
         }
 
@@ -28,12 +30,12 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<List<KendoDropdownListModel<int>>>();
             try
             {
-                var maxLevel = Utils.GetMaxLevelRole(_currentUserRoleId);
-                var predicate = PredicateBuilder.New<Role>(i=> i.Level > maxLevel);
-                if(!string.IsNullOrEmpty(searchString))
+                var maxLevel = Utils.GetMaxLevelRole(CurrentUserRoles);
+                var predicate = PredicateBuilder.New<Role>(i => i.Level > maxLevel);
+                if (!string.IsNullOrEmpty(searchString))
                 {
                     searchString = Utils.NonUnicode(searchString.Trim().ToLower());
-                    predicate = predicate.And(i=> i.NameNonUnicode.Trim().ToLower() == searchString.ToLower());
+                    predicate = predicate.And(i => i.NameNonUnicode.Trim().ToLower() == searchString.ToLower());
                 }
                 var roleList = (await _roleRepository.Repository.GetAsync(predicate))
                                                    .Select(i => new KendoDropdownListModel<int>()

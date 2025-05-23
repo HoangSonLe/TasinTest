@@ -119,7 +119,7 @@ namespace Tasin.Website.Domains.DBContexts
             //        RoleIdList = "1,2,3,4",
             //        CreatedBy = 1,
             //        CreatedDate = DateTime.Now,
-            //        IsActived = true,
+            //        IsActive = true,
             //        Email = ""
             //    }
             //);

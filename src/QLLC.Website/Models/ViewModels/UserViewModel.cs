@@ -7,18 +7,12 @@ namespace Tasin.Website.Models.ViewModels
     /// <summary>
     /// View model for user information
     /// </summary>
-    public class UserViewModel : BaseAuditableEntity
+    public class UserViewModel : BaseViewModel
     {
         /// <summary>
         /// User ID
         /// </summary>
         public int Id { get; set; }
-
-
-        /// <summary>
-        /// Tenant name
-        /// </summary>
-        public string TenantName { get; set; }
 
         /// <summary>
         /// Username for login

@@ -4,13 +4,13 @@
     "Name" VARCHAR(255) NOT NULL,
     "NameNonUnicode" VARCHAR(255),
     "Address" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100)
-)
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
 
 CREATE TABLE "Unit" (
     "ID" SERIAL PRIMARY KEY,
@@ -19,9 +19,13 @@ CREATE TABLE "Unit" (
     "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE
-)
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
+    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
 
 CREATE TABLE "Category" (
     "ID" SERIAL PRIMARY KEY,
@@ -31,10 +35,14 @@ CREATE TABLE "Category" (
     "Name_EN" VARCHAR(255),
     "Parent_ID" INTEGER,
     "Description" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+   "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
+    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_parent" FOREIGN KEY ("Parent_ID") REFERENCES "Category"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "ProcessingType" (
     "ID" SERIAL PRIMARY KEY,
@@ -43,9 +51,13 @@ CREATE TABLE "ProcessingType" (
     "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE
-)
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
+    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
 
 CREATE TABLE "Customer" (
     "ID" SERIAL PRIMARY KEY,
@@ -57,12 +69,13 @@ CREATE TABLE "Customer" (
     "Email" VARCHAR(255),
     "TaxCode" VARCHAR(100),
     "Address" TEXT,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
-    "IsActived" BOOLEAN default true
-)
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
 
 CREATE TABLE "SpecialProductTaxRate" (
     "ID" SERIAL PRIMARY KEY,
@@ -71,23 +84,27 @@ CREATE TABLE "SpecialProductTaxRate" (
     "NameNonUnicode" VARCHAR(255),
     "Name_EN" VARCHAR(255),
     "Description" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE
-)
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
+    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
 
 CREATE TABLE "TaxRateConfig" (
     "ID" SERIAL PRIMARY KEY,
     "CompanyTaxRate" NUMERIC(5, 2) NOT NULL,
     "ConsumerTaxRate" NUMERIC(5, 2) NOT NULL,
     "SpecialProductTaxRate_ID" INTEGER,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_special_product_taxrate" FOREIGN KEY ("SpecialProductTaxRate_ID") REFERENCES "SpecialProductTaxRate"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "Material" (
     "ID" SERIAL PRIMARY KEY,
@@ -97,10 +114,14 @@ CREATE TABLE "Material" (
     "Name_EN" VARCHAR(255),
     "Parent_ID" INTEGER,
     "Description" TEXT,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
+    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_material_parent" FOREIGN KEY ("Parent_ID") REFERENCES "Material"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "Product" (
     "ID" SERIAL PRIMARY KEY,
@@ -119,18 +140,18 @@ CREATE TABLE "Product" (
     "Note" TEXT,
     "IsDiscontinued" BOOLEAN DEFAULT FALSE,
     "ProcessingFee" NUMERIC(18, 2),
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID"),
     CONSTRAINT "fk_category" FOREIGN KEY ("Category_ID") REFERENCES "Category"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID"),
     CONSTRAINT "fk_taxrateconfig" FOREIGN KEY ("TaxRateConfig_ID") REFERENCES "TaxRateConfig"("ID"),
     CONSTRAINT "fk_material" FOREIGN KEY ("Material_ID") REFERENCES "Material"("ID")
-)
+);
 
 CREATE TABLE "Product_Vendor" (
     "Vendor_ID" INTEGER NOT NULL,
@@ -142,7 +163,7 @@ CREATE TABLE "Product_Vendor" (
     PRIMARY KEY ("Vendor_ID", "Product_ID"),
     FOREIGN KEY ("Vendor_ID") REFERENCES "Vendor"("ID"),
     FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Order" (
     "ID" SERIAL PRIMARY KEY,
@@ -150,14 +171,14 @@ CREATE TABLE "Purchase_Order" (
     "TotalPrice" NUMERIC(18, 2) NOT NULL,
     "TotalPriceNoTax" NUMERIC(18, 2) NOT NULL,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_customer" FOREIGN KEY ("Customer_ID") REFERENCES "Customer"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Order_Item" (
     "PO_ID" INTEGER NOT NULL,
@@ -177,7 +198,7 @@ CREATE TABLE "Purchase_Order_Item" (
     CONSTRAINT "fk_product" FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID"),
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Agreement" (
     "ID" SERIAL PRIMARY KEY,
@@ -185,14 +206,14 @@ CREATE TABLE "Purchase_Agreement" (
     "Note" TEXT,
     "Code" VARCHAR(50) NOT NULL UNIQUE,
     "TotalPrice" NUMERIC(18, 2) NOT NULL,
-    "Status" VARCHAR(50),
-    "IsActived" BOOLEAN DEFAULT TRUE,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_vendor" FOREIGN KEY ("Vendor_ID") REFERENCES "Vendor"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Agreement_Item" (
     "PA_ID" INTEGER NOT NULL,
@@ -205,7 +226,7 @@ CREATE TABLE "Purchase_Agreement_Item" (
     CONSTRAINT "fk_pa" FOREIGN KEY ("PA_ID") REFERENCES "Purchase_Agreement"("ID") ON DELETE CASCADE,
     CONSTRAINT "fk_product" FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID"),
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID")
-)
+);
 
 CREATE TABLE "CodeVersion" (
     "ID" SERIAL PRIMARY KEY,
@@ -213,7 +234,7 @@ CREATE TABLE "CodeVersion" (
     "VersionIndex" INTEGER NOT NULL,
     "Type" VARCHAR(50),
     "Note" TEXT
-)
+);
 
 
 CREATE TABLE "Role" (
@@ -223,7 +244,7 @@ CREATE TABLE "Role" (
     "Description" TEXT,
     "Level" INTEGER NOT NULL,
     "EnumActionList" VARCHAR(1000) NOT NULL DEFAULT ''  -- lưu danh sách dạng chuỗi
-)
+);
 
 CREATE TABLE "User" (
     "Id" SERIAL PRIMARY KEY,
@@ -237,10 +258,13 @@ CREATE TABLE "User" (
     "Phone" VARCHAR(50) NOT NULL DEFAULT '',
     "RoleIdList" TEXT NOT NULL DEFAULT '', -- lưu danh sách role IDs dưới dạng chuỗi (ví dụ: '1,2,3')
     "TypeAccount" INTEGER NOT NULL,
+    "Status" VARCHAR(50) NOT NULL,
+    "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" VARCHAR(100),
-    "UpdatedBy" VARCHAR(100),
-    "IsActived" BOOLEAN default true,
-
-)
+    "CreatedBy" INT4 NOT NULL,
+    "UpdatedBy" INT4 NULL
+);
+INSERT INTO public."User"
+("Id", "UserName", "Password", "Name", "NameNonUnicode", "Code", "Email", "Address", "Phone", "RoleIdList", "TypeAccount", "Status", "IsActive", "CreatedDate", "UpdatedDate", "CreatedBy", "UpdatedBy")
+VALUES(1, 'ADMIN', '/cA7ZZQqtyOGVwe1kEbPSg==', 'ADMIN', 'ADMIN', 'ADMIN', NULL, NULL, '', '', 0, '1', true, '2025-05-23 09:57:22.382', NULL, 1, 1);
