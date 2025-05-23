@@ -49,4 +49,24 @@ namespace Tasin.Website.Common.Enums
         [Description("Cá nhân")]
         Individual,
     }
+    public enum EPOStatus
+    {
+        [Description("Mới")]
+        New,
+        [Description("Đã tạo đơn tổng hợp")]
+        Executed,
+    }
+
+    public enum EPAStatus
+    {
+        [Description("Mới")]
+        New,
+        [Description("Đã gửi NCC")]
+        SendVendor,
+        [Description("Hủy")]
+        Cancel,
+        [Description("Hoàn thành")]
+        Completed,
+    }
+
 }
