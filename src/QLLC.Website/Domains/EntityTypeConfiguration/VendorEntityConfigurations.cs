@@ -17,14 +17,13 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode").HasMaxLength(255);
             builder.Property(p => p.Address).HasColumnName("Address").HasColumnType("TEXT");
             builder.Property(p => p.Status).HasColumnName("Status").HasMaxLength(50);
-            builder.Property(p => p.IsActive).HasColumnName("IsActived").HasDefaultValue(true);
-            
+            builder.Property(p => p.IsActive).HasColumnName("IsActive").HasDefaultValue(true);
+
             // Audit properties
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(p => p.UpdatedDate).HasColumnName("UpdatedDate");
-            builder.Property(p => p.CreatedBy).HasColumnName("CreatedBy").HasMaxLength(100);
-            builder.Property(p => p.UpdatedBy).HasColumnName("UpdatedBy").HasMaxLength(100);
-            builder.Property(p => p.IsActive).HasColumnName("IsActived");
+            builder.Property(p => p.CreatedBy).HasColumnName("CreatedBy");
+            builder.Property(p => p.UpdatedBy).HasColumnName("UpdatedBy");
 
             // Indexes
             builder.HasIndex(p => p.Code).IsUnique();

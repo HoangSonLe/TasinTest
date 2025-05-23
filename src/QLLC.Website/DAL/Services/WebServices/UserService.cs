@@ -120,7 +120,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetUserDataDropdownList(string searchString, List<int> selectedIdList)
         {
             var predicate = PredicateBuilder.New<User>(i => i.IsActive == true);
-            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
+            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
             var selectedUserList = new List<User>();
             if (selectedIdList.Count > 0 && string.IsNullOrEmpty(searchString))
             {
@@ -169,7 +169,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 }
 
                 var userList = new List<UserViewModel>();
-                predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
+                predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
                 var userDbQuery = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(
                     new PagingParameters(searchModel.PageNumber, searchModel.PageSize),
                     predicate,
@@ -260,7 +260,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
                 newUser.Password = postData.Password;
                 newUser.CreatedDate = DateTime.Now;
-                newUser.CreatedBy = _currentUserId;
+                newUser.CreatedBy = CurrentUserId;
                 newUser.UpdatedDate = newUser.CreatedDate;
                 newUser.UpdatedBy = newUser.CreatedBy;
                 await ack.TrySaveChangesAsync(res => res.AddAsync(newUser), _userRepository.Repository);
@@ -282,7 +282,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     existItem.UserName = postData.UserName;
                     existItem.NameNonUnicode = Utils.NonUnicode(postData.Name);
                     existItem.UpdatedDate = DateTime.Now;
-                    existItem.UpdatedBy = _currentUserId;
+                    existItem.UpdatedBy = CurrentUserId;
                     await ack.TrySaveChangesAsync(res => res.UpdateAsync(existItem), _userRepository.Repository);
                 }
             }
@@ -378,7 +378,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
             postData.OldPassword = Utils.EncodePassword(postData.OldPassword, EEncodeType.SHA_256);
             postData.NewPassword = Utils.EncodePassword(postData.NewPassword, EEncodeType.SHA_256);
-            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == _currentUserId);
+            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == CurrentUserId);
             if (user == null)
             {
                 ack.AddMessage("Không tìm thấy người dùng.");
@@ -390,7 +390,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return ack;
             }
             user.Password = postData.NewPassword;
-            user.UpdatedBy = _currentUserId;
+            user.UpdatedBy = CurrentUserId;
             user.UpdatedDate = DateTime.Now;
             await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
             return ack;

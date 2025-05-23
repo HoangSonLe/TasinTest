@@ -14,6 +14,8 @@ namespace Tasin.Website.Common.AutoMapper
             CreateMap<UserViewModel, User>();
             CreateMap<Customer, CustomerViewModel>();
             CreateMap<CustomerViewModel, Customer>();
+            CreateMap<Vendor, VendorViewModel>();
+            CreateMap<VendorViewModel, Vendor>();
             CreateMap<Role, RoleViewModel>();
         }
     }

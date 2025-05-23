@@ -44,7 +44,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetCustomerDataDropdownList(string searchString)
         {
             var predicate = PredicateBuilder.New<Customer>(i => i.IsActive == true);
-            predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
+            predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
             var selectedUserList = new List<User>();
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -80,7 +80,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 }
 
                 var userList = new List<CustomerViewModel>();
-                predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, _currentUserRoleId, _currentUserId);
+                predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
                 var customerQuery = await _customerRepository.ReadOnlyRespository.GetWithPagingAsync(
                     new PagingParameters(searchModel.PageNumber, searchModel.PageSize),
                     predicate,
@@ -177,7 +177,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 newCustomer.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.Customer, DbContext);
                 newCustomer.NameNonUnicode = Utils.NonUnicode(newCustomer.Name);
                 newCustomer.CreatedDate = DateTime.Now;
-                newCustomer.CreatedBy = _currentUserId;
+                newCustomer.CreatedBy = CurrentUserId;
                 newCustomer.UpdatedDate = newCustomer.CreatedDate;
                 newCustomer.UpdatedBy = newCustomer.CreatedBy;
                 await ack.TrySaveChangesAsync(res => res.AddAsync(newCustomer), _customerRepository.Repository);
@@ -200,7 +200,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     existItem.TaxCode = postData.TaxCode;
                     existItem.Address = postData.Address;
                     existItem.UpdatedDate = DateTime.Now;
-                    existItem.UpdatedBy = _currentUserId;
+                    existItem.UpdatedBy = CurrentUserId;
                     await ack.TrySaveChangesAsync(res => res.UpdateAsync(existItem), _customerRepository.Repository);
                 }
             }

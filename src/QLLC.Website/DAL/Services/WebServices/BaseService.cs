@@ -24,13 +24,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         public List<ERoleType> CurrentUserRoles => _currentUserContext.UserRoles;
         public bool IsAuthenticated => _currentUserContext.IsAuthenticated;
 
-        // For backward compatibility - will be deprecated
-        [Obsolete("Use CurrentUserId property instead")]
-        public int _currentUserId => CurrentUserId;
-
-        [Obsolete("Use CurrentUserRoles property instead")]
-        public List<ERoleType> _currentUserRoleId => CurrentUserRoles;
-
         public BaseService(
             ILogger<T> logger,
             IConfiguration configuration,

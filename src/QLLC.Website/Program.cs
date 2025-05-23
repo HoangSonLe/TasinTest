@@ -207,12 +207,13 @@ try
     builder.Services.AddScoped<IRoleService, RoleService>();
     builder.Services.AddScoped<ICommonService, CommonService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
-
+    builder.Services.AddScoped<IVendorService, VendorService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IRoleRepository, RoleRepository>();
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+    builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 
 
     #endregion

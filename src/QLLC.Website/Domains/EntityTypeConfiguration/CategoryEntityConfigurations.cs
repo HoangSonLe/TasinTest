@@ -19,7 +19,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.Parent_ID).HasColumnName("Parent_ID");
             builder.Property(p => p.Description).HasColumnName("Description").HasColumnType("TEXT");
             builder.Property(p => p.Status).HasColumnName("Status").HasMaxLength(50);
-            builder.Property(p => p.IsActive).HasColumnName("IsActived").HasDefaultValue(true);
+            builder.Property(p => p.IsActive).HasColumnName("IsActive").HasDefaultValue(true);
             
             // Audit properties
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate");

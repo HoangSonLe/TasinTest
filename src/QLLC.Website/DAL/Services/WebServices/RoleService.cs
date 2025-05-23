@@ -30,7 +30,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<List<KendoDropdownListModel<int>>>();
             try
             {
-                var maxLevel = Utils.GetMaxLevelRole(_currentUserRoleId);
+                var maxLevel = Utils.GetMaxLevelRole(CurrentUserRoles);
                 var predicate = PredicateBuilder.New<Role>(i => i.Level > maxLevel);
                 if (!string.IsNullOrEmpty(searchString))
                 {

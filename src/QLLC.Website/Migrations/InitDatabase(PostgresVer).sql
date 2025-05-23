@@ -10,7 +10,7 @@
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-)
+);
 
 CREATE TABLE "Unit" (
     "ID" SERIAL PRIMARY KEY,
@@ -25,7 +25,7 @@ CREATE TABLE "Unit" (
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-)
+);
 
 CREATE TABLE "Category" (
     "ID" SERIAL PRIMARY KEY,
@@ -40,9 +40,9 @@ CREATE TABLE "Category" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_parent" FOREIGN KEY ("Parent_ID") REFERENCES "Category"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "ProcessingType" (
     "ID" SERIAL PRIMARY KEY,
@@ -57,7 +57,7 @@ CREATE TABLE "ProcessingType" (
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-    )
+);
 
 CREATE TABLE "Customer" (
     "ID" SERIAL PRIMARY KEY,
@@ -75,7 +75,7 @@ CREATE TABLE "Customer" (
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-)
+);
 
 CREATE TABLE "SpecialProductTaxRate" (
     "ID" SERIAL PRIMARY KEY,
@@ -90,7 +90,7 @@ CREATE TABLE "SpecialProductTaxRate" (
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-    )
+);
 
 CREATE TABLE "TaxRateConfig" (
     "ID" SERIAL PRIMARY KEY,
@@ -102,9 +102,9 @@ CREATE TABLE "TaxRateConfig" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_special_product_taxrate" FOREIGN KEY ("SpecialProductTaxRate_ID") REFERENCES "SpecialProductTaxRate"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "Material" (
     "ID" SERIAL PRIMARY KEY,
@@ -119,9 +119,9 @@ CREATE TABLE "Material" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_material_parent" FOREIGN KEY ("Parent_ID") REFERENCES "Material"("ID") ON DELETE SET NULL
-)
+);
 
 CREATE TABLE "Product" (
     "ID" SERIAL PRIMARY KEY,
@@ -145,13 +145,13 @@ CREATE TABLE "Product" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID"),
     CONSTRAINT "fk_category" FOREIGN KEY ("Category_ID") REFERENCES "Category"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID"),
     CONSTRAINT "fk_taxrateconfig" FOREIGN KEY ("TaxRateConfig_ID") REFERENCES "TaxRateConfig"("ID"),
     CONSTRAINT "fk_material" FOREIGN KEY ("Material_ID") REFERENCES "Material"("ID")
-)
+);
 
 CREATE TABLE "Product_Vendor" (
     "Vendor_ID" INTEGER NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE "Product_Vendor" (
     PRIMARY KEY ("Vendor_ID", "Product_ID"),
     FOREIGN KEY ("Vendor_ID") REFERENCES "Vendor"("ID"),
     FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Order" (
     "ID" SERIAL PRIMARY KEY,
@@ -176,9 +176,9 @@ CREATE TABLE "Purchase_Order" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_customer" FOREIGN KEY ("Customer_ID") REFERENCES "Customer"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Order_Item" (
     "PO_ID" INTEGER NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE "Purchase_Order_Item" (
     CONSTRAINT "fk_product" FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID"),
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Agreement" (
     "ID" SERIAL PRIMARY KEY,
@@ -211,9 +211,9 @@ CREATE TABLE "Purchase_Agreement" (
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 NULL
+    "UpdatedBy" INT4 null,
     CONSTRAINT "fk_vendor" FOREIGN KEY ("Vendor_ID") REFERENCES "Vendor"("ID")
-)
+);
 
 CREATE TABLE "Purchase_Agreement_Item" (
     "PA_ID" INTEGER NOT NULL,
@@ -226,7 +226,7 @@ CREATE TABLE "Purchase_Agreement_Item" (
     CONSTRAINT "fk_pa" FOREIGN KEY ("PA_ID") REFERENCES "Purchase_Agreement"("ID") ON DELETE CASCADE,
     CONSTRAINT "fk_product" FOREIGN KEY ("Product_ID") REFERENCES "Product"("ID"),
     CONSTRAINT "fk_unit" FOREIGN KEY ("Unit_ID") REFERENCES "Unit"("ID")
-)
+);
 
 CREATE TABLE "CodeVersion" (
     "ID" SERIAL PRIMARY KEY,
@@ -234,7 +234,7 @@ CREATE TABLE "CodeVersion" (
     "VersionIndex" INTEGER NOT NULL,
     "Type" VARCHAR(50),
     "Note" TEXT
-)
+);
 
 
 CREATE TABLE "Role" (
@@ -244,7 +244,7 @@ CREATE TABLE "Role" (
     "Description" TEXT,
     "Level" INTEGER NOT NULL,
     "EnumActionList" VARCHAR(1000) NOT NULL DEFAULT ''  -- lưu danh sách dạng chuỗi
-)
+);
 
 CREATE TABLE "User" (
     "Id" SERIAL PRIMARY KEY,
@@ -264,8 +264,7 @@ CREATE TABLE "User" (
     "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
     "CreatedBy" INT4 NOT NULL,
     "UpdatedBy" INT4 NULL
-
-)
+);
 INSERT INTO public."User"
-("Id", "UserName", "Password", "Name", "NameNonUnicode", "Code", "Email", "Address", "Phone", "RoleIdList", "TypeAccount", "CreatedDate", "UpdatedDate", "CreatedBy", "UpdatedBy", "IsActive")
-VALUES(1, 'ADMIN', '/cA7ZZQqtyOGVwe1kEbPSg==', 'ADMIN', 'ADMIN', 'ADMIN', NULL, NULL, '', '', 1, '2025-05-23 00:31:13.516', NULL, 1, 1, true);
+("Id", "UserName", "Password", "Name", "NameNonUnicode", "Code", "Email", "Address", "Phone", "RoleIdList", "TypeAccount", "Status", "IsActive", "CreatedDate", "UpdatedDate", "CreatedBy", "UpdatedBy")
+VALUES(1, 'ADMIN', '/cA7ZZQqtyOGVwe1kEbPSg==', 'ADMIN', 'ADMIN', 'ADMIN', NULL, NULL, '', '', 0, '1', true, '2025-05-23 09:57:22.382', NULL, 1, 1);
