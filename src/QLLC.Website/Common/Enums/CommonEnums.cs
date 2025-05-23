@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.OpenApi.Attributes;
+using System.ComponentModel;
 
 namespace Tasin.Website.Common.Enums
 {
@@ -23,9 +24,24 @@ namespace Tasin.Website.Common.Enums
 
     public enum ECategoryType
     {
-        CustomerType
+        [Display("Loại khách hàng")]
+        CustomerType,
+        CommonStatusType,
+        Unit,
+        ProcessingType,
+        Material,
+        Vendor,
+        Customer,
+        Product
     }
-    
+
+    public enum ECommonStatus
+    {
+        [Description("Đã kích hoạt")]
+        Actived,
+        [Description("Chưa kích hoạt")]
+        InActived,
+    }
     public enum ECustomerType
     {
         [Description("Doanh nghiệp")]

@@ -11,22 +11,22 @@ namespace Tasin.Website.Controllers
     [ApiController]
     public class CommonController : BaseController<CommonController>
     {
-        private readonly ICommonService _categoryService;
+        private readonly ICommonService _commonService;
 
         public CommonController(
             ILogger<CommonController> logger,
             IUserService userService,
-            ICommonService categoryService,
+            ICommonService commonService,
             ICurrentUserContext currentUserContext
             ) : base(logger, userService, currentUserContext)
         {
-            _categoryService = categoryService;
+            _commonService = commonService;
         }
         [HttpGet]
         [Route("Common/GetDataOptionsDropdown")]
         public async Task<IActionResult> GetDataOptionsDropdown(string? searchString, ECategoryType type)
         {
-            var result = await _categoryService.GetDataOptionsDropdown(searchString,type);
+            var result = await _commonService.GetDataOptionsDropdown(searchString,type);
             return Json(result);
         }
     }

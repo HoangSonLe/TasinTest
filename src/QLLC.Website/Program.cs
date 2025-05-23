@@ -213,6 +213,7 @@ try
     builder.Services.AddScoped<IProcessingTypeService, ProcessingTypeService>();
     builder.Services.AddScoped<IMaterialService, MaterialService>();
     builder.Services.AddScoped<ISpecialProductTaxRateService, SpecialProductTaxRateService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -224,6 +225,7 @@ try
     builder.Services.AddScoped<IProcessingTypeRepository, ProcessingTypeRepository>();
     builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
     builder.Services.AddScoped<ISpecialProductTaxRateRepository, SpecialProductTaxRateRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 
     #endregion
