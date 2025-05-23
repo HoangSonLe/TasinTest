@@ -199,6 +199,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     Value = i.ID.ToString(),
                     Text = $"{i.Name} ({i.Code})",
+                    Data = i
                 }).ToList();
 
                 return new Acknowledgement<List<KendoDropdownListModel<string>>>()
@@ -212,7 +213,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return new Acknowledgement<List<KendoDropdownListModel<string>>>()
                 {
                     IsSuccess = false,
-                    ErrorMessageList = new List<string> { $"Error getting product dropdown list: {ex.Message}" }
+                    ErrorMessageList = [$"Error getting product dropdown list: {ex.Message}"]
                 };
             }
         }
@@ -221,7 +222,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         {
             var response = new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
-                Data = new List<KendoDropdownListModel<string>>(),
+                Data = [],
                 IsSuccess = true
             };
             try
@@ -304,7 +305,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             catch (Exception ex)
             {
                 response.ExtractMessage(ex);
-                _logger.LogError($"GetDataOptionsDropdown error: {ex.Message}");
+                _logger.LogError("GetDataOptionsDropdown error: {ErrorMessage}", ex.Message);
                 return response;
             }
         }
