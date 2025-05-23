@@ -124,5 +124,28 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Display(Name = "ProcessingFee")]
         public decimal? ProcessingFee { get; set; }
+
+        /// <summary>
+        /// Company Tax Rate
+        /// </summary>
+        [Display(Name = "CompanyTaxRate")]
+        public decimal CompanyTaxRate { get; set; }
+
+        /// <summary>
+        /// Consumer Tax Rate
+        /// </summary>
+        [Display(Name = "ConsumerTaxRate")]
+        public decimal ConsumerTaxRate { get; set; }
+
+        /// <summary>
+        /// Special Product Tax Rate ID
+        /// </summary>
+        [Display(Name = "SpecialProductTaxRate_ID")]
+        public int? SpecialProductTaxRate_ID { get; set; }
+
+        /// <summary>
+        /// Special Product Tax Rate name
+        /// </summary>
+        public string? SpecialProductTaxRateName { get; set; }
     }
 }

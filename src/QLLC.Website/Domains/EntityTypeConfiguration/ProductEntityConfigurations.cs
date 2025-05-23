@@ -27,9 +27,12 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.Note).HasColumnName("Note").HasColumnType("TEXT");
             builder.Property(p => p.IsDiscontinued).HasColumnName("IsDiscontinued").HasDefaultValue(false);
             builder.Property(p => p.ProcessingFee).HasColumnName("ProcessingFee").HasColumnType("NUMERIC(18, 2)");
+            builder.Property(p => p.CompanyTaxRate).HasColumnName("CompanyTaxRate").IsRequired().HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.ConsumerTaxRate).HasColumnName("ConsumerTaxRate").IsRequired().HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.SpecialProductTaxRate_ID).HasColumnName("SpecialProductTaxRate_ID");
             builder.Property(p => p.Status).HasColumnName("Status").HasMaxLength(50);
             builder.Property(p => p.IsActive).HasColumnName("IsActive").HasDefaultValue(true);
-            
+
             // Audit properties
             builder.Property(p => p.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(p => p.UpdatedDate).HasColumnName("UpdatedDate");
@@ -40,22 +43,26 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.HasOne(p => p.Unit)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.Unit_ID);
-                
+
             builder.HasOne(p => p.Category)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.Category_ID);
-                
+
             builder.HasOne(p => p.ProcessingType)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.ProcessingType_ID);
-                
+
             builder.HasOne(p => p.TaxRateConfig)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.TaxRateConfig_ID);
-                
+
             builder.HasOne(p => p.Material)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.Material_ID);
+
+            builder.HasOne(p => p.SpecialProductTaxRate)
+                .WithMany(p => p.Products)
+                .HasForeignKey(p => p.SpecialProductTaxRate_ID);
 
             // Indexes
             builder.HasIndex(p => p.Code).IsUnique();

@@ -26,6 +26,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         private ICategoryRepository _categoryRepository;
         private IProcessingTypeRepository _processingTypeRepository;
         private IMaterialRepository _materialRepository;
+        private ISpecialProductTaxRateRepository _specialProductTaxRateRepository;
 
         public ProductService(
             ILogger<ProductService> logger,
@@ -35,6 +36,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             ICategoryRepository categoryRepository,
             IProcessingTypeRepository processingTypeRepository,
             IMaterialRepository materialRepository,
+            ISpecialProductTaxRateRepository specialProductTaxRateRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
             IConfiguration configuration,
@@ -49,6 +51,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             _categoryRepository = categoryRepository;
             _processingTypeRepository = processingTypeRepository;
             _materialRepository = materialRepository;
+            _specialProductTaxRateRepository = specialProductTaxRateRepository;
         }
 
         public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel)
@@ -66,7 +69,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
                 {
                     var searchStringNonUnicode = Utils.NonUnicode(searchModel.SearchString.Trim().ToLower());
-                    predicate = predicate.And(i => 
+                    predicate = predicate.And(i =>
                         (i.NameNonUnicode != null && i.NameNonUnicode.ToLower().Contains(searchStringNonUnicode)) ||
                         i.Code.ToLower().Contains(searchStringNonUnicode)
                     );
@@ -108,11 +111,13 @@ namespace Tasin.Website.DAL.Services.WebServices
                 var categoryIds = productViewModels.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
                 var processingTypeIds = productViewModels.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
                 var materialIds = productViewModels.Where(p => p.Material_ID.HasValue).Select(p => p.Material_ID.Value).Distinct().ToList();
+                var specialProductTaxRateIds = productViewModels.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
 
                 var units = await _unitRepository.ReadOnlyRespository.GetAsync(i => unitIds.Contains(i.ID));
                 var categories = await _categoryRepository.ReadOnlyRespository.GetAsync(i => categoryIds.Contains(i.ID));
                 var processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(i => processingTypeIds.Contains(i.ID));
                 var materials = await _materialRepository.ReadOnlyRespository.GetAsync(i => materialIds.Contains(i.ID));
+                var specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(i => specialProductTaxRateIds.Contains(i.ID));
 
                 foreach (var product in productViewModels)
                 {
@@ -138,6 +143,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         var material = materials.FirstOrDefault(m => m.ID == product.Material_ID.Value);
                         product.MaterialName = material?.Name;
+                    }
+
+                    if (product.SpecialProductTaxRate_ID.HasValue)
+                    {
+                        var specialProductTaxRate = specialProductTaxRates.FirstOrDefault(s => s.ID == product.SpecialProductTaxRate_ID.Value);
+                        product.SpecialProductTaxRateName = specialProductTaxRate?.Name;
                     }
                 }
 
@@ -215,6 +226,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                     productViewModel.MaterialName = material?.Name;
                 }
 
+                if (product.SpecialProductTaxRate_ID.HasValue)
+                {
+                    var specialProductTaxRate = await _specialProductTaxRateRepository.ReadOnlyRespository.FindAsync(product.SpecialProductTaxRate_ID.Value);
+                    productViewModel.SpecialProductTaxRateName = specialProductTaxRate?.Name;
+                }
+
                 // Add user names
                 var createdByUser = await _userRepository.ReadOnlyRespository.FindAsync(product.CreatedBy);
                 var updatedByUser = product.UpdatedBy > 0 ? await _userRepository.ReadOnlyRespository.FindAsync(product.UpdatedBy) : null;
@@ -278,6 +295,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     existingProduct.Note = postData.Note;
                     existingProduct.IsDiscontinued = postData.IsDiscontinued;
                     existingProduct.ProcessingFee = postData.ProcessingFee;
+                    existingProduct.CompanyTaxRate = postData.CompanyTaxRate;
+                    existingProduct.ConsumerTaxRate = postData.ConsumerTaxRate;
+                    existingProduct.SpecialProductTaxRate_ID = postData.SpecialProductTaxRate_ID;
                     existingProduct.UpdatedDate = DateTime.Now;
                     existingProduct.UpdatedBy = CurrentUserId;
                     await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingProduct), _productRepository.Repository);
