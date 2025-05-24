@@ -14,20 +14,28 @@ using Tasin.Website.Models.ViewModels.AccountViewModels;
 
 namespace Tasin.Website.Controllers
 {
-
-    //[Authorize]
+    /// <summary>
+    /// Controller for managing users
+    /// </summary>
     [ApiController]
     [Produces("application/json")]
     public class UserController : BaseController<UserController>
     {
+        private readonly IUserService _userService;
+
         public UserController(
             IUserService userService,
             ILogger<UserController> logger,
             ICurrentUserContext currentUserContext) : base(logger, userService, currentUserContext)
         {
+            _userService = userService;
         }
 
-        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        /// <summary>
+        /// User management page
+        /// </summary>
+        /// <returns>User management view</returns>
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
         [HttpGet]
         [Route("User/Index")]
         public IActionResult Index()
@@ -35,26 +43,39 @@ namespace Tasin.Website.Controllers
             ViewBag.RoleDatasource = EnumHelper.ToDropdownList<ERoleType>();
             return View();
         }
+
+        /// <summary>
+        /// Get current user authentication status
+        /// </summary>
+        /// <returns>Current user information if authenticated</returns>
         [HttpGet]
         [Route("User/Authentication")]
         public async Task<IActionResult> Authentication()
         {
             var response = new Acknowledgement();
-            if(CurrentUserContext.IsAuthenticated && CurrentUserContext.UserId.HasValue)
+            if (CurrentUserContext.IsAuthenticated && CurrentUserContext.UserId.HasValue)
             {
-                var userAck = await UserService.GetUserById(CurrentUserContext.UserId.Value);
+                var userAck = await _userService.GetUserById(CurrentUserContext.UserId.Value);
                 return Json(userAck);
             }
             return Json(response);
         }
+
+        /// <summary>
+        /// Get user dropdown list for selection
+        /// </summary>
+        /// <param name="searchString">Search string to filter users</param>
+        /// <param name="selectedIdList">Comma-separated list of selected user IDs</param>
+        /// <returns>List of users for dropdown</returns>
         [HttpGet]
         [Route("User/GetUserDropdownList")]
-        public async Task<IActionResult> GetUserDropdownList(string searchString,string selectedIdList)
+        public async Task<IActionResult> GetUserDropdownList(string searchString, string selectedIdList)
         {
             var selectedIds = selectedIdList?.Split(',').Select(int.Parse).ToList();
-            var result = await UserService.GetUserDataDropdownList(searchString, selectedIds ?? new List<int>());
+            var result = await _userService.GetUserDataDropdownList(searchString, selectedIds ?? new List<int>());
             return Json(result);
         }
+
         /// <summary>
         /// Get a list of users with pagination and filtering
         /// </summary>
@@ -62,43 +83,81 @@ namespace Tasin.Website.Controllers
         /// <returns>List of users</returns>
         /// <response code="200">Returns the list of users</response>
         [HttpGet]
-        [AllowAnonymous] // Tạm thời cho phép truy cập không cần xác thực
-        // [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<UserViewModel>>>), 200)]
-        [Produces("application/json")]
-        [Route("api/[controller]/GetUserList")]
-        public async Task<IActionResult> GetUserList([FromQuery]UserSearchModel searchModel)
+        [Route("User/GetUserList")]
+        public async Task<IActionResult> GetUserList([FromQuery] UserSearchModel searchModel)
         {
-            var result = await UserService.GetUserList(searchModel);
+            var result = await _userService.GetUserList(searchModel);
             return Json(result);
         }
+
+        /// <summary>
+        /// Delete a user by ID
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <returns>Result of the operation</returns>
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_USER])]
-        [HttpGet]
+        [HttpDelete]
         [Route("User/DeleteUserById")]
         public async Task<Acknowledgement> DeleteUserById(int userId)
         {
-            return await UserService.DeleteUserById(userId);
+            return await _userService.DeleteUserById(userId);
         }
+
+        /// <summary>
+        /// Reset a user's password
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <returns>Result of the operation</returns>
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
-        [HttpGet]
+        [HttpPost]
         [Route("User/ResetUserPasswordById")]
         public async Task<Acknowledgement> ResetUserPasswordById(int userId)
         {
-            return await UserService.ResetUserPasswordById(userId);
+            return await _userService.ResetUserPasswordById(userId);
         }
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_USER, (int)EActionRole.UPDATE_USER])]
+
+        /// <summary>
+        /// Create a new user
+        /// </summary>
+        /// <param name="postData">User data</param>
+        /// <returns>Result of the operation</returns>
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_USER])]
         [HttpPost]
-        [Route("User/CreateOrUpdateUser")]
-        public async Task<Acknowledgement> CreateOrUpdateUser([FromBody] UserViewModel postData)
+        [Route("User/Create")]
+        public async Task<Acknowledgement> Create([FromBody] UserViewModel postData)
         {
-            return await UserService.CreateOrUpdateUser(postData);
+            return await _userService.CreateOrUpdateUser(postData);
         }
+
+        /// <summary>
+        /// Update an existing user
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <param name="postData">Updated user data</param>
+        /// <returns>Result of the operation</returns>
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
+        [HttpPut]
+        [Route("User/UpdateUser/{userId}")]
+        public async Task<Acknowledgement> UpdateUser([FromRoute] int userId, [FromBody] UserViewModel postData)
+        {
+            postData.Id = userId;
+            return await _userService.CreateOrUpdateUser(postData);
+        }
+
+        /// <summary>
+        /// Change a user's password
+        /// </summary>
+        /// <param name="postData">Password change data</param>
+        /// <returns>Result of the operation</returns>
         [HttpPost]
         [Route("User/ChangePassword")]
         public async Task<Acknowledgement> ChangePassword([FromBody] ChangePasswordModel postData)
         {
-            return await UserService.ChangePassword(postData);
+            return await _userService.ChangePassword(postData);
         }
+
         /// <summary>
         /// Get a specific user by ID
         /// </summary>
@@ -110,19 +169,21 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<UserViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetUserById/{userId}")]
+        [Route("User/GetUserById/{userId}")]
         public async Task<Acknowledgement<UserViewModel>> GetUserById(int userId)
         {
-            var ack = await UserService.GetUserById(userId);
-            return ack;
+            return await _userService.GetUserById(userId);
         }
+
+        /// <summary>
+        /// Health check endpoint
+        /// </summary>
+        /// <returns>Server status</returns>
         [HttpGet]
         [Route("User/Values")]
         public string Values()
         {
             return "Server is running";
         }
-
-
     }
 }
