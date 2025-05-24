@@ -1,5 +1,367 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Phân loại";
 }
+
+<div>
+
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    @*   <div class="demo-section wide title">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <nav id="breadcrumb"></nav>
+    </div> *@
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+<script type="text/x-kendo-template" id="template_form_header">
+    <div style="width:100%">
+        <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base _permission_' data-enum='6' style='margin-right: 5px;'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
+        <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
+    </div>
+</script>
+<script type="text/javascript">
+    let gridId = "#gridId";
+
+    function renderCreateOrEditForm(isCreate = true, dataProcessingType = {}) {
+        let myWindow = $("#window");
+        $("#window").html("<form id='formCreateAndEdit'></form>");
+
+        let formData = {
+            id: 0,
+            code: "",
+            name: "",
+            name_EN: "",
+            description :"",
+            // status: "",
+            ...dataProcessingType
+        };
+        let strSubmit = "Thêm";
+        let title = "THÊM MỚI"
+        let element;
+        if (isCreate == false) {
+            strSubmit = "Sửa";
+            title = "CẬP NHẬT";
+        }
+        $("#formCreateAndEdit").kendoForm({
+            orientation: "vertical",
+            formData: formData,
+            type: "group",
+            items: [
+
+                {
+                    field: "code",
+                    title: "Mã phân loại",
+                    label: "Mã phân loại (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập mã phân loại",
+                        required: true
+                    },
+                },
+                {
+                    field: "name",
+                    title: "Phân loại",
+                    label: "Phân loại (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập phân loại",
+                        required: true
+                    },
+                },
+                {
+                    field: "name",
+                    title: "Phân loại tiếng anh",
+                    label: "Phân loại tiếng anh (*):",
+                    validation: {
+                        validationMessage: "Vui lòng nhập phân loại tiếng anh",
+                        required: true
+                    },
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    label: "Mô tả:",
+                    // validation: {
+                    //     required: true
+                    // },
+                },
+
+            ],
+            messages: {
+                submit: strSubmit, clear: "Đặt lại"
+            },
+            submit: function (e) {
+                e.preventDefault();
+                let dataItem = {
+                    ...formData,
+                    ...e.model,
+                };
+                var response = ajax("POST", "/ProcessingType/CreateOrUpdateProcessingType", dataItem, () => {
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                    myWindow.data("kendoWindow").close();
+                });
+            },
+            close: function (e) {
+                $(this.element).empty();
+            },
+        });
+        if(!isCreate){
+
+        }
+
+        // if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
+        //     $("#userName").data("kendoTextBox").enable(false);
+        // }
+
+
+        setTimeout(() => {
+            $("input[title='name']").focus();
+        }, 500);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "500px",
+            // height: "50vh",
+            title: "",
+            visible: false,
+            actions: ["Close"],
+            resizable: false,
+            draggable: false,
+            modal: true,
+            close: function (e) {
+                //$("#window").empty();
+                remove();
+            },
+        }).data("kendoWindow").title(title).center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    async function editProcessingType(id) {
+        var response = ajax("GET", "/ProcessingType/GetProcessingTypeById", { userId: id }, (response) => {
+            renderCreateOrEditForm(false, response.data);
+        }, null, false);
+    }
+    function deleteProcessingType(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA PHÂN LOẠI",
+            content: "Bạn có chắc chắn xóa phân loại này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            var response = ajax("GET", "/ProcessingType/DeleteProcessingTypeById", {
+                userId: id
+            }, () => {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            });
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
+
+
+    function getSearchModel() {
+        let searchString = $("#searchString").val();
+
+        return {
+            searchString,
+        };
+    }
+    function InitGrid() {
+        let htmlToolbar = `
+                <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                       <div class="row gx-0 row-gap-2 w-100">
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                                <div class="pe-1">
+                                    <label for="searchString">Tìm kiếm:</label>
+                                    <input type="text" class=" w-100" id="searchString"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                                <div class="pe-1">
+                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+            `;
+
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/ProcessingType/GetProcessingTypeList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            toolbar: htmlToolbar,
+            // toolbar: "<div id='toolbar' style='width:100%'></div><div class='report-toolbar'>\</div>",
+            columns: [
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100
+                },
+                {
+                    field: "code",
+                    title: "Mã phân loại",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "name",
+                    title: "Phân loại",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "name_EN",
+                    title: "Phân loại tiếng anh",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    width: 200,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                },
+                {
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
+                    width: 200,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm:ss")#',
+                },
+                {
+                    field: "updatedByName",
+                    title: "Người cập nhật",
+                    width: 150,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                },
+                {
+                    field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    template: "<button style='margin-right:5px;' onclick=editProcessingType(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                        <button style='margin-right:5px;' onclick=deleteProcessingType(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                }
+            ],
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+
+
+    }
+    function InitKendoToolBar() {
+
+        $("#search").kendoButton({
+            icon: "search"
+        });
+        $("#search").click(async function (e) {
+            var grid = $(gridId).data("kendoGrid");
+            grid.dataSource.page(1);
+            grid.dataSource.filter({});
+        });
+        $("#exportExcel").click(async function (e) {
+            ExportExcel();
+        });
+        $("#searchString").kendoTextBox({
+            icon: {
+                type: "search",
+                position: "end"  // Có thể là "start" hoặc "end"
+            },
+            placeholder: "Nhập từ khóa tìm kiếm..."
+        });
+        $("#create").kendoButton({
+            icon: "plus"
+        });
+
+        $("#export").click(async function (e) {
+            let grid = $(gridId).data("kendoGrid");
+            grid.saveAsExcel();
+        });
+
+
+        $("#create").on('click', function () {
+            renderCreateOrEditForm();
+        });
+
+    };
+
+</script>
+<script type="text/javascript">
+    InitGrid();
+    InitKendoToolBar();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+
+    });
+</script>
+<style>
+    .k-form-buttons {
+        justify-content: flex-end;
+    }
+</style>

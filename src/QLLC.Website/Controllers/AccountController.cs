@@ -23,7 +23,7 @@ using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class AccountController : BaseController<AccountController>
     {
         private readonly IUserService _userService;
@@ -188,6 +188,14 @@ namespace Tasin.Website.Controllers
                         Expires = DateTime.Now.AddDays(30)
                     });
                 }
+                #endregion
+
+
+                #region Redirect after Login
+                if (returnUrl != null && Url.IsLocalUrl(returnUrl) && returnUrl != "/")
+                    return Redirect(returnUrl);
+                //if (userDB.RoleIdList.Count == 1 && userDB.RoleIdList.Contains((int)ERoleType.User)) return RedirectToAction("Index", "Urn");
+                return RedirectToAction("Index", "Home");
                 #endregion
             }
             else

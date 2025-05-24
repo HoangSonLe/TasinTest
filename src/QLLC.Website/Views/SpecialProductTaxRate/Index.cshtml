@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Nhà cung cấp";
+    ViewData["Title"] = "Loại mặt hàng";
 }
 
 <div>
@@ -21,13 +21,12 @@
         <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base _permission_' data-enum='6' style='margin-right: 5px;'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
     @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
         <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
-        <button id='exportExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='position: absolute; right: 16px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Export Excel</span></button>
     </div>
 </script>
 <script type="text/javascript">
     let gridId = "#gridId";
 
-    function renderCreateOrEditForm(isCreate = true, dataVendor = {}) {
+    function renderCreateOrEditForm(isCreate = true, dataSpecialProductTaxRate = {}) {
         let myWindow = $("#window");
         $("#window").html("<form id='formCreateAndEdit'></form>");
 
@@ -35,9 +34,10 @@
             id: 0,
             code: "",
             name: "",
-            address:"",
+            name_EN: "",
+            description :"",
             // status: "",
-            ...dataVendor
+            ...dataSpecialProductTaxRate
         };
         let strSubmit = "Thêm";
         let title = "THÊM MỚI"
@@ -54,29 +54,38 @@
 
                 {
                     field: "code",
-                    title: "Mã nhà cung cấp",
-                    label: "Mã nhà cung cấp (*):",
+                    title: "Mã loại mặt hàng",
+                    label: "Mã loại mặt hàng (*):",
                     validation: {
-                        validationMessage: "Vui lòng nhập mã nhà cung cấp",
+                        validationMessage: "Vui lòng nhập mã loại mặt hàng",
                         required: true
                     },
                 },
                 {
                     field: "name",
-                    title: "Họ tên",
-                    label: "Họ tên (*):",
+                    title: "Loại mặt hàng",
+                    label: "Loại mặt hàng (*):",
                     validation: {
-                        validationMessage: "Vui lòng nhập họ tên",
+                        validationMessage: "Vui lòng nhập loại mặt hàng",
                         required: true
                     },
                 },
                 {
-                    field: "address",
-                    title: "Địa chỉ",
-                    label: "Địa chỉ:",
+                    field: "name",
+                    title: "Loại mặt hàng tiếng anh",
+                    label: "Loại mặt hàng tiếng anh (*):",
                     validation: {
-                        address: true
+                        validationMessage: "Vui lòng nhập loại mặt hàng tiếng anh",
+                        required: true
                     },
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    label: "Mô tả:",
+                    // validation: {
+                    //     required: true
+                    // },
                 },
 
             ],
@@ -89,7 +98,7 @@
                     ...formData,
                     ...e.model,
                 };
-                var response = ajax("POST", "/Vendor/CreateOrUpdateVendor", dataItem, () => {
+                var response = ajax("POST", "/SpecialProductTaxRate/CreateOrUpdateSpecialProductTaxRate", dataItem, () => {
                     $(gridId).data("kendoGrid").dataSource.filter({});
                     myWindow.data("kendoWindow").close();
                 });
@@ -137,15 +146,15 @@
         myWindow.data("kendoWindow").open();
     }
 
-    async function editVendor(id) {
-        var response = ajax("GET", "/Vendor/GetVendorById", { userId: id }, (response) => {
+    async function editSpecialProductTaxRate(id) {
+        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById", { userId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
-    function deleteVendor(id) {
+    function deleteSpecialProductTaxRate(id) {
         $('#dialog').kendoConfirm({
-            title: "THÔNG BÁO XÓA NHÀ CUNG CẤP",
-            content: "Bạn có chắc chắn xóa nhà cung cấp này không?",
+            title: "THÔNG BÁO XÓA LOẠI MẶT HÀNG",
+            content: "Bạn có chắc chắn xóa loại mặt hàng này không?",
             size: "medium",
             messages: {
                 okText: "Đồng ý",
@@ -153,7 +162,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/Vendor/DeleteVendorById", {
+            var response = ajax("GET", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById", {
                 userId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -164,62 +173,6 @@
     }
 
 
-    async function ExportExcel() {
-        let dataSheet1 = [
-            {
-                cells: [
-                    {
-                        value: "Mã nhà cung cấp", textAlign: "center", background: "#428dd8"
-                    },
-                    {
-                        value: "Họ tên", textAlign: "center", background: "#428dd8"
-                    },
-                    {
-                        value: "Địa chỉ", textAlign: "center", background: "#428dd8"
-                    },
-                ]
-            }];
-
-        var searchModel = getSearchModel();
-        let postData = {
-            ...searchModel,
-            pageSize: 999999999,
-            pageNumber: 1
-        }
-        let dataSourceVendor = null;
-        var response = await ajax("GET", "/Vendor/GetVendorList", postData, (urnResponse) => {
-            dataSourceVendor = urnResponse.data.data;
-        }, null, false);
-        if (dataSourceVendor == null) return;
-
-        for (let index = 0; index < dataSourceVendor.length; index++) {
-            dataSheet1.push({
-                cells: [
-                    { value: dataSourceVendor[index].code },
-                    { value: dataSourceVendor[index].name },
-                    { value: dataSourceVendor[index].address },
-                ]
-            })
-        }
-
-
-        var workbook = new kendo.ooxml.Workbook({
-            sheets: [
-                {
-                    name: "Danh sách nhà cung cấp",
-                    columns: [
-                        { width: 200 }, { autoWidth: true }, { autoWidth: true },
-                        { autoWidth: true }, { autoWidth: true }, { autoWidth: true }
-                    ],
-                    rows: dataSheet1,
-                }
-            ]
-        });
-        kendo.saveAs({
-            dataURI: workbook.toDataURL(),
-            fileName: "Danh sách nhà cung cấp _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
-        });
-    }
 
     function getSearchModel() {
         let searchString = $("#searchString").val();
@@ -246,9 +199,6 @@
                             </div>
                         </div>
 
-                            <div class="d-flex mt-2 flex-row w-100">
-                            <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
-                        </div>
                 </div>
             `;
 
@@ -256,7 +206,7 @@
             dataSource: {
                 transport: {
                     read: {
-                        url: "/Vendor/GetVendorList",
+                        url: "/SpecialProductTaxRate/GetSpecialProductTaxRateList",
                         datatype: "json",
                     },
                     parameterMap: function (data, type) {
@@ -310,21 +260,28 @@
                 },
                 {
                     field: "code",
-                    title: "Mã nhà cung cấp",
+                    title: "Mã loại mặt hàng",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 200,
                 },
                 {
                     field: "name",
-                    title: "Họ tên",
+                    title: "Loại mặt hàng",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 200,
                 },
                 {
-                    field: "address",
-                    title: "Địa chỉ",
+                    field: "name_EN",
+                    title: "Loại mặt hàng tiếng anh",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
                     width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
@@ -347,8 +304,8 @@
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=editVendor(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                        <button style='margin-right:5px;' onclick=deleteVendor(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                    template: "<button style='margin-right:5px;' onclick=editSpecialProductTaxRate(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                        <button style='margin-right:5px;' onclick=deleteSpecialProductTaxRate(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
                 }
             ],
             dataBound: function (e) {

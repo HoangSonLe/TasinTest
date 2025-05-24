@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -13,7 +15,7 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    //[Route("api/[controller]/GetCustomerList")]
+    [Route("api/[controller]/GetCustomerList")]
     public class CustomerController : BaseController<CustomerController>
     {
         private ICustomerService _customerService;

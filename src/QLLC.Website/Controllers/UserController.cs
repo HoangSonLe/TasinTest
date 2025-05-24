@@ -15,7 +15,7 @@ using Tasin.Website.Models.ViewModels.AccountViewModels;
 namespace Tasin.Website.Controllers
 {
 
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class UserController : BaseController<UserController>

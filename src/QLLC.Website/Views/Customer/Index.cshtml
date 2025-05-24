@@ -27,7 +27,7 @@
 <script type="text/javascript">
     let gridId = "#gridId";
     var customerTypeDatasource = @Html.Raw(Json.Serialize(@ViewBag.CustomerTypeDatasource));
-    var roleDatasource = @Html.Raw(Json.Serialize(@ViewBag.RoleDatasource));
+
     function renderCreateOrEditForm(isCreate = true, dataCustomer = {}) {
         let myWindow = $("#window");
         $("#window").html("<form id='formCreateAndEdit'></form>");
@@ -126,16 +126,6 @@
                         address: true
                     },
                 },
-
-                {
-                    field: "phone",
-                    label: "Số điện thoại(*):",
-                    title: "Số điện thoại",
-                    validation: {
-                        validationMessage: "Vui lòng nhập số điện thoại",
-                        required: true
-                    }
-                },
             ],
             messages: {
                 submit: strSubmit, clear: "Đặt lại"
@@ -159,9 +149,9 @@
 
         }
 
-        if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
-            $("#userName").data("kendoTextBox").enable(false);
-        }
+        // if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
+        //     $("#userName").data("kendoTextBox").enable(false);
+        // }
        
 
         setTimeout(() => {
@@ -296,14 +286,9 @@
 
     function getSearchModel() {
         let searchString = $("#searchString").val();
-        let roleIdDomList = $("#roleDropdownList").data("kendoMultiSelect")?.value();
-        let roleIdListString = [];
-        if (roleIdDomList) {
-            roleIdListString = roleIdDomList.join();
-        }
+        
         return {
             searchString,
-            roleIdListString,
         };
     }
     function InitGrid() {
@@ -314,12 +299,6 @@
                                 <div class="pe-1">
                                     <label for="searchString">Tìm kiếm:</label>
                                     <input type="text" class=" w-100" id="searchString"/>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
-                                <div class="pe-1">
-                                    <label for="roleDropdownList">Vai trò:</label>
-                                    <input type="text" class=" w-100" id="roleDropdownList"/>
                                 </div>
                             </div>
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
@@ -471,20 +450,6 @@
 
     }
     function InitKendoToolBar() {
-        // $("#toolbar").kendoToolBar({
-        //     items: [
-        //         { template: "<label for='searchLabel'>Tìm kiếm:</label>" },
-        //         { template: '<input id="searchString" style="width:100%" />' },
-        //         { template: "<label for='roleLabel'>Vai trò:</label>" },
-        //         { template: '<input id="roleDropdownList" style="width:100%" />' },
-        //         { template: '<button id="search" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary me-2 k-button-solid-base k-icon-button"></button>' },
-        //         {
-        //             template: '<div class="buttonContainer">\
-        //                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>\
-        //                         <button id="create" style="margin-left:5px;" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success me-2 _permission_" data-enum="6"><span class="k-icon k-i-plus k-button-icon" > </span><span class="k-button-text">Thêm</span ></button></div>' },
-
-        //     ]
-        // });
 
         $("#search").kendoButton({
             icon: "search"
@@ -504,12 +469,6 @@
             },
             placeholder: "Nhập từ khóa tìm kiếm..."
         });
-        // $("#roleDropdownList").kendoMultiSelect({
-        //     dataTextField: "text",
-        //     dataValueField: "value",
-        //     optionLabel: 'Lọc vai trò...',
-        //     dataSource: roleDatasource,
-        // });
         $("#create").kendoButton({
             icon: "plus"
         });

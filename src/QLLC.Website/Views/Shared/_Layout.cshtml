@@ -441,28 +441,28 @@
 
         $(document).ready(function () {
            
-            // ajax("GET", "/User/Authentication", null, (response) => {
-            //     $("#pnAccount").text("Xin chào: " + response.data.name);
+            ajax("GET", "/User/Authentication", null, (response) => {
+                $("#pnAccount").text("Xin chào: " + response.data.name);
               
-            //     $("#titleHeader").text("An lạc tịnh đường " + response.data.tenantName);
-            //     Userdata = response.data;
-            //     menu(Userdata.enumActionList)
-            //     NotificationForUser.constructor();
-            //     CheckPermission()
-            //     removeColumnNotEditAndDelete()
+                // $("#titleHeader").text("An lạc tịnh đường " + response.data.tenantName);
+                Userdata = response.data;
+                menu(Userdata.enumActionList)
+                NotificationForUser.constructor();
+                CheckPermission()
+                removeColumnNotEditAndDelete()
                
-            //     $("#div_user_QRcode").click(function (e) {
-            //         e.preventDefault();
-            //         ajax("GET", "/Home/QRCode", null, (res) => {
-            //             $("#QRcode_Popup .modal-body img").prop("src", res.data);
-            //             $("#QRcode_Popup").modal("show");
-            //         }, null, false);
-            //     });
+                $("#div_user_QRcode").click(function (e) {
+                    e.preventDefault();
+                    ajax("GET", "/Home/QRCode", null, (res) => {
+                        $("#QRcode_Popup .modal-body img").prop("src", res.data);
+                        $("#QRcode_Popup").modal("show");
+                    }, null, false);
+                });
 
-            // },
-            //     () => {
-            //         location.href = 'Account/Logout';
-            //     }, false);
+            },
+                () => {
+                    location.href = 'Account/Logout';
+                }, false);
         });
     </script>
 </body>
