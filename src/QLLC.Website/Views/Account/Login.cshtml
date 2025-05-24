@@ -6,7 +6,7 @@
     ViewBag.Title = "Đăng nhập";
     Layout = null;
     int numOfLoginFailed = 1;
-    int.TryParse(ViewBag.NumOfLoginFailed.ToString(), out numOfLoginFailed);
+    int.TryParse(ViewBag.NumOfLoginFailed.ToString() ?? 0, out numOfLoginFailed);
     var UIConfig = ViewBag.UIConfig;
     bool isLock = (bool)ViewBag.IsLock;
 

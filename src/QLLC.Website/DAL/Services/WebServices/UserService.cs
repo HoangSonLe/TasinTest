@@ -44,7 +44,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<User>();
 
             var hashPassword = Utils.EncodePassword(password, EEncodeType.SHA_256);
-            var userDB = (await _userRepository.ReadOnlyRespository.GetAsync(u => u.UserName.ToLower() == userName.ToLower() && u.IsActive == true, null, null, "Tenant")).FirstOrDefault();
+            var userDB = (await _userRepository.ReadOnlyRespository.GetAsync(u => u.UserName.ToLower() == userName.ToLower() && u.IsActive == true)).FirstOrDefault();
 
 
             if (userDB == null)

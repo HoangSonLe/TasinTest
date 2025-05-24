@@ -10,7 +10,7 @@ using Tasin.Website.Common.Services;
 
 namespace Tasin.Website.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class FileController : BaseController<FileController>
     {
         private readonly IUserService _userService;

@@ -7,7 +7,7 @@ using Tasin.Website.DAL.Services.WebServices;
 
 namespace Tasin.Website.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     public class CommonController : BaseController<CommonController>
     {

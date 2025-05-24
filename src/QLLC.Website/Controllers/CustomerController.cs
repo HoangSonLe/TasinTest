@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,14 +29,14 @@ namespace Tasin.Website.Controllers
         }
 
         //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
-        //[HttpGet]
-        //[Route("Customer/Index")]
-        //public IActionResult Index()
-        //{
-        //    ViewBag.RoleDatasource = EnumHelper.ToDropdownList<ERoleType>();
-        //    return View();
-        //}
-       
+        [HttpGet]
+        [Route("Customer/Index")]
+        public IActionResult Index()
+        {
+            ViewBag.CustomerTypeDatasource = EnumHelper.ToDropdownList<ECustomerType>();
+            return View();
+        }
+
 
         /// <summary>
         /// Get a list of users with pagination and filtering
