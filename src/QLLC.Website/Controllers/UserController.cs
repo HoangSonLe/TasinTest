@@ -22,20 +22,23 @@ namespace Tasin.Website.Controllers
     public class UserController : BaseController<UserController>
     {
         private readonly IUserService _userService;
+        private readonly ICommonService _commonService;
 
         public UserController(
             IUserService userService,
+            ICommonService commonService,
             ILogger<UserController> logger,
             ICurrentUserContext currentUserContext) : base(logger, userService, currentUserContext)
         {
             _userService = userService;
+            _commonService = commonService;
         }
 
         /// <summary>
         /// User management page
         /// </summary>
         /// <returns>User management view</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
         [HttpGet]
         [Route("User/Index")]
         public IActionResult Index()
@@ -62,28 +65,13 @@ namespace Tasin.Website.Controllers
         }
 
         /// <summary>
-        /// Get user dropdown list for selection
-        /// </summary>
-        /// <param name="searchString">Search string to filter users</param>
-        /// <param name="selectedIdList">Comma-separated list of selected user IDs</param>
-        /// <returns>List of users for dropdown</returns>
-        [HttpGet]
-        [Route("User/GetUserDropdownList")]
-        public async Task<IActionResult> GetUserDropdownList(string searchString, string selectedIdList)
-        {
-            var selectedIds = selectedIdList?.Split(',').Select(int.Parse).ToList();
-            var result = await _userService.GetUserDataDropdownList(searchString, selectedIds ?? new List<int>());
-            return Json(result);
-        }
-
-        /// <summary>
         /// Get a list of users with pagination and filtering
         /// </summary>
         /// <param name="searchModel">Search parameters</param>
         /// <returns>List of users</returns>
         /// <response code="200">Returns the list of users</response>
         [HttpGet]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<UserViewModel>>>), 200)]
         [Route("User/GetUserList")]
         public async Task<IActionResult> GetUserList([FromQuery] UserSearchModel searchModel)
@@ -97,7 +85,7 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="userId">User ID</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_USER])]
         [HttpDelete]
         [Route("User/DeleteUserById")]
         public async Task<Acknowledgement> DeleteUserById(int userId)
@@ -110,7 +98,7 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="userId">User ID</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
         [HttpPost]
         [Route("User/ResetUserPasswordById")]
         public async Task<Acknowledgement> ResetUserPasswordById(int userId)
@@ -123,7 +111,7 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="postData">User data</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_USER])]
         [HttpPost]
         [Route("User/Create")]
         public async Task<Acknowledgement> Create([FromBody] UserViewModel postData)
@@ -137,7 +125,7 @@ namespace Tasin.Website.Controllers
         /// <param name="userId">User ID</param>
         /// <param name="postData">Updated user data</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
         [HttpPut]
         [Route("User/UpdateUser/{userId}")]
         public async Task<Acknowledgement> UpdateUser([FromRoute] int userId, [FromBody] UserViewModel postData)
@@ -165,7 +153,7 @@ namespace Tasin.Website.Controllers
         /// <returns>User details</returns>
         /// <response code="200">Returns the user details</response>
         /// <response code="404">If the user is not found</response>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER, (int)EActionRole.UPDATE_USER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER, (int)EActionRole.UPDATE_USER])]
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<UserViewModel>), 200)]
         [ProducesResponseType(404)]
@@ -174,16 +162,6 @@ namespace Tasin.Website.Controllers
         {
             return await _userService.GetUserById(userId);
         }
-
-        /// <summary>
-        /// Health check endpoint
-        /// </summary>
-        /// <returns>Server status</returns>
-        [HttpGet]
-        [Route("User/Values")]
-        public string Values()
-        {
-            return "Server is running";
-        }
+       
     }
 }

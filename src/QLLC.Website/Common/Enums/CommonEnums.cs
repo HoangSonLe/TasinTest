@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Tasin.Website.Common.Enums
 {
-    /// Rule for naming : E + Noun  
+    /// Rule for naming : E + Noun
 
     /// <summary>
     /// Encode password type
@@ -12,7 +12,7 @@ namespace Tasin.Website.Common.Enums
     {
         SHA_256
     }
- 
+
     /// <summary>
     /// Enum file type
     /// </summary>
@@ -32,7 +32,8 @@ namespace Tasin.Website.Common.Enums
         Material,
         Vendor,
         Customer,
-        Product
+        Product,
+        User
     }
 
     public enum ECommonStatus

@@ -124,36 +124,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             return response;
         }
-        public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetUserDataDropdownList(string searchString, List<int> selectedIdList)
-        {
-            var predicate = PredicateBuilder.New<User>(i => i.IsActive == true);
-            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
-            var selectedUserList = new List<User>();
-            if (selectedIdList.Count > 0 && string.IsNullOrEmpty(searchString))
-            {
-                var tmpPredicate = PredicateBuilder.New<User>(predicate);
-                tmpPredicate = tmpPredicate.And(i => selectedIdList.Contains(i.Id));
-                selectedUserList = (await _userRepository.ReadOnlyRespository.GetAsync(tmpPredicate, i => i.OrderBy(p => p.Name))).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                var searchStringNonUnicode = Utils.NonUnicode(searchString.Trim().ToLower());
-                predicate = predicate.And(i => (i.UserName.Trim().ToLower().Contains(searchStringNonUnicode) ||
-                                                i.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode))
-                                         );
-            }
-            var userDbList = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(new PagingParameters(1, 50 - selectedUserList.Count()), predicate, i => i.OrderBy(p => p.Name));
-            var data = userDbList.Data.Concat(selectedUserList).Select(i => new KendoDropdownListModel<int>()
-            {
-                Value = i.Id.ToString(),
-                Text = $"{i.Name} - {i.Phone}",
-            }).ToList();
-            return new Acknowledgement<List<KendoDropdownListModel<int>>>()
-            {
-                IsSuccess = true,
-                Data = data
-            };
-        }
+
         public async Task<Acknowledgement<JsonResultPaging<List<UserViewModel>>>> GetUserList(UserSearchModel searchModel)
         {
             var response = new Acknowledgement<JsonResultPaging<List<UserViewModel>>>();

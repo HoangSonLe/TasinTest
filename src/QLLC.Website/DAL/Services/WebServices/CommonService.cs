@@ -218,6 +218,37 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
         }
 
+        public async Task<Acknowledgement<List<KendoDropdownListModel<string>>>> GetUserDataDropdownList(string searchString, List<int> selectedIdList)
+        {
+            var predicate = PredicateBuilder.New<User>(i => i.IsActive == true);
+            predicate = UserAuthorPredicate.GetUserAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
+            var selectedUserList = new List<User>();
+            if (selectedIdList.Count > 0 && string.IsNullOrEmpty(searchString))
+            {
+                var tmpPredicate = PredicateBuilder.New<User>(predicate);
+                tmpPredicate = tmpPredicate.And(i => selectedIdList.Contains(i.Id));
+                selectedUserList = (await _userRepository.ReadOnlyRespository.GetAsync(tmpPredicate, i => i.OrderBy(p => p.Name))).ToList();
+            }
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var searchStringNonUnicode = Utils.NonUnicode(searchString.Trim().ToLower());
+                predicate = predicate.And(i => (i.UserName.Trim().ToLower().Contains(searchStringNonUnicode) ||
+                                                i.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode))
+                                         );
+            }
+            var userDbList = await _userRepository.ReadOnlyRespository.GetWithPagingAsync(new PagingParameters(1, 50 - selectedUserList.Count()), predicate, i => i.OrderBy(p => p.Name));
+            var data = userDbList.Data.Concat(selectedUserList).Select(i => new KendoDropdownListModel<string>()
+            {
+                Value = i.Id.ToString(),
+                Text = $"{i.Name} - {i.Code}",
+            }).ToList();
+            return new Acknowledgement<List<KendoDropdownListModel<string>>>()
+            {
+                IsSuccess = true,
+                Data = data
+            };
+        }
+
         public async Task<Acknowledgement<List<KendoDropdownListModel<string>>>> GetDataOptionsDropdown(string? searchString, ECategoryType type)
         {
             var response = new Acknowledgement<List<KendoDropdownListModel<string>>>()
@@ -296,6 +327,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                         else
                         {
                             response.ErrorMessageList = productAck.ErrorMessageList;
+                        }
+                        break;
+                    case ECategoryType.User:
+                        var userAck = await GetUserDataDropdownList(searchString ?? "", new List<int>());
+                        if (userAck.IsSuccess)
+                        {
+                            response = userAck;
+                        }
+                        else
+                        {
+                            response.ErrorMessageList = userAck.ErrorMessageList;
                         }
                         break;
                     default: break;

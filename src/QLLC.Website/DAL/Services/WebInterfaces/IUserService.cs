@@ -21,7 +21,5 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement> ResetUserPasswordById(int userId);
         Task<Acknowledgement> ChangePassword([FromBody] ChangePasswordModel postData);
 
-        Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetUserDataDropdownList(string searchString, List<int> selectedIdList);
-
     }
 }

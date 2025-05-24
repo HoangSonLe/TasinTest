@@ -33,36 +33,6 @@ namespace Tasin.Website.Common.Enums
     }
     public enum EActionRole
     {
-        CRUD_TENANT = 1,
-
-        CREATE_URN,
-        READ_URN,
-        UPDATE_URN,
-        DELETE_URN,
-
-        CREATE_USER,
-        READ_USER,
-        UPDATE_USER,
-        DELETE_USER,
-
-        CREATE_TENT,
-        READ_TENT,
-        UPDATE_TENT,
-        DELETE_TENT,
-
-        READ_CONFIG,
-        UPDATE_CONFIG,
-
-        CREATE_STORAGE,
-        READ_STORAGE,
-        UPDATE_STORAGE,
-        DELETE_STORAGE,
-
-
-        CREATE_REMINDER,
-        READ_REMINDER,
-        UPDATE_REMINDER,
-        DELETE_REMINDER,
     }
     public enum EGender
     {
