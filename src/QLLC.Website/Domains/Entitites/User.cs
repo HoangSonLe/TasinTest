@@ -24,4 +24,4 @@ namespace Tasin.Website.Domains.Entitites
         public List<RoleViewModel> RoleList { get; set; } = new List<RoleViewModel>();
         public int TypeAccount { get; set; } // loại tk : admin - người dùng
     }
-} 
+}

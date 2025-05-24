@@ -12,28 +12,29 @@ namespace Tasin.Website.DAL.Services.AuthorPredicates
             var predicateInner = PredicateBuilder.New<Purchase_Order>(predicate);
             
             // Phân quyền theo role
-            if (roleList.Contains(ERoleType.SystemAdmin) || roleList.Contains(ERoleType.Admin))
-            {
-                // Admin có thể xem tất cả
-                return predicateInner;
-            }
-            else if (roleList.Contains(ERoleType.Reporter))
-            {
-                // Reporter chỉ có thể xem, không thể sửa
-                return predicateInner;
-            }
-            else if (roleList.Contains(ERoleType.User))
-            {
-                // User chỉ có thể xem các đơn hàng do mình tạo
-                predicateInner = predicateInner.And(i => i.CreatedBy == currentUserId);
-                return predicateInner;
-            }
-            else
-            {
-                // Các role khác không có quyền xem
-                predicateInner = predicateInner.And(i => false);
-                return predicateInner;
-            }
+            //if (roleList.Contains(ERoleType.SystemAdmin) || roleList.Contains(ERoleType.Admin))
+            //{
+            //    // Admin có thể xem tất cả
+            //    return predicateInner;
+            //}
+            //else if (roleList.Contains(ERoleType.Reporter))
+            //{
+            //    // Reporter chỉ có thể xem, không thể sửa
+            //    return predicateInner;
+            //}
+            //else if (roleList.Contains(ERoleType.User))
+            //{
+            //    // User chỉ có thể xem các đơn hàng do mình tạo
+            //    predicateInner = predicateInner.And(i => i.CreatedBy == currentUserId);
+            //    return predicateInner;
+            //}
+            //else
+            //{
+            //    // Các role khác không có quyền xem
+            //    predicateInner = predicateInner.And(i => false);
+            //    return predicateInner;
+            //}
+            return predicateInner;
         }
     }
 }

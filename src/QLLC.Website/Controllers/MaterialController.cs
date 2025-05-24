@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetMaterialList")]
     public class MaterialController : BaseController<MaterialController>
     {
         private IMaterialService _materialService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<MaterialViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetMaterialById/{materialId}")]
+        [Route("Material/GetMaterialById/{materialId}")]
         public async Task<Acknowledgement<MaterialViewModel>> GetMaterialById(int materialId)
         {
             var ack = await _materialService.GetMaterialById(materialId);

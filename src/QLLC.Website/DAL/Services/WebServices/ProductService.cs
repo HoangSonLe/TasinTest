@@ -288,7 +288,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                     existingProduct.Category_ID = postData.Category_ID;
                     existingProduct.ProcessingType_ID = postData.ProcessingType_ID;
                     existingProduct.TaxRate = postData.TaxRate;
-                    existingProduct.TaxRateConfig_ID = postData.TaxRateConfig_ID;
                     existingProduct.LossRate = postData.LossRate;
                     existingProduct.Material_ID = postData.Material_ID;
                     existingProduct.ProfitMargin = postData.ProfitMargin;

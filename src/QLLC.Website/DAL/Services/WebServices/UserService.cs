@@ -74,10 +74,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (userResponse.IsSuccess)
                 {
                     var userDB = userResponse.Data;
-                    var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => userDB.RoleIdList.Contains(i.Id.ToString()));
                     UserViewModel userViewModel = _mapper.Map<UserViewModel>(userDB);
-                    userViewModel.RoleName = string.Join(",", roleDBList.Select(i => i.Description));
-                    userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
+
+                    if (!string.IsNullOrWhiteSpace(userDB.RoleIdList))
+                    {
+                        var roleIds = userDB.RoleIdList.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => int.Parse(x.Trim())).ToList();
+                        var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => roleIds.Contains(i.Id));
+                        userViewModel.RoleName = string.Join(",", roleDBList.Select(i => i.Description));
+                        userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
+                    }
+
                     response.Data = userViewModel;
                 }
                 else
@@ -164,8 +171,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                 }
                 if (searchModel.RoleIdList.Count > 0)
                 {
-                    //TODO
-                    //predicate = predicate.And(p => p.RoleIdList.Intersect(searchModel.RoleIdList).Any());
+                    var roleIdStrings = searchModel.RoleIdList.Select(id => id.ToString()).ToList();
+                    predicate = predicate.And(p => roleIdStrings.Any(roleId => p.RoleIdList.Contains(roleId)));
                 }
 
                 var userList = new List<UserViewModel>();
@@ -181,7 +188,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 var updateByUserList = await _userRepository.ReadOnlyRespository.GetAsync(i => updateByUserIdList.Contains(i.Id));
                 foreach (var user in userDBList)
                 {
-                    var roles = roleDBList.Where(j => user.RoleIdList.Contains(j.Id.ToString())).ToList();
+                    var roles = roleDBList.Where(j => user.RoleIdList.Contains(j.Id)).ToList();
                     user.RoleViewList = _mapper.Map<List<RoleViewModel>>(roles);
 
                     var updateUser = updateByUserList.First(i => i.Id == user.UpdatedBy);
@@ -208,117 +215,164 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement> CreateOrUpdateUser(UserViewModel postData)
         {
             var ack = new Acknowledgement();
-            if (string.IsNullOrWhiteSpace(postData.Name))
+            try
             {
-                ack.AddMessage("Vui lòng nhập họ tên");
-                return ack;
-            }
-            if (postData.Id == 0 && !Validate.IsValidPassword(postData.Password))
-            {
-                ack.AddMessage("Mật khẩu không đúng định dạng. (Ít nhất 8 kí tự, 1 chữ hoa,1 chữ thường, 1 chữ số và 1 kí tự đặc biệt)");
-                return ack;
-            }
-            if (string.IsNullOrWhiteSpace(postData.UserName))
-            {
-                ack.AddMessage("Vui lòng nhập tên đăng nhập");
-                return ack;
-            }
-            var phone = postData.Phone;
-            var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
-            if (validatePhoneMessage != null)
-            {
-                ack.AddMessage(validatePhoneMessage);
-                return ack;
-            }
-            postData.Phone = phone;
-            if (!string.IsNullOrWhiteSpace(postData.Email))
-            {
-                var isValidEmail = Validate.ValidEmail(postData.Email);
-                if (!isValidEmail)
+                if (string.IsNullOrWhiteSpace(postData.Name))
                 {
-                    ack.AddMessage("Email không đúng định dạng.");
+                    ack.AddMessage("Vui lòng nhập họ tên");
                     return ack;
                 }
-            }
-            if (postData.RoleIdList.Count() == 0)
-            {
-                ack.AddMessage("Vui lòng chọn vai trò.");
-                return ack;
-            }
-            postData.Password = Utils.EncodePassword(postData.Password, EEncodeType.SHA_256);
-            var checkSameUserNameItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.UserName == postData.UserName && i.IsActive == true);
-            if (checkSameUserNameItem != null && postData.Id == 0)
-            {
-                ack.AddMessage("Đã tồn tại tài khoản với tên đăng nhập này");
-                return ack;
-            }
-
-            if (postData.Id == 0)
-            {
-                var newUser = _mapper.Map<User>(postData);
-                newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User, DbContext);
-                newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
-                newUser.Password = postData.Password;
-                newUser.CreatedDate = DateTime.Now;
-                newUser.CreatedBy = CurrentUserId;
-                newUser.UpdatedDate = newUser.CreatedDate;
-                newUser.UpdatedBy = newUser.CreatedBy;
-                await ack.TrySaveChangesAsync(res => res.AddAsync(newUser), _userRepository.Repository);
-            }
-            else
-            {
-                var existItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == postData.Id && i.IsActive == true);
-                if (existItem == null)
+                if (postData.Id == 0 && !Validate.IsValidPassword(postData.Password))
                 {
-                    ack.AddMessage("Không tìm thấy người dùng");
-                    ack.IsSuccess = false;
+                    ack.AddMessage("Mật khẩu không đúng định dạng. (Ít nhất 8 kí tự, 1 chữ hoa,1 chữ thường, 1 chữ số và 1 kí tự đặc biệt)");
                     return ack;
+                }
+                if (string.IsNullOrWhiteSpace(postData.UserName))
+                {
+                    ack.AddMessage("Vui lòng nhập tên đăng nhập");
+                    return ack;
+                }
+                var phone = postData.Phone;
+                var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
+                if (validatePhoneMessage != null)
+                {
+                    ack.AddMessage(validatePhoneMessage);
+                    return ack;
+                }
+                postData.Phone = phone;
+                if (!string.IsNullOrWhiteSpace(postData.Email))
+                {
+                    var isValidEmail = Validate.ValidEmail(postData.Email);
+                    if (!isValidEmail)
+                    {
+                        ack.AddMessage("Email không đúng định dạng.");
+                        return ack;
+                    }
+                }
+                if (postData.RoleIdList == null || postData.RoleIdList.Count == 0)
+                {
+                    ack.AddMessage("Vui lòng chọn vai trò.");
+                    return ack;
+                }
+
+                // Only encode password for new users or when password is provided for updates
+                if (postData.Id == 0 || !string.IsNullOrWhiteSpace(postData.Password))
+                {
+                    postData.Password = Utils.EncodePassword(postData.Password, EEncodeType.SHA_256);
+                }
+
+                var checkSameUserNameItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.UserName == postData.UserName && i.IsActive == true);
+                if (checkSameUserNameItem != null && postData.Id == 0)
+                {
+                    ack.AddMessage("Đã tồn tại tài khoản với tên đăng nhập này");
+                    return ack;
+                }
+
+                if (postData.Id == 0)
+                {
+                    var newUser = _mapper.Map<User>(postData);
+                    newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User, DbContext);
+                    newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
+                    newUser.Password = postData.Password;
+                    newUser.CreatedDate = DateTime.Now;
+                    newUser.CreatedBy = CurrentUserId;
+                    newUser.UpdatedDate = newUser.CreatedDate;
+                    newUser.UpdatedBy = newUser.CreatedBy;
+                    await ack.TrySaveChangesAsync(res => res.AddAsync(newUser), _userRepository.Repository);
                 }
                 else
                 {
+                    var existItem = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == postData.Id && i.IsActive == true);
+                    if (existItem == null)
+                    {
+                        ack.AddMessage("Không tìm thấy người dùng");
+                        return ack;
+                    }
+
                     existItem.Name = postData.Name;
                     existItem.Phone = postData.Phone;
                     existItem.Email = postData.Email;
                     existItem.UserName = postData.UserName;
+                    existItem.RoleIdList = postData.RoleIdList == null || postData.RoleIdList.Count == 0 ? "" : string.Join(",", postData.RoleIdList);
                     existItem.NameNonUnicode = Utils.NonUnicode(postData.Name);
                     existItem.UpdatedDate = DateTime.Now;
                     existItem.UpdatedBy = CurrentUserId;
+
+                    // Only update password if a new one is provided
+                    if (!string.IsNullOrWhiteSpace(postData.Password))
+                    {
+                        existItem.Password = postData.Password;
+                    }
+
                     await ack.TrySaveChangesAsync(res => res.UpdateAsync(existItem), _userRepository.Repository);
                 }
+                return ack;
             }
-            return ack;
+            catch (Exception ex)
+            {
+                ack.ExtractMessage(ex);
+                _logger.LogError($"CreateOrUpdateUser: {ex.Message}");
+                return ack;
+            }
         }
         public async Task<Acknowledgement> DeleteUserById(int userId)
         {
             var ack = new Acknowledgement();
-            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId, "UrnList,UrnList.Urn");
-            if (user == null)
+            try
             {
-                ack.AddMessage("Không tìm thấy người dùng");
+                var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId && i.IsActive == true);
+                if (user == null)
+                {
+                    ack.AddMessage("Không tìm thấy người dùng");
+                    return ack;
+                }
+
+                user.IsActive = false;
+                user.UpdatedDate = DateTime.Now;
+                user.UpdatedBy = CurrentUserId;
+
+                await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
                 return ack;
             }
-            user.IsActive = false;
-            await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
-            return ack;
+            catch (Exception ex)
+            {
+                ack.ExtractMessage(ex);
+                _logger.LogError($"DeleteUserById: {ex.Message}");
+                return ack;
+            }
         }
         public async Task<Acknowledgement> ResetUserPasswordById(int userId)
         {
             var ack = new Acknowledgement();
-            var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId, "UrnList,UrnList.Urn");
-            if (user == null)
+            try
             {
-                ack.AddMessage("Không tìm thấy người dùng");
+                var user = await _userRepository.Repository.FirstOrDefaultAsync(i => i.Id == userId && i.IsActive == true);
+                if (user == null)
+                {
+                    ack.AddMessage("Không tìm thấy người dùng");
+                    return ack;
+                }
+
+                var defaultResetPassword = Configuration.GetSection("DefaultResetPassword").Value;
+                if (string.IsNullOrEmpty(defaultResetPassword))
+                {
+                    ack.AddMessage("Lỗi thiếu setting mật khẩu mặc định");
+                    return ack;
+                }
+
+                user.Password = Utils.EncodePassword(defaultResetPassword, EEncodeType.SHA_256);
+                user.UpdatedDate = DateTime.Now;
+                user.UpdatedBy = CurrentUserId;
+
+                await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
                 return ack;
             }
-            var defaultResetPassword = Configuration.GetSection("DefaultResetPassword").Value;
-            if (string.IsNullOrEmpty(defaultResetPassword))
+            catch (Exception ex)
             {
-                ack.AddMessage("Lỗi thiếu setting mật khẩu mặc định");
+                ack.ExtractMessage(ex);
+                _logger.LogError($"ResetUserPasswordById: {ex.Message}");
                 return ack;
             }
-            user.Password = Utils.EncodePassword(defaultResetPassword, EEncodeType.SHA_256);
-            await ack.TrySaveChangesAsync(res => res.UpdateAsync(user), _userRepository.Repository);
-            return ack;
         }
 
         public async Task<Acknowledgement<UserViewModel>> GetUserById(int userId)
@@ -336,10 +390,13 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 ack.Data = _mapper.Map<UserViewModel>(user);
                 ack.IsSuccess = true;
-                if (user.RoleIdList.Length > 0)
+                if (!string.IsNullOrWhiteSpace(user.RoleIdList))
                 {
+                    var roleIds = user.RoleIdList.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => int.Parse(x.Trim())).ToList();
+
                     var predicate = PredicateBuilder.New<Role>();
-                    predicate = predicate.And(e => user.RoleIdList.Contains(e.Id.ToString()));
+                    predicate = predicate.And(e => roleIds.Contains(e.Id));
 
                     var listRole = await _roleRepository.ReadOnlyRespository.GetAsync(predicate);
                     if (listRole != null)

@@ -15,7 +15,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetCustomerList")]
     public class CustomerController : BaseController<CustomerController>
     {
         private ICustomerService _customerService;
@@ -84,7 +83,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<CustomerViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetCustomerById/{userId}")]
+        [Route("Customer/GetCustomerById/{userId}")]
         public async Task<Acknowledgement<CustomerViewModel>> GetCustomerById(int userId)
         {
             var ack = await _customerService.GetCustomerById(userId);

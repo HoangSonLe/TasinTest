@@ -5,6 +5,28 @@ namespace Tasin.Website.Common.Helper
 {
     public static class EnumHelper
     {
+        /// <summary>
+        /// Chuyển string sang enum kiểu T.
+        /// Trả về true nếu thành công, false nếu thất bại.
+        /// </summary>
+        public static bool TryParseEnum<T>(string value, out T result, bool ignoreCase = true) where T : struct, Enum
+        {
+            return Enum.TryParse<T>(value, ignoreCase, out result);
+        }
+
+        /// <summary>
+        /// Chuyển string sang enum kiểu T.
+        /// Nếu thất bại sẽ ném lỗi.
+        /// </summary>
+        public static T ParseEnum<T>(string value, bool ignoreCase = true) where T : struct, Enum
+        {
+            if (Enum.TryParse<T>(value, ignoreCase, out var result))
+            {
+                return result;
+            }
+            throw new ArgumentException($"Không thể chuyển đổi '{value}' thành enum {typeof(T).Name}");
+        }
+
         public static string GetEnumDescription(this Enum enumValue)
         {
             var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
@@ -13,7 +35,15 @@ namespace Tasin.Website.Common.Helper
 
             return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
         }
-        
+        public static string GetEnumDescriptionByEnum(Enum enumValue)
+        {
+            var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+
+            var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
+        }
+
         public static List<KendoDropdownListModel<string>> ToDropdownList<TEnum>()
         {
             var enumValues = Enum.GetValues(typeof(TEnum));

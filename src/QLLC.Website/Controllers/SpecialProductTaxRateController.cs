@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetSpecialProductTaxRateList")]
     public class SpecialProductTaxRateController : BaseController<SpecialProductTaxRateController>
     {
         private ISpecialProductTaxRateService _specialProductTaxRateService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<SpecialProductTaxRateViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetSpecialProductTaxRateById/{specialProductTaxRateId}")]
+        [Route("SpecialProductTaxRate/GetSpecialProductTaxRateById/{specialProductTaxRateId}")]
         public async Task<Acknowledgement<SpecialProductTaxRateViewModel>> GetSpecialProductTaxRateById(int specialProductTaxRateId)
         {
             var ack = await _specialProductTaxRateService.GetSpecialProductTaxRateById(specialProductTaxRateId);

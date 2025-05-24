@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
 using Tasin.Website.Models.ViewModels;
 
 namespace Tasin.Website.Models.ViewModels
@@ -30,8 +32,9 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Non-unicode name for searching
         /// </summary>
+        [Required]
         [Display(Name = "NameNonUnicode")]
-        public string? NameNonUnicode { get; set; }
+        public required string NameNonUnicode { get; set; }
 
         /// <summary>
         /// English name
@@ -77,12 +80,6 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Display(Name = "TaxRate")]
         public decimal? TaxRate { get; set; }
-
-        /// <summary>
-        /// Tax Rate Config ID
-        /// </summary>
-        [Display(Name = "TaxRateConfig_ID")]
-        public int? TaxRateConfig_ID { get; set; }
 
         /// <summary>
         /// Loss Rate
@@ -147,5 +144,17 @@ namespace Tasin.Website.Models.ViewModels
         /// Special Product Tax Rate name
         /// </summary>
         public string? SpecialProductTaxRateName { get; set; }
+
+        /// <summary>
+        /// Status of the product
+        /// </summary>
+        [Display(Name = "Status")]
+        public ECommonStatus Status { get; set; } = ECommonStatus.Actived;
+
+        /// <summary>
+        /// Status description for display purposes
+        /// </summary>
+        [Display(Name = "Status Name")]
+        public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
     }
 }

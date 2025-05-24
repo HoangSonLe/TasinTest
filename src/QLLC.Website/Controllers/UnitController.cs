@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetUnitList")]
     public class UnitController : BaseController<UnitController>
     {
         private IUnitService _unitService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<UnitViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetUnitById/{unitId}")]
+        [Route("Unit/GetUnitById/{unitId}")]
         public async Task<Acknowledgement<UnitViewModel>> GetUnitById(int unitId)
         {
             var ack = await _unitService.GetUnitById(unitId);

@@ -37,9 +37,9 @@ namespace Tasin.Website.Common.Enums
 
     public enum ECommonStatus
     {
-        [Description("Đã kích hoạt")]
+        [Description("Đang hoạt động")]
         Actived,
-        [Description("Chưa kích hoạt")]
+        [Description("Không hoạt động")]
         InActived,
     }
     public enum ECustomerType
@@ -53,8 +53,14 @@ namespace Tasin.Website.Common.Enums
     {
         [Description("Mới")]
         New,
+        [Description("Đang chờ xác nhận")]
+        Pending,
+        [Description("Đã xác nhận")]
+        Confirmed,
         [Description("Đã tạo đơn tổng hợp")]
         Executed,
+        [Description("Đã hủy")]
+        Cancel,
     }
 
     public enum EPAStatus

@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetCategoryList")]
     public class CategoryController : BaseController<CategoryController>
     {
         private ICategoryService _categoryService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<CategoryViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetCategoryById/{categoryId}")]
+        [Route("Category/GetCategoryById/{categoryId}")]
         public async Task<Acknowledgement<CategoryViewModel>> GetCategoryById(int categoryId)
         {
             var ack = await _categoryService.GetCategoryById(categoryId);

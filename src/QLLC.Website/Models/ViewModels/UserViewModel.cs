@@ -1,5 +1,7 @@
 ﻿using AutoMapper.Configuration.Annotations;
 using System.ComponentModel.DataAnnotations;
+using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
 using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.Models.ViewModels
@@ -35,6 +37,12 @@ namespace Tasin.Website.Models.ViewModels
         public string Name { get; set; }
 
         /// <summary>
+        /// Non-unicode name for searching
+        /// </summary>
+        [Display(Name = "NameNonUnicode")]
+        public string NameNonUnicode { get; set; }
+
+        /// <summary>
         /// Email address
         /// </summary>
         [EmailAddress]
@@ -63,7 +71,7 @@ namespace Tasin.Website.Models.ViewModels
         /// List of role IDs assigned to the user
         /// </summary>
         [Display(Name = "Roles")]
-        public string RoleIdList { get; set; }
+        public List<int> RoleIdList { get; set; } = new List<int>();
 
         /// <summary>
         /// List of role view models
@@ -90,6 +98,16 @@ namespace Tasin.Website.Models.ViewModels
         [Display(Name = "Updated By")]
         public string UpdatedByName { get; set; }
 
+        /// <summary>
+        /// Status of the user
+        /// </summary>
+        [Display(Name = "Status")]
+        public ECommonStatus Status { get; set; } = ECommonStatus.Actived;
 
+        /// <summary>
+        /// Status description for display purposes
+        /// </summary>
+        [Display(Name = "Status Name")]
+        public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
     }
 }

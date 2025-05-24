@@ -32,8 +32,9 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Non-unicode name for searching
         /// </summary>
+        [Required]
         [Display(Name = "NameNonUnicode")]
-        public string? NameNonUnicode { get; set; }
+        public required string NameNonUnicode { get; set; }
 
         /// <summary>
         /// English name
@@ -58,5 +59,17 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Display(Name = "ParentName")]
         public string? ParentName { get; set; }
+
+        /// <summary>
+        /// Status of the material
+        /// </summary>
+        [Display(Name = "Status")]
+        public ECommonStatus Status { get; set; } = ECommonStatus.Actived;
+
+        /// <summary>
+        /// Status description for display purposes
+        /// </summary>
+        [Display(Name = "Status Name")]
+        public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
     }
 }

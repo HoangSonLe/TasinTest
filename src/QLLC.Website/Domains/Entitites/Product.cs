@@ -10,13 +10,12 @@ namespace Tasin.Website.Domains.Entitites
         public required string Code { get; set; }
         public required string Name { get; set; }
         [Column(TypeName = "varchar")]
-        public string? NameNonUnicode { get; set; }
+        public required string NameNonUnicode { get; set; }
         public string? Name_EN { get; set; }
         public int? Unit_ID { get; set; }
         public int? Category_ID { get; set; }
         public int? ProcessingType_ID { get; set; }
         public decimal? TaxRate { get; set; }
-        public int? TaxRateConfig_ID { get; set; }
         public decimal? LossRate { get; set; }
         public int? Material_ID { get; set; }
         public decimal? ProfitMargin { get; set; }
@@ -39,10 +38,6 @@ namespace Tasin.Website.Domains.Entitites
         [ForeignKey("ProcessingType_ID")]
         [NotMapped]
         public virtual ProcessingType? ProcessingType { get; set; }
-
-        [ForeignKey("TaxRateConfig_ID")]
-        [NotMapped]
-        public virtual TaxRateConfig? TaxRateConfig { get; set; }
 
         [ForeignKey("Material_ID")]
         [NotMapped]

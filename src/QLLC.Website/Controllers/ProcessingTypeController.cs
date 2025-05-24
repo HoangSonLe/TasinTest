@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetProcessingTypeList")]
     public class ProcessingTypeController : BaseController<ProcessingTypeController>
     {
         private IProcessingTypeService _processingTypeService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<ProcessingTypeViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetProcessingTypeById/{processingTypeId}")]
+        [Route("ProcessingType/GetProcessingTypeById/{processingTypeId}")]
         public async Task<Acknowledgement<ProcessingTypeViewModel>> GetProcessingTypeById(int processingTypeId)
         {
             var ack = await _processingTypeService.GetProcessingTypeById(processingTypeId);

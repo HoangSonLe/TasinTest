@@ -12,7 +12,7 @@ namespace Tasin.Website.Domains.Entitites
         public decimal TotalPrice { get; set; }
         public decimal TotalPriceNoTax { get; set; }
         public required string Code { get; set; }
-        public string? Status { get; set; } = ((int)EPOStatus.New).ToString();
+        public string Status { get; set; }
 
         // Navigation properties
         [ForeignKey("Customer_ID")]

@@ -14,7 +14,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             // Properties
             builder.Property(p => p.Code).HasColumnName("Code").IsRequired().HasMaxLength(50);
             builder.Property(p => p.Name).HasColumnName("Name").IsRequired().HasMaxLength(255);
-            builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode").HasMaxLength(255);
+            builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode").IsRequired().HasMaxLength(255);
             builder.Property(p => p.Address).HasColumnName("Address").HasColumnType("TEXT");
             builder.Property(p => p.Status).HasColumnName("Status").HasMaxLength(50);
             builder.Property(p => p.IsActive).HasColumnName("IsActive").HasDefaultValue(true);

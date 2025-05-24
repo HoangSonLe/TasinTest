@@ -31,6 +31,12 @@ namespace Tasin.Website.Models.ViewModels
         public string Name { get; set; }
 
         /// <summary>
+        /// Non-unicode name for searching
+        /// </summary>
+        [Display(Name = "NameNonUnicode")]
+        public string NameNonUnicode { get; set; } = "";
+
+        /// <summary>
         /// Email address
         /// </summary>
         [EmailAddress]
@@ -48,8 +54,8 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Phone]
         [Display(Name = "PhoneContact")]
-        public string PhoneContact { get; set; } 
-        
+        public string PhoneContact { get; set; }
+
         [Display(Name = "Type")]
         public ECustomerType Type { get; set; }
 
@@ -65,6 +71,16 @@ namespace Tasin.Website.Models.ViewModels
         [Display(Name = "Updated By")]
         public string UpdatedByName { get; set; }
 
+        /// <summary>
+        /// Status of the customer
+        /// </summary>
+        [Display(Name = "Status")]
+        public ECommonStatus Status { get; set; } = ECommonStatus.Actived;
 
+        /// <summary>
+        /// Status description for display purposes
+        /// </summary>
+        [Display(Name = "Status Name")]
+        public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
     }
 }

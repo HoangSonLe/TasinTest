@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]/GetVendorList")]
     public class VendorController : BaseController<VendorController>
     {
         private IVendorService _vendorService;
@@ -80,7 +79,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Acknowledgement<VendorViewModel>), 200)]
         [ProducesResponseType(404)]
-        [Route("api/[controller]/GetVendorById/{vendorId}")]
+        [Route("Vendor/GetVendorById/{vendorId}")]
         public async Task<Acknowledgement<VendorViewModel>> GetVendorById(int vendorId)
         {
             var ack = await _vendorService.GetVendorById(vendorId);

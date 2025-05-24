@@ -279,7 +279,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     }
 
                     existingPurchaseOrder.Customer_ID = postData.Customer_ID;
-                    existingPurchaseOrder.Status = postData.Status;
+                    existingPurchaseOrder.Status = postData.Status.ToString();
                     existingPurchaseOrder.UpdatedDate = DateTime.Now;
                     existingPurchaseOrder.UpdatedBy = CurrentUserId;
 

@@ -13,7 +13,6 @@ namespace Tasin.Website.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]")]
     public class PurchaseOrderController : BaseController<PurchaseOrderController>
     {
         private IPurchaseOrderService _purchaseOrderService;

@@ -48,10 +48,17 @@ namespace Tasin.Website.Models.ViewModels
         public decimal TotalPriceNoTax { get; set; }
 
         /// <summary>
-        /// Status
+        /// Status of the purchase order
         /// </summary>
+        [Required]
         [Display(Name = "Status")]
-        public string Status { get; set; }
+        public EPOStatus Status { get; set; } = EPOStatus.New;
+
+        /// <summary>
+        /// Status description for display purposes
+        /// </summary>
+        [Display(Name = "Status Name")]
+        public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
 
         /// <summary>
         /// Purchase Order Items

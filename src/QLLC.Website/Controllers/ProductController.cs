@@ -12,7 +12,6 @@ using Tasin.Website.Models.ViewModels;
 namespace Tasin.Website.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class ProductController : BaseController<ProductController>
     {
         private readonly IProductService _productService;

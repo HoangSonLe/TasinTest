@@ -19,6 +19,6 @@ namespace Tasin.Website.Models.SearchModels
         /// Status to filter by
         /// </summary>
         [Display(Name = "Status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
     }
 }

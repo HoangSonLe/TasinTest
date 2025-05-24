@@ -35,6 +35,13 @@ try
     // Add services to the container.
     builder.Services.AddAutoMapper(typeof(Program));
 
+    // Configure JSON options for enum handling - allow both string and numeric values
+    builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+    });
+
     var mappingConfig = new MapperConfiguration(mc =>
     {
         mc.AddProfile(new DomainToDTOMappingProfile());

@@ -82,7 +82,7 @@ namespace Tasin.Website.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl ="")
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = "")
         {
             //Logger.LogInformation("logging");
             int loginFailedTimes = GetLoginFailedTimesInCookies();
@@ -166,7 +166,7 @@ namespace Tasin.Website.Controllers
                 {
                     AccountType = model.AccountType,
                     EnumActionList = userDB.EnumActionList,
-                    RoleIdList = userDB.RoleIdList,
+                    RoleIdList = userDB.RoleIdList == null || userDB.RoleIdList.Count == 0 ? "" : string.Join(",", userDB.RoleIdList),
                     UserId = userDB.Id,
                     IsMobile = model.IsMobile,
                     UserName = userDB.UserName,
@@ -326,7 +326,7 @@ namespace Tasin.Website.Controllers
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     claimsPrincipal);
 
-                var userId = claimsPrincipal.Claims.FirstOrDefault(c=>c.Type == "UserID").Value;
+                var userId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == "UserID").Value;
 
                 return Redirect("/"); // Redirect to home or another page
             }

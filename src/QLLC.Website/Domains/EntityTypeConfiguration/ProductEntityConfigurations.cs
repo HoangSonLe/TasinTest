@@ -14,13 +14,12 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             // Properties
             builder.Property(p => p.Code).HasColumnName("Code").IsRequired().HasMaxLength(50);
             builder.Property(p => p.Name).HasColumnName("Name").IsRequired().HasMaxLength(255);
-            builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode").HasMaxLength(255);
+            builder.Property(p => p.NameNonUnicode).HasColumnName("NameNonUnicode").IsRequired().HasMaxLength(255);
             builder.Property(p => p.Name_EN).HasColumnName("Name_EN").HasMaxLength(255);
             builder.Property(p => p.Unit_ID).HasColumnName("Unit_ID");
             builder.Property(p => p.Category_ID).HasColumnName("Category_ID");
             builder.Property(p => p.ProcessingType_ID).HasColumnName("ProcessingType_ID");
             builder.Property(p => p.TaxRate).HasColumnName("TaxRate").HasColumnType("NUMERIC(5, 2)");
-            builder.Property(p => p.TaxRateConfig_ID).HasColumnName("TaxRateConfig_ID");
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.Material_ID).HasColumnName("Material_ID");
             builder.Property(p => p.ProfitMargin).HasColumnName("ProfitMargin").HasColumnType("NUMERIC(5, 2)");
@@ -51,10 +50,6 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.HasOne(p => p.ProcessingType)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.ProcessingType_ID);
-
-            builder.HasOne(p => p.TaxRateConfig)
-                .WithMany(p => p.Products)
-                .HasForeignKey(p => p.TaxRateConfig_ID);
 
             builder.HasOne(p => p.Material)
                 .WithMany(p => p.Products)
