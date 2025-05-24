@@ -1,5 +1,6 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Tasin.Website.Common.Enums;
 
 namespace Tasin.Website.Domains.Entitites
 {
@@ -11,7 +12,7 @@ namespace Tasin.Website.Domains.Entitites
         public decimal TotalPrice { get; set; }
         public decimal TotalPriceNoTax { get; set; }
         public required string Code { get; set; }
-        public string? Status { get; set; }
+        public string? Status { get; set; } = ((int)EPOStatus.New).ToString();
 
         // Navigation properties
         [ForeignKey("Customer_ID")]

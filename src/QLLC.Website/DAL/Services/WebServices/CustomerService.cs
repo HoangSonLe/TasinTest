@@ -41,29 +41,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         }
 
 
-        public async Task<Acknowledgement<List<KendoDropdownListModel<int>>>> GetCustomerDataDropdownList(string searchString)
-        {
-            var predicate = PredicateBuilder.New<Customer>(i => i.IsActive == true);
-            predicate = CustomerAuthorPredicate.GetCustomerAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
-            var selectedUserList = new List<User>();
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                var searchStringNonUnicode = Utils.NonUnicode(searchString.Trim().ToLower());
-                predicate = predicate.And(i => i.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode));
-            }
-            var customerDBList = await _customerRepository.ReadOnlyRespository.GetWithPagingAsync(new PagingParameters(1, 50), predicate, i => i.OrderBy(p => p.Name));
-            var data = customerDBList.Data.Select(i => new KendoDropdownListModel<int>()
-            {
-                Value = i.ID.ToString(),
-                Text = $"{i.Name} - {i.PhoneContact}",
-            }).ToList();
-            return new Acknowledgement<List<KendoDropdownListModel<int>>>()
-            {
-                IsSuccess = true,
-                Data = data
-            };
-        }
-
         public async Task<Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>> GetCustomerList(CustomerSearchModel searchModel)
         {
             var response = new Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>();

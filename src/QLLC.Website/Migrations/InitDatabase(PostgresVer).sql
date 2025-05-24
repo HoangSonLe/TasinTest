@@ -92,19 +92,6 @@ CREATE TABLE "SpecialProductTaxRate" (
     "UpdatedBy" INT4 NULL
 );
 
-CREATE TABLE "TaxRateConfig" (
-    "ID" SERIAL PRIMARY KEY,
-    "CompanyTaxRate" NUMERIC(5, 2) NOT NULL,
-    "ConsumerTaxRate" NUMERIC(5, 2) NOT NULL,
-    "SpecialProductTaxRate_ID" INTEGER,
-    "Status" VARCHAR(50) NOT NULL,
-    "IsActive" BOOLEAN DEFAULT TRUE,
-    "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    "UpdatedDate" TIMESTAMP WITHOUT TIME ZONE,
-    "CreatedBy" INT4 NOT NULL,
-    "UpdatedBy" INT4 null,
-    CONSTRAINT "fk_special_product_taxrate" FOREIGN KEY ("SpecialProductTaxRate_ID") REFERENCES "SpecialProductTaxRate"("ID") ON DELETE SET NULL
-);
 
 CREATE TABLE "Material" (
     "ID" SERIAL PRIMARY KEY,
@@ -140,6 +127,9 @@ CREATE TABLE "Product" (
     "Note" TEXT,
     "IsDiscontinued" BOOLEAN DEFAULT FALSE,
     "ProcessingFee" NUMERIC(18, 2),
+    "CompanyTaxRate" NUMERIC(5, 2) NOT NULL,
+    "ConsumerTaxRate" NUMERIC(5, 2) NOT NULL,
+    "SpecialProductTaxRate_ID" INTEGER,
     "Status" VARCHAR(50) NOT NULL,
     "IsActive" BOOLEAN DEFAULT TRUE,
     "CreatedDate" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -150,7 +140,9 @@ CREATE TABLE "Product" (
     CONSTRAINT "fk_category" FOREIGN KEY ("Category_ID") REFERENCES "Category"("ID"),
     CONSTRAINT "fk_processingtype" FOREIGN KEY ("ProcessingType_ID") REFERENCES "ProcessingType"("ID"),
     CONSTRAINT "fk_taxrateconfig" FOREIGN KEY ("TaxRateConfig_ID") REFERENCES "TaxRateConfig"("ID"),
-    CONSTRAINT "fk_material" FOREIGN KEY ("Material_ID") REFERENCES "Material"("ID")
+    CONSTRAINT "fk_material" FOREIGN KEY ("Material_ID") REFERENCES "Material"("ID"),
+    CONSTRAINT "fk_special_product_taxrate" FOREIGN KEY ("SpecialProductTaxRate_ID") REFERENCES "SpecialProductTaxRate"("ID")
+
 );
 
 CREATE TABLE "Product_Vendor" (

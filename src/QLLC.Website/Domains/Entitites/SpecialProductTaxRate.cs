@@ -17,5 +17,8 @@ namespace Tasin.Website.Domains.Entitites
         // Navigation properties
         [NotMapped]
         public virtual ICollection<TaxRateConfig>? TaxRateConfigs { get; set; }
+
+        [NotMapped]
+        public virtual ICollection<Product>? Products { get; set; }
     }
 }

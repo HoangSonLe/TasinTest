@@ -47,6 +47,12 @@ namespace Tasin.Website.Common.AutoMapper
                 .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
             CreateMap<SpecialProductTaxRateViewModel, SpecialProductTaxRate>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+
+            // Product mapping
+            CreateMap<Product, ProductViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
+            CreateMap<ProductViewModel, Product>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
         }
     }
 }
