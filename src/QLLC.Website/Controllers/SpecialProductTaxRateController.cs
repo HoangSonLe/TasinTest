@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("SpecialProductTaxRate/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_SPECIALPRODUCTTAXRATE])]
         public IActionResult Index()
         {
             return View();
@@ -41,6 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("SpecialProductTaxRate/GetSpecialProductTaxRateList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<SpecialProductTaxRateViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_SPECIALPRODUCTTAXRATE])]
         public async Task<IActionResult> GetSpecialProductTaxRateList([FromQuery] SpecialProductTaxRateSearchModel searchModel)
         {
             var result = await _specialProductTaxRateService.GetSpecialProductTaxRateList(searchModel);
@@ -49,6 +53,7 @@ namespace Tasin.Website.Controllers
 
         [HttpDelete]
         [Route("SpecialProductTaxRate/DeleteSpecialProductTaxRateById")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_SPECIALPRODUCTTAXRATE])]
         public async Task<Acknowledgement> DeleteSpecialProductTaxRateById(int specialProductTaxRateId)
         {
             return await _specialProductTaxRateService.DeleteSpecialProductTaxRateById(specialProductTaxRateId);
@@ -56,6 +61,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPost]
         [Route("SpecialProductTaxRate/Create")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_SPECIALPRODUCTTAXRATE])]
         public async Task<Acknowledgement> Create([FromBody] SpecialProductTaxRateViewModel postData)
         {
             return await _specialProductTaxRateService.CreateOrUpdateSpecialProductTaxRate(postData);
@@ -63,6 +69,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPut]
         [Route("SpecialProductTaxRate/UpdateSpecialProductTaxRate/{specialProductTaxRateId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_SPECIALPRODUCTTAXRATE])]
         public async Task<Acknowledgement> CreateOrUpdateSpecialProductTaxRate([FromRoute] int specialProductTaxRateId, [FromBody] SpecialProductTaxRateViewModel postData)
         {
             postData.Id = specialProductTaxRateId;
@@ -80,6 +87,7 @@ namespace Tasin.Website.Controllers
         [ProducesResponseType(typeof(Acknowledgement<SpecialProductTaxRateViewModel>), 200)]
         [ProducesResponseType(404)]
         [Route("SpecialProductTaxRate/GetSpecialProductTaxRateById/{specialProductTaxRateId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_SPECIALPRODUCTTAXRATE, (int)EActionRole.UPDATE_SPECIALPRODUCTTAXRATE])]
         public async Task<Acknowledgement<SpecialProductTaxRateViewModel>> GetSpecialProductTaxRateById(int specialProductTaxRateId)
         {
             var ack = await _specialProductTaxRateService.GetSpecialProductTaxRateById(specialProductTaxRateId);

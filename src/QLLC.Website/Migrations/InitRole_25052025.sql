@@ -7,3 +7,6 @@ VALUES(2, 'Super Admin', 'Super Admin', 'Super Admin', 0, '0,1,2,3,4,5,6,7,8,9,1
 INSERT INTO public."Role"
 ("Id", "Name", "NameNonUnicode", "Description", "Level", "EnumActionList")
 VALUES(3, 'User', 'User', 'Người dùng', 2, '36,37,38,39,40,41,42,43');
+
+
+UPDATE public."User" SET "RoleIdList"='1' WHERE "UserName"='ADMIN';

@@ -316,7 +316,7 @@
 
     <script>
             function menu(EnumRoleList) {
-                debugger
+                
                 if (!EnumRoleList) return;
                     let listDanhMuc = [1,5,9,13,17,21,25,29,33,37];
                     let html = "";
@@ -332,50 +332,63 @@
                             <div class="nav collapse" id="menu-category" data-bs-parent="#accordionSidenav">
                                  <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">`;
                     if (EnumRoleList.find(e => e == 1)){
-                        html += `<a class="nav-link _permission_" data-enum="1" href="/User">Người dùng</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="1" href="/User/Index">Người dùng</a>`;
                     }
                     if (EnumRoleList.find(e => e == 5)){
-                        html += `<a class="nav-link _permission_" data-enum="5" href="/Vendor">Nhà cung cấp</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="5" href="/Vendor/Index">Nhà cung cấp</a>`;
                     }
                     if (EnumRoleList.find(e => e == 9)){
-                        html += `<a class="nav-link _permission_" data-enum="9" href="/Customer">Khách hàng</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="9" href="/Customer/Index">Khách hàng</a>`;
                     }
                     if (EnumRoleList.find(e => e == 13)){
-                        html += `<a class="nav-link _permission_" data-enum="13" href="/Product">Hàng hoá</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="13" href="/Product/Index">Hàng hoá</a>`;
                     }
                     if (EnumRoleList.find(e => e == 17)){
-                        html += `<a class="nav-link _permission_" data-enum="17" href="/Unit">Đơn vị</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="17" href="/Unit/Index">Đơn vị</a>`;
                     }
                     if (EnumRoleList.find(e => e == 21)){
-                        html += `<a class="nav-link _permission_" data-enum="21" href="/Category">Quy cách</a>`;
+                        html += `<a class="nav-link _permission_" data-enum="21" href="/Category/Index">Quy cách</a>`;
                     }
                     //ko dùng nữa
                     // if (EnumRoleList.find(e => e == 25)){
                     //     html += `<a class="nav-link _permission_" data-enum="25" href="/">Cấu hình thuế</a>`;
                     // }
                     if (EnumRoleList.find(e => e == 29)){
-                            html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate">Loại mặt hàng</a>`;
+                            html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate/Index">Loại mặt hàng</a>`;
                     }
                     if (EnumRoleList.find(e => e == 33)){
-                            html += `<a class="nav-link _permission_" data-enum="33" href="/Material">Vật liệu</a>`;
+                            html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index">Vật liệu</a>`;
                     }
                     if (EnumRoleList.find(e => e == 37)){
-                            html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType">Phân loại hàng hoá</a>`;
+                            html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index">Phân loại hàng hoá</a>`;
                     }
                     html += `</nav>
                                             </div>`;
                 }
 
-                if (EnumRoleList.find(e => e == 41)){
-                    html += `<a class="nav-link my-1 _permission_" data-enum="41" href="/Urn">
-                                <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
+                if (EnumRoleList.find(e => e == 40)){
+                    html += `<a class="nav-link my-1 _permission_" data-enum="40" href="/PurchaseOrder/Index">
+                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
                                 Tạo đơn hàng
                             </a>`;
                 }
-                if (EnumRoleList.find(e => e == 45)){
-                    html += `<a class="nav-link  my-1 _permission_" data-enum="45" href="/StorageMap">
-                                <i class="fa-solid fa-diagram-project fa-1_5x me-2"></i>
+                if (EnumRoleList.find(e => e == 41)){
+                    html += `<a class="nav-link my-1 _permission_" data-enum="41" href="/PurchaseOrder/Index">
+                                <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
+                                Danh sách đơn hàng
+                            </a>`;
+                }
+                if (EnumRoleList.find(e => e == 44)){
+                    html += `<a class="nav-link  my-1 _permission_" data-enum="44" href="/PurchaseAgreement/Index">
+                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
                                 Tổng hợp đơn
+                                        <span id="badge-sent" data-role="badge" class="k-badge k-badge-solid k-badge-solid-success k-badge-md k-rounded-full k-badge-inline k-ml-2" style="background-color: var(--bs-danger);">34</span>
+                            </a>`;
+                }
+                if (EnumRoleList.find(e => e == 45)){
+                    html += `<a class="nav-link  my-1 _permission_" data-enum="45" href="/PurchaseAgreement/Index">
+                                <i class="fa-solid fa-diagram-project fa-1_5x me-2"></i>
+                                Danh sách tổng hợp đơn
                             </a>`;
                 }
 
@@ -389,7 +402,7 @@
 
                 let pathname = window.location.pathname;
                 let element_ = $("a[href='" + pathname + "']");
-                let listUrl = ["/User", "/Vendor", "/Customer", "/Product", "/Unit", "/Category", "/TaxRateConfig", "/SpecialProductTaxRate", "/Material", "/ProcessingType",];
+                let listUrl = ["/User/Index", "/Vendor/Index", "/Customer/Index", "/Product/Index", "/Unit/Index", "/Category/Index", "/TaxRateConfig/Index", "/SpecialProductTaxRate/Index", "/Material/Index", "/ProcessingType/Index"];
                 if (listUrl.includes(pathname)) {
                     $("#category_").addClass("active");
                     $("#menu-category").addClass("show");

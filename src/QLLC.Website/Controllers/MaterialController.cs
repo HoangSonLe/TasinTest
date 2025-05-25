@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("Material/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_MATERIAL])]
         public IActionResult Index()
         {
             return View();
@@ -41,6 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Material/GetMaterialList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<MaterialViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_MATERIAL])]
         public async Task<IActionResult> GetMaterialList([FromQuery] MaterialSearchModel searchModel)
         {
             var result = await _materialService.GetMaterialList(searchModel);
@@ -49,6 +53,7 @@ namespace Tasin.Website.Controllers
 
         [HttpDelete]
         [Route("Material/DeleteMaterialById")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_MATERIAL])]
         public async Task<Acknowledgement> DeleteMaterialById(int materialId)
         {
             return await _materialService.DeleteMaterialById(materialId);
@@ -56,6 +61,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPost]
         [Route("Material/Create")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_MATERIAL])]
         public async Task<Acknowledgement> Create([FromBody] MaterialViewModel postData)
         {
             return await _materialService.CreateOrUpdateMaterial(postData);
@@ -63,6 +69,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPut]
         [Route("Material/UpdateMaterial/{materialId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_MATERIAL])]
         public async Task<Acknowledgement> CreateOrUpdateMaterial([FromRoute] int materialId, [FromBody] MaterialViewModel postData)
         {
             postData.Id = materialId;
@@ -80,6 +87,7 @@ namespace Tasin.Website.Controllers
         [ProducesResponseType(typeof(Acknowledgement<MaterialViewModel>), 200)]
         [ProducesResponseType(404)]
         [Route("Material/GetMaterialById/{materialId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_MATERIAL])]
         public async Task<Acknowledgement<MaterialViewModel>> GetMaterialById(int materialId)
         {
             var ack = await _materialService.GetMaterialById(materialId);

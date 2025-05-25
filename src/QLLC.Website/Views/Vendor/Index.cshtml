@@ -272,6 +272,7 @@
                     },
                 },
                 serverPaging: true,
+                serverFiltering: true,
                 page: 1,
                 pageSize: 20,
                 schema: {
@@ -365,7 +366,6 @@
         });
         $("#search").click(async function (e) {
             var grid = $(gridId).data("kendoGrid");
-            grid.dataSource.page(1);
             grid.dataSource.filter({});
         });
         $("#exportExcel").click(async function (e) {

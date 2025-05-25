@@ -13,13 +13,13 @@ namespace Tasin.Website.Models.SearchModels
         /// Search string to filter users by name, username, or phone
         /// </summary>
         [Display(Name = "Search")]
-        public string SearchString { get; set; }
+        public string? SearchString { get; set; }
 
         /// <summary>
         /// Comma-separated list of role IDs to filter users by role
         /// </summary>
         [Display(Name = "Role IDs")]
-        public string RoleIdListString { get; set; }
+        public string? RoleIdListString { get; set; }
 
         /// <summary>
         /// List of role IDs parsed from RoleIdListString

@@ -117,6 +117,7 @@
                         dataTextField: "text",
                         dataValueField: "value",
                         filter: "contains",
+                        filter: "contains",
                         dataSource: {
                             type: "json",
                             serverFiltering: true,
@@ -393,6 +394,7 @@
                     },
                 },
                 serverPaging: true,
+                serverFiltering: true,
                 page: 1,
                 pageSize: 20,
                 schema: {
@@ -499,8 +501,8 @@
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: "<button style='margin-right:5px;' onclick=editUser(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                                                               <button style='margin-right:5px;' onclick=deleteUser(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>\
-                                                               <button onclick=resetPassword(#=id#) title='Reset mật khẩu' class='k-button k-button-md k-rounded-md k-button-solid-primary _permission_' data-enum='8'><span class='k-icon k-i-lock k-button-icon'></span></button>",
+                            <button style='margin-right:5px;' onclick=deleteUser(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>\
+                            <button onclick=resetPassword(#=id#) title='Reset mật khẩu' class='k-button k-button-md k-rounded-md k-button-solid-primary _permission_' data-enum='8'><span class='k-icon k-i-lock k-button-icon'></span></button>",
                 }
             ],
             dataBound: function (e) {
@@ -531,7 +533,6 @@
         });
         $("#search").click(async function (e) {
             var grid = $(gridId).data("kendoGrid");
-            grid.dataSource.page(1);
             grid.dataSource.filter({});
         });
         $("#exportExcel").click(async function (e) {
@@ -571,7 +572,9 @@
     InitGrid();
     InitKendoToolBar();
     $(document).ready(function () {
-        $(window).trigger("resize");
+        setTimeout(() => {
+            $(window).trigger("resize");
+        }, 500);
 
     });
 </script>

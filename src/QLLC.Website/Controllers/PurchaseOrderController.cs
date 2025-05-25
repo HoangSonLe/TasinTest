@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("PurchaseOrder/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_ORDER])]
         public IActionResult Index()
         {
             return View();
@@ -41,6 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseOrder/GetPurchaseOrderList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<PurchaseOrderViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_ORDER])]
         public async Task<IActionResult> GetPurchaseOrderList([FromQuery] PurchaseOrderSearchModel searchModel)
         {
             var result = await _purchaseOrderService.GetPurchaseOrderList(searchModel);
@@ -56,6 +60,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseOrder/GetPurchaseOrderById")]
         [ProducesResponseType(typeof(Acknowledgement<PurchaseOrderViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_ORDER])]
         public async Task<IActionResult> GetPurchaseOrderById(int purchaseOrderId)
         {
             var result = await _purchaseOrderService.GetPurchaseOrderById(purchaseOrderId);
@@ -71,6 +76,7 @@ namespace Tasin.Website.Controllers
         [HttpPost]
         [Route("PurchaseOrder/CreatePurchaseOrder")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PURCHASE_ORDER])]
         public async Task<IActionResult> CreatePurchaseOrder([FromBody] PurchaseOrderViewModel postData)
         {
             postData.Id = 0; // Ensure we're creating a new record
@@ -87,6 +93,7 @@ namespace Tasin.Website.Controllers
         [HttpPut]
         [Route("PurchaseOrder/UpdatePurchaseOrder")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PURCHASE_ORDER])]
         public async Task<IActionResult> UpdatePurchaseOrder([FromBody] PurchaseOrderViewModel postData)
         {
             if (postData.Id <= 0)
@@ -107,6 +114,7 @@ namespace Tasin.Website.Controllers
         [HttpDelete]
         [Route("PurchaseOrder/DeletePurchaseOrderById")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PURCHASE_ORDER])]
         public async Task<Acknowledgement> DeletePurchaseOrderById(int purchaseOrderId)
         {
             return await _purchaseOrderService.DeletePurchaseOrderById(purchaseOrderId);

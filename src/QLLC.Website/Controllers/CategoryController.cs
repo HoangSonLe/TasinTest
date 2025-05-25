@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("Category/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CATEGORY])]
         public IActionResult Index()
         {
             return View();
@@ -40,6 +43,7 @@ namespace Tasin.Website.Controllers
         /// <response code="200">Returns the list of categories</response>
         [HttpGet]
         [Route("Category/GetCategoryList")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CATEGORY])]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<CategoryViewModel>>>), 200)]
         public async Task<IActionResult> GetCategoryList([FromQuery] CategorySearchModel searchModel)
         {
@@ -49,6 +53,7 @@ namespace Tasin.Website.Controllers
 
         [HttpDelete]
         [Route("Category/DeleteCategoryById")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_CATEGORY])]
         public async Task<Acknowledgement> DeleteCategoryById(int categoryId)
         {
             return await _categoryService.DeleteCategoryById(categoryId);
@@ -56,6 +61,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPost]
         [Route("Category/Create")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_CATEGORY])]
         public async Task<Acknowledgement> Create([FromBody] CategoryViewModel postData)
         {
             return await _categoryService.CreateOrUpdateCategory(postData);
@@ -63,6 +69,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPut]
         [Route("Category/UpdateCategory/{categoryId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_CATEGORY])]
         public async Task<Acknowledgement> CreateOrUpdateCategory([FromRoute] int categoryId, [FromBody] CategoryViewModel postData)
         {
             postData.Id = categoryId;
@@ -80,6 +87,7 @@ namespace Tasin.Website.Controllers
         [ProducesResponseType(typeof(Acknowledgement<CategoryViewModel>), 200)]
         [ProducesResponseType(404)]
         [Route("Category/GetCategoryById/{categoryId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CATEGORY])]
         public async Task<Acknowledgement<CategoryViewModel>> GetCategoryById(int categoryId)
         {
             var ack = await _categoryService.GetCategoryById(categoryId);

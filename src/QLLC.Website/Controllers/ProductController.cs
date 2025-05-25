@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Common.Enums;
@@ -31,6 +32,7 @@ namespace Tasin.Website.Controllers
         }
         [HttpGet]
         [Route("Product/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public IActionResult Index()
         {
             return View();
@@ -44,6 +46,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Product/GetProductList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<ProductViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> GetProductList([FromQuery] ProductSearchModel searchModel)
         {
             try
@@ -70,6 +73,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Product/GetProductById/{productId}")]
         [ProducesResponseType(typeof(Acknowledgement<ProductViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> GetProductById(int productId)
         {
             try
@@ -95,6 +99,7 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of operation</returns>
         [HttpPost]
         [Route("Product/Create")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PRODUCT])]
         public async Task<Acknowledgement> Create([FromBody] ProductViewModel model)
         {
             try
@@ -120,6 +125,7 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of operation</returns>
         [HttpPut]
         [Route("Product/UpdateProduct/{productId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PRODUCT])]
         public async Task<Acknowledgement> UpdateProduct([FromRoute] int productId, [FromBody] ProductViewModel model)
         {
             try
@@ -145,6 +151,7 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of operation</returns>
         [HttpDelete]
         [Route("Product/DeleteProductById")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PRODUCT])]
         public async Task<Acknowledgement> DeleteProductById(int productId)
         {
             try
@@ -169,6 +176,7 @@ namespace Tasin.Website.Controllers
         /// <returns>List of products for dropdown</returns>
         [HttpGet]
         [Route("Product/GetProductDropdownList")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         [ProducesResponseType(typeof(Acknowledgement<List<KendoDropdownListModel<string>>>), 200)]
         public async Task<IActionResult> GetProductDropdownList(string? searchString)
         {
@@ -196,6 +204,7 @@ namespace Tasin.Website.Controllers
         [HttpPost]
         [Route("Product/ImportExcel")]
         [ProducesResponseType(typeof(Acknowledgement<ProductExcelImportResult>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> ImportExcel(IFormFile file)
         {
             try
