@@ -16,5 +16,6 @@ namespace Tasin.Website.Common.Enums
         public const string SpecialProductTaxRate = "SPECIAL_PRODUCT_TAX_RATE";
         public const string PurchaseOrder = "PURCHASE_ORDER";
         public const string PurchaseAgreement = "PURCHASE_AGREEMENT";
+        public const string PAGroupCode = "PA_GROUP";
     }
 }

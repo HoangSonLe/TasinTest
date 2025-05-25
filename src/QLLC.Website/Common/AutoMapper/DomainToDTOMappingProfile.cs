@@ -86,6 +86,37 @@ namespace Tasin.Website.Common.AutoMapper
                 .ForMember(dest => dest.Product, opts => opts.Ignore())
                 .ForMember(dest => dest.Unit, opts => opts.Ignore())
                 .ForMember(dest => dest.ProcessingType, opts => opts.Ignore());
+
+            // PurchaseAgreement mapping
+            CreateMap<Purchase_Agreement, PurchaseAgreementViewModel>()
+                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID))
+                .ForMember(dest => dest.Status, opts => opts.MapFrom(src => ParsePAStatus(src.Status)))
+                .ForMember(dest => dest.VendorName, opts => opts.Ignore());
+            CreateMap<PurchaseAgreementViewModel, Purchase_Agreement>()
+                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Status, opts => opts.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.Vendor, opts => opts.Ignore())
+                .ForMember(dest => dest.PurchaseAgreementItems, opts => opts.Ignore());
+
+            // PurchaseAgreementItem mapping
+            CreateMap<Purchase_Agreement_Item, PurchaseAgreementItemViewModel>()
+                .ForMember(dest => dest.ProductName, opts => opts.Ignore())
+                .ForMember(dest => dest.UnitName, opts => opts.Ignore());
+            CreateMap<PurchaseAgreementItemViewModel, Purchase_Agreement_Item>()
+                .ForMember(dest => dest.PurchaseAgreement, opts => opts.Ignore())
+                .ForMember(dest => dest.Product, opts => opts.Ignore())
+                .ForMember(dest => dest.Unit, opts => opts.Ignore());
+        }
+
+        private static EPAStatus ParsePAStatus(string status)
+        {
+            if (string.IsNullOrEmpty(status))
+                return EPAStatus.New;
+
+            if (Enum.TryParse<EPAStatus>(status, out var result))
+                return result;
+
+            return EPAStatus.New;
         }
 
         //private static EPOStatus ParsePOStatus(string status)

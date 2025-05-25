@@ -222,6 +222,7 @@ try
     builder.Services.AddScoped<ISpecialProductTaxRateService, SpecialProductTaxRateService>();
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+    builder.Services.AddScoped<IPurchaseAgreementService, PurchaseAgreementService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -236,6 +237,9 @@ try
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
     builder.Services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemRepository>();
+    builder.Services.AddScoped<IPurchaseAgreementRepository, PurchaseAgreementRepository>();
+    builder.Services.AddScoped<IPurchaseAgreementItemRepository, PurchaseAgreementItemRepository>();
+    builder.Services.AddScoped<IProduct_VendorRepository, Product_VendorRepository>();
 
 
     #endregion

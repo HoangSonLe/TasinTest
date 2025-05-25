@@ -10,7 +10,9 @@ namespace Tasin.Website.Domains.Entitites
         public int Vendor_ID { get; set; }
         public string? Note { get; set; }
         public required string Code { get; set; }
+        public required string GroupCode { get; set; }
         public decimal TotalPrice { get; set; }
+        public new string Status { get; set; }
 
         // Navigation properties
         [ForeignKey("Vendor_ID")]

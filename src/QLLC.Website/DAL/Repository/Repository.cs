@@ -351,6 +351,57 @@ namespace Tasin.Website.DAL.Repository
             DbSet.RemoveRange(entityToDelete);
             return await _SaveChangesAsync();
         }
+
+        // Transaction-friendly methods (don't auto-save)
+        public async Task AddWithoutSaveAsync(TEntity entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
+            await DbSet.AddAsync(entity);
+        }
+
+        public async Task AddRangeWithoutSaveAsync(List<TEntity> entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
+            if (entity.Count == 0)
+                throw new ArgumentException("Entity list cannot be empty", nameof(entity));
+
+            await DbSet.AddRangeAsync(entity);
+        }
+
+        public void UpdateWithoutSave(TEntity entityToUpdate)
+        {
+            ArgumentNullException.ThrowIfNull(entityToUpdate, nameof(entityToUpdate));
+            _context.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+
+        public void UpdateRangeWithoutSave(List<TEntity> entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
+            if (entity.Count == 0)
+                throw new ArgumentException("Entity list cannot be empty", nameof(entity));
+
+            DbSet.UpdateRange(entity);
+        }
+
+        public void DeleteWithoutSave(TEntity entityToDelete)
+        {
+            ArgumentNullException.ThrowIfNull(entityToDelete, nameof(entityToDelete));
+            DbSet.Remove(entityToDelete);
+        }
+
+        public void DeleteRangeWithoutSave(List<TEntity> entityToDelete)
+        {
+            ArgumentNullException.ThrowIfNull(entityToDelete, nameof(entityToDelete));
+            if (entityToDelete.Count == 0)
+                return;
+
+            DbSet.RemoveRange(entityToDelete);
+        }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _SaveChangesAsync();
+        }
         #endregion
 
         private bool disposed = false;

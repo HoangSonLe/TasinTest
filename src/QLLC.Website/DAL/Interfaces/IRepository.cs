@@ -61,6 +61,25 @@ namespace Tasin.Website.DAL.Interfaces
 
         Task<int> DeleteRangeAsync(List<TEntity> entityToDelete);
 
+        // Transaction-friendly methods (don't auto-save)
+        Task AddWithoutSaveAsync(TEntity entity);
+
+        Task AddRangeWithoutSaveAsync(List<TEntity> entity);
+
+        void UpdateWithoutSave(TEntity entityToUpdate);
+
+        void UpdateRangeWithoutSave(List<TEntity> entity);
+
+        void DeleteWithoutSave(TEntity entityToDelete);
+
+        void DeleteRangeWithoutSave(List<TEntity> entityToDelete);
+
+        Task<int> SaveChangesAsync();
+
+        // Alternative: Repository methods with transaction parameter
+        //Task<int> AddRangeAsync(List<TEntity> entity, bool autoSave = true);
+        //Task<int> UpdateRangeAsync(List<TEntity> entity, bool autoSave = true);
+
     }
 
 }
