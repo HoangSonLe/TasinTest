@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Common.Enums;
+using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.DAL.Services.WebServices;
@@ -184,6 +185,57 @@ namespace Tasin.Website.Controllers
                     IsSuccess = false,
                     ErrorMessageList = new List<string> { ex.Message }
                 });
+            }
+        }
+
+        /// <summary>
+        /// Import products from Excel file
+        /// </summary>
+        /// <param name="file">Excel file to import</param>
+        /// <returns>Import result</returns>
+        [HttpPost]
+        [Route("Product/ImportExcel")]
+        [ProducesResponseType(typeof(Acknowledgement<ProductExcelImportResult>), 200)]
+        public async Task<IActionResult> ImportExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _productService.ImportProductsFromExcel(file);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"ImportExcel: {ex.Message}");
+                return Json(new Acknowledgement<ProductExcelImportResult>
+                {
+                    IsSuccess = false,
+                    ErrorMessageList = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Download Excel template for product import
+        /// </summary>
+        /// <returns>Excel template file</returns>
+        [HttpGet]
+        [Route("Product/DownloadTemplate")]
+        public async Task<IActionResult> DownloadTemplate()
+        {
+            try
+            {
+                var templateBytes = await _productService.GenerateProductExcelTemplate();
+                var fileName = $"Product_Import_Template_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                // Set proper content type and encoding for Excel files with UTF-8 support
+                Response.Headers.Add("Content-Disposition", ExcelHelper.GetContentDispositionHeader(fileName));
+
+                return File(templateBytes, ExcelHelper.GetExcelContentType(), fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"DownloadTemplate: {ex.Message}");
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

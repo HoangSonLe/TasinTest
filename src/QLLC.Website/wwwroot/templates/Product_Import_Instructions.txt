@@ -1,0 +1,43 @@
+HƯỚNG DẪN IMPORT SẢN PHẨM
+
+1. Các cột bắt buộc:
+   - Tên sản phẩm (*): Không được để trống
+   - Thuế suất công ty (%): Bắt buộc nhập số
+   - Thuế suất người tiêu dùng (%): Bắt buộc nhập số
+
+2. Các cột tùy chọn:
+   - Tên tiếng Anh: Có thể để trống
+   - Mã đơn vị: Phải tồn tại trong hệ thống (ví dụ: KG, THUNG, CAI)
+   - Mã danh mục: Phải tồn tại trong hệ thống
+   - Mã loại chế biến: Phải tồn tại trong hệ thống
+   - Mã nguyên liệu: Phải tồn tại trong hệ thống
+   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống
+   - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)
+   - Phí chế biến: Nhập số
+   - Ghi chú: Có thể để trống
+   - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0
+
+3. Lưu ý:
+   - Không được xóa dòng tiêu đề
+   - Dữ liệu bắt đầu từ dòng 2
+   - File phải có định dạng Excel (.xlsx, .xls, .xlsm) hoặc CSV
+   - Mã các thực thể liên quan phải tồn tại trong hệ thống
+   - Xóa dữ liệu mẫu trước khi nhập dữ liệu thực tế
+
+4. Các mã thường dùng:
+   - Đơn vị: KG, THUNG, CAI, GOI, HOP
+   - Danh mục: CAT001, CAT002, CAT003
+   - Loại chế biến: PT001, PT002, PT003
+   - Nguyên liệu: MAT001, MAT002, MAT003
+
+5. Quy trình import:
+   - Tải file mẫu từ hệ thống
+   - Điền dữ liệu vào file mẫu
+   - Kiểm tra dữ liệu trước khi import
+   - Upload file và xem kết quả import
+   - Kiểm tra các lỗi nếu có và sửa chữa
+
+6. Xử lý lỗi:
+   - Nếu có lỗi, hệ thống sẽ hiển thị chi tiết lỗi theo từng dòng
+   - Sửa lỗi trong file Excel và import lại
+   - Chỉ những dòng không có lỗi mới được import thành công
