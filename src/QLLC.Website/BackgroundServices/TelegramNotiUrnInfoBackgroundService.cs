@@ -65,7 +65,7 @@ namespace Tasin.Website.BackgroundServices
             return new List<int>()
                     {
                         (int)ERoleType.Admin,
-                        (int)ERoleType.Reporter,
+                        //(int)ERoleType.Reporter,
                     };
         }
         private async Task SendTelegramNoti(CancellationToken stoppingToken)

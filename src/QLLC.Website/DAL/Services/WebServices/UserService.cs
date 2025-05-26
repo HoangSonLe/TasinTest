@@ -244,6 +244,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var newUser = _mapper.Map<User>(postData);
                     newUser.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.User, DbContext);
                     newUser.NameNonUnicode = Utils.NonUnicode(newUser.Name);
+                    newUser.Address = postData.Address;
                     newUser.Password = postData.Password;
                     newUser.CreatedDate = DateTime.Now;
                     newUser.CreatedBy = CurrentUserId;
@@ -260,6 +261,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         return ack;
                     }
 
+                    existItem.Address = postData.Address;
                     existItem.Name = postData.Name;
                     existItem.Phone = postData.Phone;
                     existItem.Email = postData.Email;

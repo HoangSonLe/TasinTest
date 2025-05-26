@@ -21,15 +21,15 @@ namespace Tasin.Website.Common.Enums
         Admin,
         [Description("Người dùng")]
         User,
-        [Description("Reporter")]
-        Reporter,
+        //[Description("Reporter")]
+        //Reporter,
     }
     public enum ELevelRole
     {
         SystemAdmin = 1,
         Admin,
         User,
-        Reporter,
+        //Reporter,
     }
 
     public enum EGender

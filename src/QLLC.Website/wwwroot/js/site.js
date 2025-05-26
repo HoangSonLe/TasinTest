@@ -1,4 +1,5 @@
 ﻿function filterCustom(item, input) {
+    
     let nonUnicode = removeVietnameseTones(item);
     input = removeVietnameseTones(input);
     let res = nonUnicode.toLowerCase().includes(input.toLowerCase());

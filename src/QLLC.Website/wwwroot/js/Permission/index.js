@@ -4,7 +4,7 @@ function CheckPermission() {
     //    $(permission).toArray().forEach(e => {
     //        let _enum = e?.dataset?.enum;
     //        if (_enum) {
-    //            let findPermission = Userdata.enumActionList.find(i => i == _enum);
+    //            let findPermission = Userdata?.enumActionList?.find(i => i == _enum);
     //            if (!findPermission) e.remove();
 
     //        }

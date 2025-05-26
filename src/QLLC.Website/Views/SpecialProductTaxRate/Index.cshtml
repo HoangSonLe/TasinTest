@@ -32,7 +32,6 @@
 
         let formData = {
             id: 0,
-            code: "",
             name: "",
             name_EN: "",
             description :"",
@@ -51,16 +50,6 @@
             formData: formData,
             type: "group",
             items: [
-
-                {
-                    field: "code",
-                    title: "Mã loại mặt hàng",
-                    label: "Mã loại mặt hàng (*):",
-                    validation: {
-                        validationMessage: "Vui lòng nhập mã loại mặt hàng",
-                        required: true
-                    },
-                },
                 {
                     field: "name",
                     title: "Loại mặt hàng",

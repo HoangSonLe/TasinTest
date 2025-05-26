@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Tasin.Website.styles.css" asp-append-version="true" />
     <link href="~/lib/fontawesome-free-6.5.2-web/css/all.min.css" rel="stylesheet" />
-    <script src="~/js/enum.js"></script>
+    <script src="~/js/enum.js" asp-append-version="true"></script>
     @* jquery *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     @* kendo *@
@@ -30,12 +30,12 @@
 
     <script src="~/lib/kendo/js/messages/kendo.messages.vi-VN.min.js"></script>
     <script src="~/lib/kendo/js/cultures/kendo.culture.vi-VN.min.js"></script>
-    <script src="~/js/login/changepassword.js"></script>
-    <script src="~/js/permission/index.js"></script>
+    <script src="~/js/login/changepassword.js" asp-append-version="true"></script>
+    <script src="~/js/permission/index.js" asp-append-version="true"></script>
     <script>
         kendo.culture("vi-VN");
     </script>
-    <script src="~/js/site.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
         const isMobile = {
@@ -118,6 +118,10 @@
 
         .customClass {
             z-index: 999999 !important;
+        }
+
+        span#badge-sent:hover {
+            color: white;
         }
     </style>
 </head>
@@ -305,12 +309,12 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/css/scriptss.js"></script>
+    <script src="~/css/scriptss.js" asp-append-version="true"></script>
 
-    <script src="~/js/kendogridresize/notification.js"></script>
+    <script src="~/js/kendogridresize/notification.js" asp-append-version="true"></script>
 
-    <script src="~/js/kendogridresize/resize.js"></script>
-    <script src="~/js/notificationforuser/index.js"></script>
+    <script src="~/js/kendogridresize/resize.js" asp-append-version="true"></script>
+    <script src="~/js/notificationforuser/index.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
