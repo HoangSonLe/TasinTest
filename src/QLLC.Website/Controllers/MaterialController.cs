@@ -48,8 +48,8 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Material/DeleteMaterialById")]
-        public async Task<Acknowledgement> DeleteMaterialById(int materialId)
+        [Route("Material/DeleteMaterialById/{materialId}")]
+        public async Task<Acknowledgement> DeleteMaterialById([FromRoute] int materialId)
         {
             return await _materialService.DeleteMaterialById(materialId);
         }

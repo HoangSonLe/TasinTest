@@ -48,8 +48,8 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("ProcessingType/DeleteProcessingTypeById")]
-        public async Task<Acknowledgement> DeleteProcessingTypeById(int processingTypeId)
+        [Route("ProcessingType/DeleteProcessingTypeById/{processingTypeId}")]
+        public async Task<Acknowledgement> DeleteProcessingTypeById([FromRoute] int processingTypeId)
         {
             return await _processingTypeService.DeleteProcessingTypeById(processingTypeId);
         }

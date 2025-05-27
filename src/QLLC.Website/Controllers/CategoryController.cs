@@ -48,8 +48,8 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Category/DeleteCategoryById")]
-        public async Task<Acknowledgement> DeleteCategoryById(int categoryId)
+        [Route("Category/DeleteCategoryById/{categoryId}")]
+        public async Task<Acknowledgement> DeleteCategoryById([FromRoute] int categoryId)
         {
             return await _categoryService.DeleteCategoryById(categoryId);
         }

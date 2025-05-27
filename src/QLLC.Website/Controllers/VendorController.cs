@@ -48,8 +48,8 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Vendor/DeleteVendorById")]
-        public async Task<Acknowledgement> DeleteVendorById(int vendorId)
+        [Route("Vendor/DeleteVendorById/{vendorId}")]
+        public async Task<Acknowledgement> DeleteVendorById([FromRoute] int vendorId)
         {
             return await _vendorService.DeleteVendorById(vendorId);
         }

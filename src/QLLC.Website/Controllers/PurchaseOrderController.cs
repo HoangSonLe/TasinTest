@@ -110,9 +110,9 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of the operation</returns>
         /// <response code="200">Returns the result of the operation</response>
         [HttpDelete]
-        [Route("PurchaseOrder/DeletePurchaseOrderById")]
+        [Route("PurchaseOrder/DeletePurchaseOrderById/{purchaseOrderId}")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
-        public async Task<Acknowledgement> DeletePurchaseOrderById(int purchaseOrderId)
+        public async Task<Acknowledgement> DeletePurchaseOrderById([FromRoute] int purchaseOrderId)
         {
             return await _purchaseOrderService.DeletePurchaseOrderById(purchaseOrderId);
         }

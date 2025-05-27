@@ -48,8 +48,8 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("SpecialProductTaxRate/DeleteSpecialProductTaxRateById")]
-        public async Task<Acknowledgement> DeleteSpecialProductTaxRateById(int specialProductTaxRateId)
+        [Route("SpecialProductTaxRate/DeleteSpecialProductTaxRateById/{specialProductTaxRateId}")]
+        public async Task<Acknowledgement> DeleteSpecialProductTaxRateById([FromRoute] int specialProductTaxRateId)
         {
             return await _specialProductTaxRateService.DeleteSpecialProductTaxRateById(specialProductTaxRateId);
         }

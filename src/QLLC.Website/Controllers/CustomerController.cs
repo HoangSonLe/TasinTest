@@ -46,18 +46,18 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Customer/GetCustomerList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>), 200)]
-        public async Task<IActionResult> GetCustomerList([FromQuery]CustomerSearchModel searchModel)
+        public async Task<IActionResult> GetCustomerList([FromQuery] CustomerSearchModel searchModel)
         {
             var result = await _customerService.GetCustomerList(searchModel);
             return Json(result);
         }
         [HttpDelete]
-        [Route("Customer/DeleteCustomerById")]
-        public async Task<Acknowledgement> DeleteCustomerById(int customerId)
+        [Route("Customer/DeleteCustomerById/{customerId}")]
+        public async Task<Acknowledgement> DeleteCustomerById([FromRoute] int customerId)
         {
             return await _customerService.DeleteCustomerById(customerId);
         }
-       
+
         [HttpPost]
         [Route("Customer/Create")]
         public async Task<Acknowledgement> Create([FromBody] CustomerViewModel postData)
@@ -67,7 +67,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPut]
         [Route("Customer/UpdateCustomer/{customerId}")]
-        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute]int customerId, [FromBody] CustomerViewModel postData)
+        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute] int customerId, [FromBody] CustomerViewModel postData)
         {
             postData.Id = customerId;
             return await _customerService.CreateOrUpdateCustomer(postData);
