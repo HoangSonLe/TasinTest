@@ -53,7 +53,7 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Phone]
         [Display(Name = "PhoneContact")]
-        public string PhoneContact { get; set; }
+        public string? PhoneContact { get; set; }
 
         [Display(Name = "Type")]
         public ECustomerType Type { get; set; }
@@ -62,7 +62,7 @@ namespace Tasin.Website.Models.ViewModels
         public string TypeName => EnumHelper.GetEnumDescription(Type);
 
         [Display(Name = "TaxCode")]
-        public string TaxCode { get; set; }
+        public string? TaxCode { get; set; }
 
         /// <summary>
         /// Name of the user who last updated this record

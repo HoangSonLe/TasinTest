@@ -37,9 +37,9 @@
             name: "",
             type: "",
             phoneContact: "",
-            email:"",
-            taxCode:"",
-            address:"",
+            email:null,
+            taxCode:null,
+            address:null,
             ...dataCustomer
         };
         let strSubmit = "Thêm";
@@ -69,12 +69,12 @@
                     label: "Loại tài khoản (*):",
                     editor: "DropDownList",
                     editorOptions: {
-                                optionLabel: "Chọn loại tài khoản",
-                                dataTextField: "text",
-                                dataValueField: "value",
-                                filter: "contains",
-                                dataSource: customerTypeDatasource,
-                            },
+                        optionLabel: "Chọn loại tài khoản",
+                        dataTextField: "text",
+                        dataValueField: "value",
+                        filter: filterCustom,
+                        dataSource: customerTypeDatasource,
+                    },
                     validation: {
                         validationMessage: "Vui lòng chọn loại tài khoản",
                         required: true
@@ -121,6 +121,7 @@
             },
             submit: function (e) {
                 e.preventDefault();
+                debugger
                 let dataItem = {
                     ...formData,
                     ...e.model,
@@ -198,7 +199,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/Customer/DeleteCustomerById/"+id, {
+            var response = ajax("DELETE", "/Customer/DeleteCustomerById/"+id, {
                 customerId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -254,7 +255,7 @@
                 cells: [
                     { value: dataSourceCustomer[index].code },
                     { value: dataSourceCustomer[index].name },
-                    { value: dataSourceCustomer[index].type },
+                    { value: dataSourceCustomer[index].typeName },
                     { value: dataSourceCustomer[index].phone },
                     { value: dataSourceCustomer[index].email },
                     { value: dataSourceCustomer[index].taxCode },
@@ -394,8 +395,8 @@
                     width: 200,
                 },
                 {
-                    field: "type",
-                    title: "Số điện thoại",
+                    field: "typeName",
+                    title: "Loại khách hàng",
                     width: 150,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },

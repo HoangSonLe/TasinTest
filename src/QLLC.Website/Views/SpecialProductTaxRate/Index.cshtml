@@ -159,7 +159,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/"+id, {
+            var response = ajax("DELETE", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/"+id, {
                 specialProductTaxRateId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
