@@ -87,10 +87,18 @@
                     ...formData,
                     ...e.model,
                 };
-                var response = ajax("POST", "/SpecialProductTaxRate/CreateOrUpdateSpecialProductTaxRate", dataItem, () => {
-                    $(gridId).data("kendoGrid").dataSource.filter({});
-                    myWindow.data("kendoWindow").close();
-                });
+                if( dataItem.id > 0){
+                    var response = ajax("PUT", "/SpecialProductTaxRate/UpdateSpecialProductTaxRate/"+dataItem.id, dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+                else{
+                    var response = ajax("POST", "/SpecialProductTaxRate/Create" , dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
             },
             close: function (e) {
                 $(this.element).empty();
@@ -136,7 +144,7 @@
     }
 
     async function editSpecialProductTaxRate(id) {
-        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById", { userId: id }, (response) => {
+        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById", { specialProductTaxRateId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -151,8 +159,8 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById", {
-                userId: id
+            var response = ajax("GET", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/"+id, {
+                specialProductTaxRateId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
@@ -225,6 +233,15 @@
                             }
                         }
                         return response.data;
+                    },
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
                     },
                     data: "data",
                     total: "total"

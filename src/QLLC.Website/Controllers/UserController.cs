@@ -98,10 +98,10 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="userId">User ID</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
-        [HttpPost]
-        [Route("User/ResetUserPasswordById")]
-        public async Task<Acknowledgement> ResetUserPasswordById(int userId)
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER, (int)EActionRole.CREATE_USER])]
+        [HttpPut]
+        [Route("User/ResetUserPasswordById/{userId}")]
+        public async Task<Acknowledgement> ResetUserPasswordById([FromRoute] int userId)
         {
             return await _userService.ResetUserPasswordById(userId);
         }

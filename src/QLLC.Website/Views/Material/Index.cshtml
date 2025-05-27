@@ -96,10 +96,18 @@
                     ...formData,
                     ...e.model,
                 };
-                var response = ajax("POST", "/Material/CreateOrUpdateMaterial", dataItem, () => {
-                    $(gridId).data("kendoGrid").dataSource.filter({});
-                    myWindow.data("kendoWindow").close();
-                });
+                if( dataItem.id > 0){
+                    var response = ajax("PUT", "/Material/UpdateMaterial/"+dataItem.id, dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+                else{
+                    var response = ajax("POST", "/Material/Create" , dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
             },
             close: function (e) {
                 $(this.element).empty();
@@ -145,7 +153,7 @@
     }
 
     async function editMaterial(id) {
-        var response = ajax("GET", "/Material/GetMaterialById", { userId: id }, (response) => {
+        var response = ajax("GET", "/Material/GetMaterialById/"+id, { materialId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -160,8 +168,8 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/Material/DeleteMaterialById", {
-                userId: id
+            var response = ajax("GET", "/Material/DeleteMaterialById/"+id, {
+                materialId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
@@ -234,6 +242,15 @@
                             }
                         }
                         return response.data;
+                    },
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
                     },
                     data: "data",
                     total: "total"
