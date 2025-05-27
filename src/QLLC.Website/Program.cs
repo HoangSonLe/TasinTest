@@ -225,6 +225,7 @@ try
     builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
     builder.Services.AddScoped<IPurchaseAgreementService, PurchaseAgreementService>();
     builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+    builder.Services.AddScoped<IProductOrderStatisticsService, ProductOrderStatisticsService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -243,6 +244,8 @@ try
     builder.Services.AddScoped<IPurchaseAgreementItemRepository, PurchaseAgreementItemRepository>();
     builder.Services.AddScoped<IProduct_VendorRepository, Product_VendorRepository>();
 
+    // Register Unit of Work
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     #endregion
 
