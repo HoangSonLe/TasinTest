@@ -62,7 +62,7 @@
                     },
                 },
                 {
-                    field: "name",
+                    field: "name_EN",
                     title: "Quy cách tiếng anh",
                     label: "Quy cách tiếng anh (*):",
                     validation: {
@@ -170,7 +170,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/Category/DeleteCategoryById/"+id, {
+            var response = ajax("DELETE", "/Category/DeleteCategoryById/"+id, {
                 categoryId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});

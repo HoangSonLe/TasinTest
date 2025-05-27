@@ -60,7 +60,7 @@
                     },
                 },
                 {
-                    field: "name",
+                    field: "name_EN",
                     title: "Đơn vị tính tiếng anh",
                     label: "Đơn vị tính tiếng anh (*):",
                     validation: {
@@ -160,7 +160,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/Unit/DeleteUnitById/"+id, {
+            var response = ajax("DELETE", "/Unit/DeleteUnitById/"+id, {
                 unitId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});

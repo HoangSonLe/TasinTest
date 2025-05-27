@@ -45,7 +45,7 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Email address
         /// </summary>
-        //[EmailAddress]
+        [EmailAddress]
         [Display(Name = "Email")]
         public string? Email { get; set; }
 

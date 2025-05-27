@@ -160,7 +160,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/ProcessingType/DeleteProcessingTypeById/"+id, {
+            var response = ajax("DELETE", "/ProcessingType/DeleteProcessingTypeById/"+id, {
                 processingTypeId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
