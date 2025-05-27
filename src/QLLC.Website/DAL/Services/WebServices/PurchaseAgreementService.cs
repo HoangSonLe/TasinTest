@@ -505,45 +505,48 @@ namespace Tasin.Website.DAL.Services.WebServices
                     childPA.PurchaseAgreementItems = _mapper.Map<List<PurchaseAgreementItemViewModel>>(items);
 
                     // Get product and unit names for items
-                    var productIds = childPA.PurchaseAgreementItems.Select(i => i.Product_ID).Distinct().ToList();
-                    var unitIds = childPA.PurchaseAgreementItems.Where(i => i.Unit_ID.HasValue).Select(i => i.Unit_ID.Value).Distinct().ToList();
-
-                    var products = await _productRepository.ReadOnlyRespository.GetAsync(filter: p => productIds.Contains(p.ID));
-                    var units = await _unitRepository.ReadOnlyRespository.GetAsync(filter: u => unitIds.Contains(u.ID));
-
-                    foreach (var item in childPA.PurchaseAgreementItems)
+                    if (childPA.PurchaseAgreementItems != null)
                     {
-                        var product = products.FirstOrDefault(p => p.ID == item.Product_ID);
-                        if (product != null)
-                        {
-                            item.ProductName = product.Name;
-                        }
+                        var productIds = childPA.PurchaseAgreementItems.Select(i => i.Product_ID).Distinct().ToList();
+                        var unitIds = childPA.PurchaseAgreementItems.Where(i => i.Unit_ID.HasValue).Select(i => i.Unit_ID.Value).Distinct().ToList();
 
-                        if (item.Unit_ID.HasValue)
+                        var products = await _productRepository.ReadOnlyRespository.GetAsync(filter: p => productIds.Contains(p.ID));
+                        var units = await _unitRepository.ReadOnlyRespository.GetAsync(filter: u => unitIds.Contains(u.ID));
+
+                        foreach (var item in childPA.PurchaseAgreementItems)
                         {
-                            var unit = units.FirstOrDefault(u => u.ID == item.Unit_ID.Value);
-                            if (unit != null)
+                            var product = products.FirstOrDefault(p => p.ID == item.Product_ID);
+                            if (product != null)
                             {
-                                item.UnitName = unit.Name;
+                                item.ProductName = product.Name;
+                            }
+
+                            if (item.Unit_ID.HasValue)
+                            {
+                                var unit = units.FirstOrDefault(u => u.ID == item.Unit_ID.Value);
+                                if (unit != null)
+                                {
+                                    item.UnitName = unit.Name;
+                                }
                             }
                         }
                     }
+
+                    var paViewModel = new PAGroupViewModel
+                    {
+                        GroupCode = groupCode,
+                        TotalPrice = purchaseAgreements.Sum(pa => pa.TotalPrice),
+                        Status = Enum.Parse<EPAStatus>(purchaseAgreements.First().Status),
+                        CreatedDate = purchaseAgreements.Min(pa => pa.CreatedDate),
+                        CreatedBy = purchaseAgreements.First().CreatedBy,
+                        UpdatedDate = purchaseAgreements.Max(pa => pa.UpdatedDate),
+                        UpdatedBy = purchaseAgreements.First().UpdatedBy,
+                        ChildPAs = childPAs
+                    };
+
+                    ack.Data = paViewModel;
+                    ack.IsSuccess = true;
                 }
-
-                var paViewModel = new PAGroupViewModel
-                {
-                    GroupCode = groupCode,
-                    TotalPrice = purchaseAgreements.Sum(pa => pa.TotalPrice),
-                    Status = Enum.Parse<EPAStatus>(purchaseAgreements.First().Status),
-                    CreatedDate = purchaseAgreements.Min(pa => pa.CreatedDate),
-                    CreatedBy = purchaseAgreements.First().CreatedBy,
-                    UpdatedDate = purchaseAgreements.Max(pa => pa.UpdatedDate),
-                    UpdatedBy = purchaseAgreements.First().UpdatedBy,
-                    ChildPAs = childPAs
-                };
-
-                ack.Data = paViewModel;
-                ack.IsSuccess = true;
             }
             catch (Exception ex)
             {
@@ -931,7 +934,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 ack.Data = result;
                 ack.IsSuccess = true;
-                ack.AddMessage($"Đã tạo thành công PA tổng hợp với {result.ChildPAs.Count} PA con từ đơn hàng.");
+                ack.AddMessage($"Đã tạo thành công PA tổng hợp với {result.ChildPAs?.Count ?? 0} PA con từ đơn hàng.");
             }
             catch (Exception ex)
             {
@@ -944,15 +947,18 @@ namespace Tasin.Website.DAL.Services.WebServices
 
 
 
-        private async Task SavePurchaseAgreementItems(int purchaseAgreementId, List<PurchaseAgreementItemViewModel> items)
+        private async Task SavePurchaseAgreementItems(int purchaseAgreementId, List<PurchaseAgreementItemViewModel>? items)
         {
-            foreach (var item in items)
+            if (items != null)
             {
-                var agreementItem = _mapper.Map<Purchase_Agreement_Item>(item);
-                agreementItem.PA_ID = purchaseAgreementId;
-                await _purchaseAgreementItemRepository.Repository.AddAsync(agreementItem);
+                foreach (var item in items)
+                {
+                    var agreementItem = _mapper.Map<Purchase_Agreement_Item>(item);
+                    agreementItem.PA_ID = purchaseAgreementId;
+                    await _purchaseAgreementItemRepository.Repository.AddAsync(agreementItem);
+                }
+                await DbContext.SaveChangesAsync();
             }
-            await DbContext.SaveChangesAsync();
         }
     }
 }

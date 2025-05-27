@@ -4,15 +4,6 @@ namespace Tasin.Website.Common.Enums
 {
     /// Rule for naming : E + Noun  
 
-    /// <summary>
-    /// Define enums for specific models
-    /// </summary>
-    public enum EReactType
-    {
-        Like = 0,
-        Dislike = 1,
-        Haha = 2
-    }
     public enum ERoleType
     {
         [Description("Admin hệ thống")]
@@ -40,13 +31,6 @@ namespace Tasin.Website.Common.Enums
         MALE,
         [Description("Nữ")]
         FAMALE
-    }
-    public enum EUrnType
-    {
-        [Description("Linh")]
-        Soul,
-        [Description("Cốt")]
-        Gauss
     }
     public enum ETelegramNotiType
     {

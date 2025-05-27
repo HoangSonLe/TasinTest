@@ -24,6 +24,6 @@ namespace Tasin.Website.Models.SearchModels
         /// <summary>
         /// List of role IDs parsed from RoleIdListString
         /// </summary>
-        public List<int> RoleIdList => !string.IsNullOrEmpty(RoleIdListString) ? RoleIdListString.Split(",").Select(i => Int32.Parse(i)).ToList() : new List<int>();
+        public List<int>? RoleIdList => !string.IsNullOrEmpty(RoleIdListString) ? RoleIdListString.Split(",").Select(i => Int32.Parse(i)).ToList() : null;
     }
 }

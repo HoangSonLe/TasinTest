@@ -71,19 +71,19 @@ namespace Tasin.Website.Models.ViewModels
         /// List of role IDs assigned to the user
         /// </summary>
         [Display(Name = "Roles")]
-        public List<int> RoleIdList { get; set; } = new List<int>();
+        public List<int>? RoleIdList { get; set; }
 
         /// <summary>
         /// List of role view models
         /// </summary>
         [Ignore]
-        public List<RoleViewModel> RoleViewList { get; set; } = new List<RoleViewModel>();
+        public List<RoleViewModel>? RoleViewList { get; set; }
 
         /// <summary>
         /// List of action permissions
         /// </summary>
         [Ignore]
-        public List<int> EnumActionList { get; set; } = new List<int>();
+        public List<int>? EnumActionList { get; set; } = new List<int>();
 
         /// <summary>
         /// Comma-separated list of role names

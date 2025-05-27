@@ -104,7 +104,7 @@ namespace Tasin.Website.Common.Helper
             public bool RememberMe { get; set; }
             public bool IsMobile { get; set; }
             public string RoleIdList { get; set; }
-            public List<int> EnumActionList { get; set; }
+            public List<int> EnumActionList { get; set; } = new List<int>();
 
         }
         public class LoginClaimCustomModel

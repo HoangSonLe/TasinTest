@@ -82,7 +82,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             .Select(x => int.Parse(x.Trim())).ToList();
                         var roleDBList = await _roleRepository.ReadOnlyRespository.GetAsync(i => roleIds.Contains(i.Id));
                         userViewModel.RoleName = string.Join(",", roleDBList.Select(i => i.Description));
-                        userViewModel.EnumActionList = roleDBList.SelectMany(i => i.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
+                        userViewModel.EnumActionList = (roleDBList ?? []).SelectMany(i => i.EnumActionList.Split(",")).Select(i => Int32.Parse(i)).Distinct().ToList();
                     }
 
                     response.Data = userViewModel;
@@ -140,7 +140,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                                                     (string.IsNullOrEmpty(i.Phone) == false && i.Phone.Trim().ToLower().Contains(searchStringNonUnicode))
                                              );
                 }
-                if (searchModel.RoleIdList.Count > 0)
+                if (searchModel.RoleIdList != null && searchModel.RoleIdList.Count > 0)
                 {
                     var roleIdStrings = searchModel.RoleIdList.Select(id => id.ToString()).ToList();
                     predicate = predicate.And(p => roleIdStrings.Any(roleId => p.RoleIdList.Contains(roleId)));

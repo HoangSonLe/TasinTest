@@ -45,19 +45,19 @@ namespace Tasin.Website.Models.ViewModels
         /// List of child PAs grouped by vendor
         /// </summary>
         [Display(Name = "ChildPAs")]
-        public List<PurchaseAgreementViewModel> ChildPAs { get; set; } = new List<PurchaseAgreementViewModel>();
+        public List<PurchaseAgreementViewModel>? ChildPAs { get; set; }
 
         /// <summary>
         /// Total number of vendors involved
         /// </summary>
         [Display(Name = "VendorCount")]
-        public int VendorCount => ChildPAs.Count;
+        public int VendorCount => ChildPAs?.Count ?? 0;
 
         /// <summary>
         /// Total number of items across all child PAs
         /// </summary>
         [Display(Name = "TotalItemCount")]
-        public int TotalItemCount => ChildPAs.Sum(pa => pa.PurchaseAgreementItems.Count);
+        public int TotalItemCount => ChildPAs?.Sum(pa => pa.PurchaseAgreementItems?.Count ?? 0) ?? 0;
     }
 
     /// <summary>
@@ -124,6 +124,6 @@ namespace Tasin.Website.Models.ViewModels
         /// Purchase Agreement Items for this vendor
         /// </summary>
         [Display(Name = "PurchaseAgreementItems")]
-        public List<PurchaseAgreementItemViewModel> PurchaseAgreementItems { get; set; } = new List<PurchaseAgreementItemViewModel>();
+        public List<PurchaseAgreementItemViewModel>? PurchaseAgreementItems { get; set; }
     }
 }
