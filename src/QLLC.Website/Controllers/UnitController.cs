@@ -52,9 +52,9 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Unit/DeleteUnitById")]
+        [Route("Unit/DeleteUnitById/{unitId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_UNIT])]
-        public async Task<Acknowledgement> DeleteUnitById(int unitId)
+        public async Task<Acknowledgement> DeleteUnitById([FromRoute] int unitId)
         {
             return await _unitService.DeleteUnitById(unitId);
         }

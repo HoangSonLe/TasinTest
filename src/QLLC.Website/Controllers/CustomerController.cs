@@ -48,19 +48,19 @@ namespace Tasin.Website.Controllers
         [Route("Customer/GetCustomerList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>), 200)]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
-        public async Task<IActionResult> GetCustomerList([FromQuery]CustomerSearchModel searchModel)
+        public async Task<IActionResult> GetCustomerList([FromQuery] CustomerSearchModel searchModel)
         {
             var result = await _customerService.GetCustomerList(searchModel);
             return Json(result);
         }
         [HttpDelete]
-        [Route("Customer/DeleteCustomerById")]
+        [Route("Customer/DeleteCustomerById/{customerId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_CUSTOMER])]
-        public async Task<Acknowledgement> DeleteCustomerById(int customerId)
+        public async Task<Acknowledgement> DeleteCustomerById([FromRoute] int customerId)
         {
             return await _customerService.DeleteCustomerById(customerId);
         }
-       
+
         [HttpPost]
         [Route("Customer/Create")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_CUSTOMER])]
@@ -72,7 +72,7 @@ namespace Tasin.Website.Controllers
         [HttpPut]
         [Route("Customer/UpdateCustomer/{customerId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_CUSTOMER])]
-        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute]int customerId, [FromBody] CustomerViewModel postData)
+        public async Task<Acknowledgement> CreateOrUpdateCustomer([FromRoute] int customerId, [FromBody] CustomerViewModel postData)
         {
             postData.Id = customerId;
             return await _customerService.CreateOrUpdateCustomer(postData);

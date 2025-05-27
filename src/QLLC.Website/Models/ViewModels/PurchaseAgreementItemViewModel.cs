@@ -28,7 +28,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Product Name
         /// </summary>
         [Display(Name = "ProductName")]
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
 
         /// <summary>
         /// Quantity
@@ -47,7 +47,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Unit Name
         /// </summary>
         [Display(Name = "UnitName")]
-        public string UnitName { get; set; }
+        public string? UnitName { get; set; }
 
         /// <summary>
         /// Price

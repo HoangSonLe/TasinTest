@@ -150,9 +150,9 @@ namespace Tasin.Website.Controllers
         /// <param name="productId">Product ID</param>
         /// <returns>Result of operation</returns>
         [HttpDelete]
-        [Route("Product/DeleteProductById")]
+        [Route("Product/DeleteProductById/{productId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PRODUCT])]
-        public async Task<Acknowledgement> DeleteProductById(int productId)
+        public async Task<Acknowledgement> DeleteProductById([FromRoute] int productId)
         {
             try
             {

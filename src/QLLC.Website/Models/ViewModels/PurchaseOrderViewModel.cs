@@ -18,9 +18,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Purchase Order Code
         /// </summary>
-        [Required]
         [Display(Name = "Code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// Customer ID
@@ -33,7 +32,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Customer Name
         /// </summary>
         [Display(Name = "CustomerName")]
-        public string CustomerName { get; set; }
+        public string? CustomerName { get; set; }
 
         /// <summary>
         /// Total Price

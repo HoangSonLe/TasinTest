@@ -52,9 +52,9 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("SpecialProductTaxRate/DeleteSpecialProductTaxRateById")]
+        [Route("SpecialProductTaxRate/DeleteSpecialProductTaxRateById/{specialProductTaxRateId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_SPECIALPRODUCTTAXRATE])]
-        public async Task<Acknowledgement> DeleteSpecialProductTaxRateById(int specialProductTaxRateId)
+        public async Task<Acknowledgement> DeleteSpecialProductTaxRateById([FromRoute] int specialProductTaxRateId)
         {
             return await _specialProductTaxRateService.DeleteSpecialProductTaxRateById(specialProductTaxRateId);
         }

@@ -72,7 +72,7 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="postData">Purchase agreement data</param>
         /// <returns>Result of the operation</returns>
-        /// <response code="200">Returns the result of the operation</response> 
+        /// <response code="200">Returns the result of the operation</response>
         [HttpPut]
         [Route("PurchaseAgreement/UpdatePurchaseAgreement")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
@@ -95,10 +95,10 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of the operation</returns>
         /// <response code="200">Returns the result of the operation</response>
         [HttpDelete]
-        [Route("PurchaseAgreement/DeletePurchaseAgreementById")]
+        [Route("PurchaseAgreement/DeletePurchaseAgreementById/{purchaseAgreementId}")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PURCHASE_AGREEMENT])]
-        public async Task<Acknowledgement> DeletePurchaseAgreementById(int purchaseAgreementId)
+        public async Task<Acknowledgement> DeletePurchaseAgreementById([FromRoute] int purchaseAgreementId)
         {
             return await _purchaseAgreementService.DeletePurchaseAgreementById(purchaseAgreementId);
         }

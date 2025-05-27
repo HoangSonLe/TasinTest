@@ -52,9 +52,9 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Category/DeleteCategoryById")]
+        [Route("Category/DeleteCategoryById/{categoryId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_CATEGORY])]
-        public async Task<Acknowledgement> DeleteCategoryById(int categoryId)
+        public async Task<Acknowledgement> DeleteCategoryById([FromRoute] int categoryId)
         {
             return await _categoryService.DeleteCategoryById(categoryId);
         }

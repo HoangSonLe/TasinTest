@@ -35,7 +35,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Product Name
         /// </summary>
         [Display(Name = "ProductName")]
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
 
         /// <summary>
         /// Quantity
@@ -54,7 +54,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Unit Name
         /// </summary>
         [Display(Name = "UnitName")]
-        public string UnitName { get; set; }
+        public string? UnitName { get; set; }
 
         /// <summary>
         /// Price
@@ -78,7 +78,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Processing Type Name
         /// </summary>
         [Display(Name = "ProcessingTypeName")]
-        public string ProcessingTypeName { get; set; }
+        public string? ProcessingTypeName { get; set; }
 
         /// <summary>
         /// Loss Rate
@@ -96,7 +96,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Note
         /// </summary>
         [Display(Name = "Note")]
-        public string Note { get; set; }
+        public string? Note { get; set; }
 
         /// <summary>
         /// Profit Margin

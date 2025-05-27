@@ -52,9 +52,9 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("Material/DeleteMaterialById")]
+        [Route("Material/DeleteMaterialById/{materialId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_MATERIAL])]
-        public async Task<Acknowledgement> DeleteMaterialById(int materialId)
+        public async Task<Acknowledgement> DeleteMaterialById([FromRoute] int materialId)
         {
             return await _materialService.DeleteMaterialById(materialId);
         }

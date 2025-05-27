@@ -22,8 +22,13 @@ namespace Tasin.Website.Models.ViewModels
 
 
         /// <summary>
+        /// Name of the user who created the entity
+        /// </summary>
+        public string? CreatedByName { get; set; }
+
+        /// <summary>
         /// Name of the user who last updated the entity
         /// </summary>
-        public string UpdatedByName { get; set; } = string.Empty;
+        public string? UpdatedByName { get; set; }
     }
 }

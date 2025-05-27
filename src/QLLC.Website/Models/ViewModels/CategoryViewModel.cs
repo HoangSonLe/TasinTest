@@ -17,9 +17,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Code
         /// </summary>
-        [Required]
         [Display(Name = "Code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// Name of the category
@@ -31,9 +30,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Non-unicode name for searching
         /// </summary>
-        [Required]
         [Display(Name = "NameNonUnicode")]
-        public required string NameNonUnicode { get; set; }
+        public string? NameNonUnicode { get; set; }
 
         /// <summary>
         /// English name

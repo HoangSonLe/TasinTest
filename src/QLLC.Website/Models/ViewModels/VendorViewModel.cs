@@ -17,9 +17,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Code
         /// </summary>
-        [Required]
         [Display(Name = "Code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// Full name of the vendor
@@ -31,9 +30,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Non-unicode name for searching
         /// </summary>
-        [Required]
         [Display(Name = "NameNonUnicode")]
-        public required string NameNonUnicode { get; set; }
+        public string? NameNonUnicode { get; set; }
 
         /// <summary>
         /// Physical address
@@ -46,7 +44,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Name of the user who last updated this record
         /// </summary>
         [Display(Name = "Updated By")]
-        public string UpdatedByName { get; set; }
+        public string? UpdatedByName { get; set; }
 
         /// <summary>
         /// Status of the vendor

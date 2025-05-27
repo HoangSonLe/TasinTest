@@ -52,9 +52,9 @@ namespace Tasin.Website.Controllers
         }
 
         [HttpDelete]
-        [Route("ProcessingType/DeleteProcessingTypeById")]
+        [Route("ProcessingType/DeleteProcessingTypeById/{processingTypeId}")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PROCESSING_TYPE])]
-        public async Task<Acknowledgement> DeleteProcessingTypeById(int processingTypeId)
+        public async Task<Acknowledgement> DeleteProcessingTypeById([FromRoute] int processingTypeId)
         {
             return await _processingTypeService.DeleteProcessingTypeById(processingTypeId);
         }
