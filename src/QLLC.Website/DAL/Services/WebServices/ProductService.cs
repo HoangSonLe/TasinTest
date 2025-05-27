@@ -1,8 +1,7 @@
 using AutoMapper;
 using ClosedXML.Excel;
 using LinqKit;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Common.Enums;
@@ -10,7 +9,6 @@ using Tasin.Website.Common.Helper;
 using Tasin.Website.Common.Services;
 using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
-using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services.AuthorPredicates;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Domains.DBContexts;
@@ -23,12 +21,12 @@ namespace Tasin.Website.DAL.Services.WebServices
     public class ProductService : BaseService<ProductService>, IProductService
     {
         private readonly IMapper _mapper;
-        private IProductRepository _productRepository;
-        private IUnitRepository _unitRepository;
-        private ICategoryRepository _categoryRepository;
-        private IProcessingTypeRepository _processingTypeRepository;
-        private IMaterialRepository _materialRepository;
-        private ISpecialProductTaxRateRepository _specialProductTaxRateRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IProcessingTypeRepository _processingTypeRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly ISpecialProductTaxRateRepository _specialProductTaxRateRepository;
 
         public ProductService(
             ILogger<ProductService> logger,
@@ -56,7 +54,174 @@ namespace Tasin.Website.DAL.Services.WebServices
             _specialProductTaxRateRepository = specialProductTaxRateRepository;
         }
 
+        #region Helper Methods
+
+        /// <summary>
+        /// Loads related entity names for a collection of products
+        /// </summary>
+        private async Task LoadRelatedEntityNamesAsync(List<ProductViewModel> products)
+        {
+            if (!products.Any()) return;
+
+            // Get distinct IDs for batch loading
+            var unitIds = products.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
+            var categoryIds = products.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
+            var processingTypeIds = products.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
+            var materialIds = products.Where(p => p.Material_ID.HasValue).Select(p => p.Material_ID.Value).Distinct().ToList();
+            var specialProductTaxRateIds = products.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
+
+            // Load related entities sequentially to avoid DbContext threading issues
+            IEnumerable<Unit> units = new List<Unit>();
+            if (unitIds.Count > 0)
+            {
+                units = await _unitRepository.ReadOnlyRespository.GetAsync(i => unitIds.Contains(i.ID));
+            }
+
+            IEnumerable<Category> categories = new List<Category>();
+            if (categoryIds.Count > 0)
+            {
+                categories = await _categoryRepository.ReadOnlyRespository.GetAsync(i => categoryIds.Contains(i.ID));
+            }
+
+            IEnumerable<ProcessingType> processingTypes = new List<ProcessingType>();
+            if (processingTypeIds.Count > 0)
+            {
+                processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(i => processingTypeIds.Contains(i.ID));
+            }
+
+            IEnumerable<Material> materials = new List<Material>();
+            if (materialIds.Count > 0)
+            {
+                materials = await _materialRepository.ReadOnlyRespository.GetAsync(i => materialIds.Contains(i.ID));
+            }
+
+            IEnumerable<SpecialProductTaxRate> specialProductTaxRates = new List<SpecialProductTaxRate>();
+            if (specialProductTaxRateIds.Count > 0)
+            {
+                specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(i => specialProductTaxRateIds.Contains(i.ID));
+            }
+
+            // Create lookup dictionaries for O(1) access
+            var unitLookup = units.ToDictionary(u => u.ID, u => u.Name);
+            var categoryLookup = categories.ToDictionary(c => c.ID, c => c.Name);
+            var processingTypeLookup = processingTypes.ToDictionary(p => p.ID, p => p.Name);
+            var materialLookup = materials.ToDictionary(m => m.ID, m => m.Name);
+            var specialProductTaxRateLookup = specialProductTaxRates.ToDictionary(s => s.ID, s => s.Name);
+
+            // Assign names using lookups
+            foreach (var product in products)
+            {
+                if (product.Unit_ID.HasValue && unitLookup.TryGetValue(product.Unit_ID.Value, out var unitName))
+                    product.UnitName = unitName;
+
+                if (product.Category_ID.HasValue && categoryLookup.TryGetValue(product.Category_ID.Value, out var categoryName))
+                    product.CategoryName = categoryName;
+
+                if (product.ProcessingType_ID.HasValue && processingTypeLookup.TryGetValue(product.ProcessingType_ID.Value, out var processingTypeName))
+                    product.ProcessingTypeName = processingTypeName;
+
+                if (product.Material_ID.HasValue && materialLookup.TryGetValue(product.Material_ID.Value, out var materialName))
+                    product.MaterialName = materialName;
+
+                if (product.SpecialProductTaxRate_ID.HasValue && specialProductTaxRateLookup.TryGetValue(product.SpecialProductTaxRate_ID.Value, out var specialProductTaxRateName))
+                    product.SpecialProductTaxRateName = specialProductTaxRateName;
+            }
+        }
+
+        /// <summary>
+        /// Loads user names for a collection of view models
+        /// </summary>
+        private async Task LoadUserNamesAsync<T>(List<T> viewModels) where T : BaseViewModel
+        {
+            if (viewModels.Count == 0) return;
+
+            var userIdList = viewModels
+                .SelectMany(i => new[] { i.CreatedBy, i.UpdatedBy ?? 0 })
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
+
+            if (userIdList.Count == 0) return;
+
+            var userList = await _userRepository.ReadOnlyRespository.GetAsync(i => userIdList.Contains(i.Id));
+            var userLookup = userList.ToDictionary(u => u.Id, u => u.Name);
+
+            foreach (var viewModel in viewModels)
+            {
+                var updatedByName = viewModel.UpdatedBy.HasValue && viewModel.UpdatedBy > 0 && userLookup.TryGetValue(viewModel.UpdatedBy.Value, out var updatedName) ? updatedName : null;
+                var createdByName = userLookup.TryGetValue(viewModel.CreatedBy, out var createdName) ? createdName : null;
+                viewModel.UpdatedByName = updatedByName ?? createdByName ?? "";
+            }
+        }
+
+        /// <summary>
+        /// Validates product data
+        /// </summary>
+        private static Acknowledgement ValidateProductData(ProductViewModel productData)
+        {
+            var ack = new Acknowledgement { IsSuccess = true };
+
+            if (string.IsNullOrWhiteSpace(productData.Name))
+            {
+                ack.AddMessage("Tên sản phẩm không được để trống.");
+                ack.IsSuccess = false;
+            }
+
+            return ack;
+        }
+
+        /// <summary>
+        /// Creates a new product entity from view model
+        /// </summary>
+        private async Task<Product> CreateProductEntityAsync(ProductViewModel productData)
+        {
+            var product = _mapper.Map<Product>(productData);
+            product.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.Product, DbContext);
+            product.NameNonUnicode = Utils.NonUnicode(product.Name);
+            product.CreatedDate = DateTime.Now;
+            product.CreatedBy = CurrentUserId;
+            product.UpdatedDate = product.CreatedDate;
+            product.UpdatedBy = product.CreatedBy;
+            product.IsActive = true;
+            product.Status = ECommonStatus.Actived.ToString();
+            return product;
+        }
+
+        /// <summary>
+        /// Updates an existing product entity from view model
+        /// </summary>
+        private static void UpdateProductEntity(Product existingProduct, ProductViewModel productData, int currentUserId)
+        {
+            existingProduct.Name = productData.Name;
+            existingProduct.NameNonUnicode = Utils.NonUnicode(productData.Name);
+            existingProduct.Name_EN = productData.Name_EN;
+            existingProduct.Unit_ID = productData.Unit_ID;
+            existingProduct.Category_ID = productData.Category_ID;
+            existingProduct.ProcessingType_ID = productData.ProcessingType_ID;
+            existingProduct.TaxRate = productData.TaxRate;
+            existingProduct.LossRate = productData.LossRate;
+            existingProduct.Material_ID = productData.Material_ID;
+            existingProduct.ProfitMargin = productData.ProfitMargin;
+            existingProduct.Note = productData.Note;
+            existingProduct.IsDiscontinued = productData.IsDiscontinued;
+            existingProduct.ProcessingFee = productData.ProcessingFee;
+            existingProduct.CompanyTaxRate = productData.CompanyTaxRate;
+            existingProduct.ConsumerTaxRate = productData.ConsumerTaxRate;
+            existingProduct.SpecialProductTaxRate_ID = productData.SpecialProductTaxRate_ID;
+            existingProduct.UpdatedDate = DateTime.Now;
+            existingProduct.UpdatedBy = currentUserId;
+        }
+
+        #endregion
+
+        #region Public Methods
+
         public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel)
+        {
+            return await GetProductList(searchModel, null);
+        }
+
+        public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null)
         {
             var response = new Acknowledgement<JsonResultPaging<List<ProductViewModel>>>();
             try
@@ -108,68 +273,9 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var productViewModels = _mapper.Map<List<ProductViewModel>>(productQuery.Data);
 
-                // Add related entity names
-                var unitIds = productViewModels.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
-                var categoryIds = productViewModels.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
-                var processingTypeIds = productViewModels.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
-                var materialIds = productViewModels.Where(p => p.Material_ID.HasValue).Select(p => p.Material_ID.Value).Distinct().ToList();
-                var specialProductTaxRateIds = productViewModels.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
-
-                var units = await _unitRepository.ReadOnlyRespository.GetAsync(i => unitIds.Contains(i.ID));
-                var categories = await _categoryRepository.ReadOnlyRespository.GetAsync(i => categoryIds.Contains(i.ID));
-                var processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(i => processingTypeIds.Contains(i.ID));
-                var materials = await _materialRepository.ReadOnlyRespository.GetAsync(i => materialIds.Contains(i.ID));
-                var specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(i => specialProductTaxRateIds.Contains(i.ID));
-
-                foreach (var product in productViewModels)
-                {
-                    if (product.Unit_ID.HasValue)
-                    {
-                        var unit = units.FirstOrDefault(u => u.ID == product.Unit_ID.Value);
-                        product.UnitName = unit?.Name;
-                    }
-
-                    if (product.Category_ID.HasValue)
-                    {
-                        var category = categories.FirstOrDefault(c => c.ID == product.Category_ID.Value);
-                        product.CategoryName = category?.Name;
-                    }
-
-                    if (product.ProcessingType_ID.HasValue)
-                    {
-                        var processingType = processingTypes.FirstOrDefault(p => p.ID == product.ProcessingType_ID.Value);
-                        product.ProcessingTypeName = processingType?.Name;
-                    }
-
-                    if (product.Material_ID.HasValue)
-                    {
-                        var material = materials.FirstOrDefault(m => m.ID == product.Material_ID.Value);
-                        product.MaterialName = material?.Name;
-                    }
-
-                    if (product.SpecialProductTaxRate_ID.HasValue)
-                    {
-                        var specialProductTaxRate = specialProductTaxRates.FirstOrDefault(s => s.ID == product.SpecialProductTaxRate_ID.Value);
-                        product.SpecialProductTaxRateName = specialProductTaxRate?.Name;
-                    }
-                }
-
-                // Add user names
-                var userIdList = productViewModels
-                    .SelectMany(i => new[] { i.CreatedBy, i.UpdatedBy })
-                    .Where(id => id > 0)
-                    .Distinct()
-                    .ToList();
-
-                var userList = await _userRepository.ReadOnlyRespository.GetAsync(i => userIdList.Contains(i.Id));
-
-                foreach (var product in productViewModels)
-                {
-                    var createdByUser = userList.FirstOrDefault(i => i.Id == product.CreatedBy);
-                    var updatedByUser = userList.FirstOrDefault(i => i.Id == product.UpdatedBy);
-
-                    product.UpdatedByName = updatedByUser?.Name ?? createdByUser?.Name ?? "";
-                }
+                // Load related entity names and user names using optimized helper methods
+                await LoadRelatedEntityNamesAsync(productViewModels);
+                await LoadUserNamesAsync(productViewModels);
 
                 response.Data = new JsonResultPaging<List<ProductViewModel>>
                 {
@@ -203,42 +309,9 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var productViewModel = _mapper.Map<ProductViewModel>(product);
 
-                // Add related entity names
-                if (product.Unit_ID.HasValue)
-                {
-                    var unit = await _unitRepository.ReadOnlyRespository.FindAsync(product.Unit_ID.Value);
-                    productViewModel.UnitName = unit?.Name;
-                }
-
-                if (product.Category_ID.HasValue)
-                {
-                    var category = await _categoryRepository.ReadOnlyRespository.FindAsync(product.Category_ID.Value);
-                    productViewModel.CategoryName = category?.Name;
-                }
-
-                if (product.ProcessingType_ID.HasValue)
-                {
-                    var processingType = await _processingTypeRepository.ReadOnlyRespository.FindAsync(product.ProcessingType_ID.Value);
-                    productViewModel.ProcessingTypeName = processingType?.Name;
-                }
-
-                if (product.Material_ID.HasValue)
-                {
-                    var material = await _materialRepository.ReadOnlyRespository.FindAsync(product.Material_ID.Value);
-                    productViewModel.MaterialName = material?.Name;
-                }
-
-                if (product.SpecialProductTaxRate_ID.HasValue)
-                {
-                    var specialProductTaxRate = await _specialProductTaxRateRepository.ReadOnlyRespository.FindAsync(product.SpecialProductTaxRate_ID.Value);
-                    productViewModel.SpecialProductTaxRateName = specialProductTaxRate?.Name;
-                }
-
-                // Add user names
-                var createdByUser = await _userRepository.ReadOnlyRespository.FindAsync(product.CreatedBy);
-                var updatedByUser = product.UpdatedBy > 0 ? await _userRepository.ReadOnlyRespository.FindAsync(product.UpdatedBy) : null;
-
-                productViewModel.UpdatedByName = updatedByUser?.Name ?? createdByUser?.Name ?? "";
+                // Load related entity names and user names using optimized helper methods
+                await LoadRelatedEntityNamesAsync(new List<ProductViewModel> { productViewModel });
+                await LoadUserNamesAsync(new List<ProductViewModel> { productViewModel });
 
                 response.Data = productViewModel;
                 response.IsSuccess = true;
@@ -254,61 +327,52 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement> CreateOrUpdateProduct(ProductViewModel postData)
         {
-            var ack = new Acknowledgement();
+            return postData.Id == 0
+                ? await CreateProduct(postData)
+                : await UpdateProduct(postData);
+        }
+
+        public async Task<Acknowledgement> CreateProduct(ProductViewModel postData)
+        {
+            var ack = ValidateProductData(postData);
+            if (!ack.IsSuccess) return ack;
+
             try
             {
-                if (string.IsNullOrWhiteSpace(postData.Name))
-                {
-                    ack.AddMessage("Tên sản phẩm không được để trống.");
-                    return ack;
-                }
-
-                if (postData.Id == 0)
-                {
-                    var newProduct = _mapper.Map<Product>(postData);
-                    newProduct.Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.Product, DbContext);
-                    newProduct.NameNonUnicode = Utils.NonUnicode(newProduct.Name);
-                    newProduct.CreatedDate = DateTime.Now;
-                    newProduct.CreatedBy = CurrentUserId;
-                    newProduct.UpdatedDate = newProduct.CreatedDate;
-                    newProduct.UpdatedBy = newProduct.CreatedBy;
-                    await ack.TrySaveChangesAsync(res => res.AddAsync(newProduct), _productRepository.Repository);
-                }
-                else
-                {
-                    var existingProduct = await _productRepository.Repository.FindAsync(postData.Id);
-                    if (existingProduct == null)
-                    {
-                        ack.AddMessage("Không tìm thấy sản phẩm.");
-                        return ack;
-                    }
-
-                    existingProduct.Name = postData.Name;
-                    existingProduct.NameNonUnicode = Utils.NonUnicode(postData.Name);
-                    existingProduct.Name_EN = postData.Name_EN;
-                    existingProduct.Unit_ID = postData.Unit_ID;
-                    existingProduct.Category_ID = postData.Category_ID;
-                    existingProduct.ProcessingType_ID = postData.ProcessingType_ID;
-                    existingProduct.TaxRate = postData.TaxRate;
-                    existingProduct.LossRate = postData.LossRate;
-                    existingProduct.Material_ID = postData.Material_ID;
-                    existingProduct.ProfitMargin = postData.ProfitMargin;
-                    existingProduct.Note = postData.Note;
-                    existingProduct.IsDiscontinued = postData.IsDiscontinued;
-                    existingProduct.ProcessingFee = postData.ProcessingFee;
-                    existingProduct.CompanyTaxRate = postData.CompanyTaxRate;
-                    existingProduct.ConsumerTaxRate = postData.ConsumerTaxRate;
-                    existingProduct.SpecialProductTaxRate_ID = postData.SpecialProductTaxRate_ID;
-                    existingProduct.UpdatedDate = DateTime.Now;
-                    existingProduct.UpdatedBy = CurrentUserId;
-                    await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingProduct), _productRepository.Repository);
-                }
+                var newProduct = await CreateProductEntityAsync(postData);
+                await ack.TrySaveChangesAsync(res => res.AddAsync(newProduct), _productRepository.Repository);
                 return ack;
             }
             catch (Exception ex)
             {
                 ack.ExtractMessage(ex);
-                _logger.LogError($"CreateOrUpdateProduct: {ex.Message}");
+                _logger.LogError($"CreateProduct: {ex.Message}");
+                return ack;
+            }
+        }
+
+        public async Task<Acknowledgement> UpdateProduct(ProductViewModel postData)
+        {
+            var ack = ValidateProductData(postData);
+            if (!ack.IsSuccess) return ack;
+
+            try
+            {
+                var existingProduct = await _productRepository.Repository.FindAsync(postData.Id);
+                if (existingProduct == null)
+                {
+                    ack.AddMessage("Không tìm thấy sản phẩm.");
+                    return ack;
+                }
+
+                UpdateProductEntity(existingProduct, postData, CurrentUserId);
+                await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingProduct), _productRepository.Repository);
+                return ack;
+            }
+            catch (Exception ex)
+            {
+                ack.ExtractMessage(ex);
+                _logger.LogError($"UpdateProduct: {ex.Message}");
                 return ack;
             }
         }
@@ -567,7 +631,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
         }
 
-        public async Task<byte[]> GenerateProductExcelTemplate()
+        public Task<byte[]> GenerateProductExcelTemplate()
         {
             try
             {
@@ -664,7 +728,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                     instructionSheet.Columns().AdjustToContents();
 
-                    return ExcelHelper.SaveToByteArray(workbook);
+                    return Task.FromResult(ExcelHelper.SaveToByteArray(workbook));
                 }
             }
             catch (Exception ex)
@@ -684,5 +748,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
             return null;
         }
+
+        #endregion
     }
 }

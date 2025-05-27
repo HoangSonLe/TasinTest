@@ -41,35 +41,52 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<JsonResultPaging<List<ProductOrderStatisticsViewModel>>>();
             try
             {
-                // Build predicate for Purchase Agreements with Completed status
-                var paPredicate = PredicateBuilder.New<Purchase_Agreement>(pa =>
-                    pa.IsActive == true &&
-                    pa.Status == EPAStatus.Completed.ToString());
+                // Use optimized single query with proper JOINs
+                var query = from pa in DbContext.PurchaseAgreements
+                            join vendor in DbContext.Vendors on pa.Vendor_ID equals vendor.ID
+                            join paItem in DbContext.PurchaseAgreementItems on pa.ID equals paItem.PA_ID
+                            join product in DbContext.Products on paItem.Product_ID equals product.ID
+                            join unit in DbContext.Units on paItem.Unit_ID equals unit.ID into unitGroup
+                            from unit in unitGroup.DefaultIfEmpty()
+                            where pa.IsActive == true &&
+                                  pa.Status == EPAStatus.Completed.ToString()
+                            select new
+                            {
+                                PA = pa,
+                                Vendor = vendor,
+                                PAItem = paItem,
+                                Product = product,
+                                Unit = unit
+                            };
 
-                // Apply date filters
+                // Apply filters
                 if (searchModel.DateFrom.HasValue)
                 {
-                    paPredicate = paPredicate.And(pa => pa.CreatedDate >= searchModel.DateFrom.Value);
+                    query = query.Where(x => x.PA.CreatedDate >= searchModel.DateFrom.Value);
                 }
 
                 if (searchModel.DateTo.HasValue)
                 {
-                    paPredicate = paPredicate.And(pa => pa.CreatedDate <= searchModel.DateTo.Value);
+                    query = query.Where(x => x.PA.CreatedDate <= searchModel.DateTo.Value);
                 }
 
-                // Apply vendor filter
                 if (searchModel.Vendor_ID.HasValue)
                 {
-                    paPredicate = paPredicate.And(pa => pa.Vendor_ID == searchModel.Vendor_ID.Value);
+                    query = query.Where(x => x.PA.Vendor_ID == searchModel.Vendor_ID.Value);
                 }
 
-                // Get completed PAs with their items, products, vendors, and units
-                var completedPAs = await _unitOfWork.PurchaseAgreements.ReadOnlyRespository.GetAsync(
-                    filter: paPredicate,
-                    includeProperties: "PurchaseAgreementItems,Vendor"
-                );
+                // Apply product name filter if provided
+                if (!string.IsNullOrWhiteSpace(searchModel.ProductName))
+                {
+                    var productNameFilter = searchModel.ProductName.Trim().ToLower();
+                    query = query.Where(x => x.Product.Name.ToLower().Contains(productNameFilter) ||
+                                           (x.Product.NameNonUnicode != null && x.Product.NameNonUnicode.ToLower().Contains(productNameFilter)));
+                }
 
-                if (!completedPAs.Any())
+                // Execute query and group in database
+                var rawData = await query.ToListAsync();
+
+                if (!rawData.Any())
                 {
                     response.Data = new JsonResultPaging<List<ProductOrderStatisticsViewModel>>
                     {
@@ -82,118 +99,71 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return response;
                 }
 
-                // Get all PA items for the completed PAs
-                var paIds = completedPAs.Select(pa => pa.ID).ToList();
-                var paItems = await _unitOfWork.PurchaseAgreementItems.ReadOnlyRespository.GetAsync(
-                    filter: item => paIds.Contains(item.PA_ID)
-                );
-
-                // Get all products and units referenced in PA items
-                var productIds = paItems.Select(item => item.Product_ID).Distinct().ToList();
-                var unitIds = paItems.Where(item => item.Unit_ID.HasValue).Select(item => item.Unit_ID!.Value).Distinct().ToList();
-
-                var products = await DbContext.Products.Where(p => productIds.Contains(p.ID)).ToListAsync();
-                var units = await DbContext.Units.Where(u => unitIds.Contains(u.ID)).ToListAsync();
-
-                // Apply product name filter
-                if (!string.IsNullOrEmpty(searchModel.ProductName))
-                {
-                    var productNameNonUnicode = Utils.NonUnicode(searchModel.ProductName.Trim().ToLower());
-                    var filteredProductIds = products.Where(p =>
-                        p.NameNonUnicode.ToLower().Contains(productNameNonUnicode) ||
-                        p.Name.ToLower().Contains(searchModel.ProductName.Trim().ToLower()) ||
-                        p.Code.ToLower().Contains(searchModel.ProductName.Trim().ToLower())
-                    ).Select(p => p.ID).ToList();
-
-                    paItems = paItems.Where(item => filteredProductIds.Contains(item.Product_ID)).ToList();
-
-                    // Update PA list to only include PAs that have the filtered products
-                    var filteredPAIds = paItems.Select(item => item.PA_ID).Distinct().ToList();
-                    completedPAs = completedPAs.Where(pa => filteredPAIds.Contains(pa.ID)).ToList();
-                }
-
-                // Group by vendor
-                var vendorGroups = completedPAs.GroupBy(pa => pa.Vendor_ID).ToList();
+                // Efficient in-memory grouping using the optimized data
+                var vendorGroups = rawData
+                    .GroupBy(x => new { x.Vendor.ID, x.Vendor.Code, x.Vendor.Name, x.Vendor.Address })
+                    .ToList();
 
                 var statisticsViewModels = new List<ProductOrderStatisticsViewModel>();
 
                 foreach (var vendorGroup in vendorGroups)
                 {
-                    var vendor = vendorGroup.First().Vendor;
-                    if (vendor == null) continue;
-
-                    var vendorPAs = vendorGroup.ToList();
-                    var vendorPAIds = vendorPAs.Select(pa => pa.ID).ToList();
-                    var vendorPAItems = paItems.Where(item => vendorPAIds.Contains(item.PA_ID)).ToList();
+                    var vendorKey = vendorGroup.Key;
+                    var vendorData = vendorGroup.ToList();
 
                     // Group by product within this vendor
-                    var productGroups = vendorPAItems.GroupBy(item => item.Product_ID).ToList();
+                    var productGroups = vendorData
+                        .GroupBy(x => new { x.Product.ID, x.Product.Code, x.Product.Name, UnitName = x.Unit?.Name })
+                        .ToList();
 
                     var productStatistics = new List<ProductStatisticsViewModel>();
 
                     foreach (var productGroup in productGroups)
                     {
-                        var product = products.FirstOrDefault(p => p.ID == productGroup.Key);
-                        if (product == null) continue;
-
+                        var productKey = productGroup.Key;
                         var productItems = productGroup.ToList();
-                        var totalQuantity = productItems.Sum(item => item.Quantity);
-                        var totalValue = productItems.Sum(item => (item.Price ?? 0) * item.Quantity);
-                        var totalOrderAmount = totalValue; // Tổng tiền đặt hàng = tổng giá trị
 
-                        // Tính toán các loại giá
-                        var pricesWithValues = productItems.Where(item => item.Price.HasValue && item.Price.Value > 0).ToList();
-                        var minPrice = pricesWithValues.Any() ? pricesWithValues.Min(item => item.Price!.Value) : (decimal?)null;
-                        var maxPrice = pricesWithValues.Any() ? pricesWithValues.Max(item => item.Price!.Value) : (decimal?)null;
-                        var averagePrice = pricesWithValues.Any() ? pricesWithValues.Average(item => item.Price!.Value) : (decimal?)null;
+                        // Efficient calculations using LINQ aggregations
+                        var totalQuantity = productItems.Sum(x => x.PAItem.Quantity);
+                        var totalValue = productItems.Sum(x => (x.PAItem.Price ?? 0) * x.PAItem.Quantity);
+                        var totalOrderAmount = totalValue;
 
-                        // Giá hiện tại = giá của PA được tạo gần nhất
-                        var currentPrice = (decimal?)null;
-                        if (pricesWithValues.Any())
-                        {
-                            var latestPA = vendorPAs.Where(pa => productItems.Any(item => item.PA_ID == pa.ID && item.Price.HasValue))
-                                                   .OrderByDescending(pa => pa.CreatedDate)
-                                                   .FirstOrDefault();
-                            if (latestPA != null)
+                        // Calculate price statistics efficiently
+                        var validPrices = productItems
+                            .Where(x => x.PAItem.Price.HasValue && x.PAItem.Price.Value > 0)
+                            .Select(x => x.PAItem.Price!.Value)
+                            .ToList();
+
+                        var minPrice = validPrices.Any() ? validPrices.Min() : (decimal?)null;
+                        var maxPrice = validPrices.Any() ? validPrices.Max() : (decimal?)null;
+                        var averagePrice = validPrices.Any() ? validPrices.Average() : (decimal?)null;
+
+                        // Current price = latest PA price
+                        var currentPrice = productItems
+                            .Where(x => x.PAItem.Price.HasValue && x.PAItem.Price.Value > 0)
+                            .OrderByDescending(x => x.PA.CreatedDate)
+                            .FirstOrDefault()?.PAItem.Price;
+
+                        // Efficient PA details creation
+                        var paDetails = searchModel.IncludeDetails
+                            ? productItems.Select(x => new PAProductDetailViewModel
                             {
-                                var latestItem = productItems.FirstOrDefault(item => item.PA_ID == latestPA.ID && item.Price.HasValue);
-                                currentPrice = latestItem?.Price;
-                            }
-                        }
-
-                        var paDetails = new List<PAProductDetailViewModel>();
-
-                        if (searchModel.IncludeDetails)
-                        {
-                            foreach (var item in productItems)
-                            {
-                                var pa = vendorPAs.FirstOrDefault(p => p.ID == item.PA_ID);
-                                if (pa != null)
-                                {
-                                    paDetails.Add(new PAProductDetailViewModel
-                                    {
-                                        PA_ID = pa.ID,
-                                        PACode = pa.Code,
-                                        GroupCode = pa.GroupCode,
-                                        Quantity = item.Quantity,
-                                        Price = item.Price,
-                                        Value = (item.Price ?? 0) * item.Quantity,
-                                        CreatedDate = pa.CreatedDate
-                                    });
-                                }
-                            }
-                        }
-
-                        var unit = productItems.FirstOrDefault(item => item.Unit_ID.HasValue)?.Unit_ID.HasValue == true
-                            ? units.FirstOrDefault(u => u.ID == productItems.First(item => item.Unit_ID.HasValue).Unit_ID!.Value)
-                            : null;
+                                PA_ID = x.PA.ID,
+                                PACode = x.PA.Code,
+                                GroupCode = x.PA.GroupCode,
+                                Quantity = x.PAItem.Quantity,
+                                Price = x.PAItem.Price,
+                                Value = (x.PAItem.Price ?? 0) * x.PAItem.Quantity,
+                                CreatedDate = x.PA.CreatedDate
+                            }).ToList()
+                            : new List<PAProductDetailViewModel>();
 
                         productStatistics.Add(new ProductStatisticsViewModel
                         {
-                            ProductID = product.ID,
-                            ProductCode = product.Code,
-                            ProductName = product.Name,
-                            UnitName = unit?.Name,
+                            ProductID = productKey.ID,
+                            ProductCode = productKey.Code,
+                            ProductName = productKey.Name,
+                            UnitName = productKey.UnitName,
                             TotalQuantity = totalQuantity,
                             MinPrice = minPrice,
                             MaxPrice = maxPrice,
@@ -201,29 +171,33 @@ namespace Tasin.Website.DAL.Services.WebServices
                             CurrentPrice = currentPrice,
                             TotalValue = totalValue,
                             TotalOrderAmount = totalOrderAmount,
-                            PACount = productItems.Select(item => item.PA_ID).Distinct().Count(),
+                            PACount = productItems.Select(x => x.PA.ID).Distinct().Count(),
                             PADetails = paDetails
                         });
                     }
+
+                    // Efficient vendor statistics calculation
+                    var orderedProducts = productStatistics.OrderBy(p => p.ProductName).ToList();
+                    var completedPACount = vendorData.Select(x => x.PA.ID).Distinct().Count();
 
                     statisticsViewModels.Add(new ProductOrderStatisticsViewModel
                     {
                         Vendor = new VendorStatisticsViewModel
                         {
-                            ID = vendor.ID,
-                            Code = vendor.Code,
-                            Name = vendor.Name,
-                            Address = vendor.Address
+                            ID = vendorKey.ID,
+                            Code = vendorKey.Code,
+                            Name = vendorKey.Name,
+                            Address = vendorKey.Address
                         },
-                        Products = productStatistics.OrderBy(p => p.ProductName).ToList(),
-                        TotalValue = productStatistics.Sum(p => p.TotalValue),
-                        TotalOrderAmount = productStatistics.Sum(p => p.TotalOrderAmount),
-                        TotalQuantity = productStatistics.Sum(p => p.TotalQuantity),
-                        CompletedPACount = vendorPAs.Count
+                        Products = orderedProducts,
+                        TotalValue = orderedProducts.Sum(p => p.TotalValue),
+                        TotalOrderAmount = orderedProducts.Sum(p => p.TotalOrderAmount),
+                        TotalQuantity = orderedProducts.Sum(p => p.TotalQuantity),
+                        CompletedPACount = completedPACount
                     });
                 }
 
-                // Apply pagination
+                // Efficient pagination with early ordering
                 var totalRecords = statisticsViewModels.Count;
                 var pagedData = statisticsViewModels
                     .OrderBy(s => s.Vendor.Name)

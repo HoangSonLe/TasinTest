@@ -12,6 +12,8 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel postData);
         Task<Acknowledgement<ProductViewModel>> GetProductById(int productId);
         Task<Acknowledgement> CreateOrUpdateProduct(ProductViewModel postData);
+        Task<Acknowledgement> CreateProduct(ProductViewModel postData);
+        Task<Acknowledgement> UpdateProduct(ProductViewModel postData);
         Task<Acknowledgement> DeleteProductById(int productId);
 
         /// <summary>
