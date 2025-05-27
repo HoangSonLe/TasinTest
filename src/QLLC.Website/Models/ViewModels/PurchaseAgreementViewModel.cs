@@ -13,9 +13,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Group Code - unique identifier for this PA group
         /// </summary>
-        [Required]
         [Display(Name = "GroupCode")]
-        public string GroupCode { get; set; }
+        public string? GroupCode { get; set; }
 
         /// <summary>
         /// Total Price of all child PAs
@@ -74,9 +73,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Purchase Agreement Code
         /// </summary>
-        [Required]
         [Display(Name = "Code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// Vendor ID
@@ -89,14 +87,13 @@ namespace Tasin.Website.Models.ViewModels
         /// Vendor Name
         /// </summary>
         [Display(Name = "VendorName")]
-        public string VendorName { get; set; }
+        public string? VendorName { get; set; }
 
         /// <summary>
         /// Group Code - links to parent PA
         /// </summary>
-        [Required]
         [Display(Name = "GroupCode")]
-        public string GroupCode { get; set; }
+        public string? GroupCode { get; set; }
 
         /// <summary>
         /// Total Price for this vendor

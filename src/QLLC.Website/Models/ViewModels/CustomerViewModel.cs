@@ -19,9 +19,8 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Code
         /// </summary>
-        [Required]
         [Display(Name = "Code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// Full name of the user
@@ -34,7 +33,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Non-unicode name for searching
         /// </summary>
         [Display(Name = "NameNonUnicode")]
-        public string NameNonUnicode { get; set; } = "";
+        public string? NameNonUnicode { get; set; }
 
         /// <summary>
         /// Email address
@@ -69,7 +68,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Name of the user who last updated this record
         /// </summary>
         [Display(Name = "Updated By")]
-        public string UpdatedByName { get; set; }
+        public string? UpdatedByName { get; set; }
 
         /// <summary>
         /// Status of the customer
