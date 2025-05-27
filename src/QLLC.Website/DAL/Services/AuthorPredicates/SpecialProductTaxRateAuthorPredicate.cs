@@ -17,11 +17,11 @@ namespace Tasin.Website.DAL.Services.AuthorPredicates
                 // Admin có thể xem tất cả
                 return predicateInner;
             }
-            else if (roleList.Contains(ERoleType.Reporter))
-            {
-                // Reporter chỉ có thể xem, không thể sửa
-                return predicateInner;
-            }
+            //else if (roleList.Contains(ERoleType.Reporter))
+            //{
+            //    // Reporter chỉ có thể xem, không thể sửa
+            //    return predicateInner;
+            //}
             else if (roleList.Contains(ERoleType.User))
             {
                 // User chỉ có thể xem những thuế suất sản phẩm đặc biệt do mình tạo

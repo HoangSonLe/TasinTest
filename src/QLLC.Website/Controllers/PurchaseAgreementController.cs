@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("PurchaseAgreement/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
         public IActionResult Index()
         {
             return View();
@@ -41,6 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseAgreement/GetPurchaseAgreementList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<PurchaseAgreementViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> GetPurchaseAgreementList([FromQuery] PurchaseAgreementSearchModel searchModel)
         {
             var result = await _purchaseAgreementService.GetPurchaseAgreementList(searchModel);
@@ -56,6 +60,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseAgreement/GetPurchaseAgreementById")]
         [ProducesResponseType(typeof(Acknowledgement<PurchaseAgreementViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> GetPurchaseAgreementById(int purchaseAgreementId)
         {
             var result = await _purchaseAgreementService.GetPurchaseAgreementById(purchaseAgreementId);
@@ -71,6 +76,7 @@ namespace Tasin.Website.Controllers
         [HttpPut]
         [Route("PurchaseAgreement/UpdatePurchaseAgreement")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> UpdatePurchaseAgreement([FromBody] PurchaseAgreementViewModel postData)
         {
             if (postData.Id <= 0)
@@ -91,6 +97,7 @@ namespace Tasin.Website.Controllers
         [HttpDelete]
         [Route("PurchaseAgreement/DeletePurchaseAgreementById/{purchaseAgreementId}")]
         [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PURCHASE_AGREEMENT])]
         public async Task<Acknowledgement> DeletePurchaseAgreementById([FromRoute] int purchaseAgreementId)
         {
             return await _purchaseAgreementService.DeletePurchaseAgreementById(purchaseAgreementId);
@@ -107,6 +114,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseAgreement/GetPAGroupList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<PAGroupViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> GetPAGroupList([FromQuery] PAGroupSearchModel searchModel)
         {
             var result = await _purchaseAgreementService.GetPAGroupList(searchModel);
@@ -122,6 +130,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("PurchaseAgreement/GetPAByGroupCode")]
         [ProducesResponseType(typeof(Acknowledgement<PAGroupViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> GetPAByGroupCode(string groupCode)
         {
             var result = await _purchaseAgreementService.GetPAByGroupCode(groupCode);
@@ -136,6 +145,7 @@ namespace Tasin.Website.Controllers
         [HttpPost]
         [Route("PurchaseAgreement/CreatePAGroup")]
         [ProducesResponseType(typeof(Acknowledgement<PAGroupViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PURCHASE_AGREEMENT])]
         public async Task<IActionResult> CreatePAGroup()
         {
             var result = await _purchaseAgreementService.CreatePAGroup();

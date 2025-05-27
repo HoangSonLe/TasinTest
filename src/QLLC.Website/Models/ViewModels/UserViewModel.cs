@@ -27,25 +27,25 @@ namespace Tasin.Website.Models.ViewModels
         /// User password (hashed)
         /// </summary>
         [Display(Name = "Password")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         /// <summary>
         /// Full name of the user
         /// </summary>
         [Required]
         [Display(Name = "Full Name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Non-unicode name for searching
         /// </summary>
         [Display(Name = "NameNonUnicode")]
-        public string NameNonUnicode { get; set; }
+        public string? NameNonUnicode { get; set; }
 
         /// <summary>
         /// Email address
         /// </summary>
-        [EmailAddress]
+        //[EmailAddress]
         [Display(Name = "Email")]
         public string? Email { get; set; }
 
@@ -60,7 +60,7 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Phone]
         [Display(Name = "Phone")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         /// <summary>
         /// Không dùng nữa
@@ -77,26 +77,26 @@ namespace Tasin.Website.Models.ViewModels
         /// List of role view models
         /// </summary>
         [Ignore]
-        public List<RoleViewModel> RoleViewList { get; set; }
+        public List<RoleViewModel> RoleViewList { get; set; } = new List<RoleViewModel>();
 
         /// <summary>
         /// List of action permissions
         /// </summary>
         [Ignore]
-        public List<int> EnumActionList { get; set; }
+        public List<int> EnumActionList { get; set; } = new List<int>();
 
         /// <summary>
         /// Comma-separated list of role names
         /// </summary>
         [Ignore]
         [Display(Name = "Role Names")]
-        public string RoleName { get; set; }
+        public string? RoleName { get; set; }
 
         /// <summary>
         /// Name of the user who last updated this record
         /// </summary>
         [Display(Name = "Updated By")]
-        public string UpdatedByName { get; set; }
+        public string? UpdatedByName { get; set; }
 
         /// <summary>
         /// Status of the user

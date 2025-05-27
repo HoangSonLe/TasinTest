@@ -1,4 +1,5 @@
 ﻿function filterCustom(item, input) {
+    
     let nonUnicode = removeVietnameseTones(item);
     input = removeVietnameseTones(input);
     let res = nonUnicode.toLowerCase().includes(input.toLowerCase());
@@ -663,12 +664,12 @@ function debounce(fn, delay) {
     };
 }
 AuthenticationFunc = () => {
-    //ajax("GET", "/User/Authentication", null, (response) => {
-    //    $("#pnAccount").text("Xin chào: " + response.data.name);
-    //    Userdata = response.data;
-    //}, () => {
-    //    location.href = 'Account/Logout';
-    //}, false);
+    ajax("GET", "/User/Authentication", null, (response) => {
+        $("#pnAccount").text("Xin chào: " + response.data.name);
+        Userdata = response.data;
+    }, () => {
+        location.href = 'Account/Logout';
+    }, false);
 } 
 String.prototype.removeSpecialCharater = function () {
     return this.replace(/[^\x00-\x7F]/g, "").trim();

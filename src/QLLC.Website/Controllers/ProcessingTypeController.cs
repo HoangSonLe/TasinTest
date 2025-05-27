@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Common.Services;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
@@ -27,6 +29,7 @@ namespace Tasin.Website.Controllers
 
         [HttpGet]
         [Route("ProcessingType/Index")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PROCESSING_TYPE])]
         public IActionResult Index()
         {
             return View();
@@ -41,6 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("ProcessingType/GetProcessingTypeList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<ProcessingTypeViewModel>>>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PROCESSING_TYPE])]
         public async Task<IActionResult> GetProcessingTypeList([FromQuery] ProcessingTypeSearchModel searchModel)
         {
             var result = await _processingTypeService.GetProcessingTypeList(searchModel);
@@ -49,6 +53,7 @@ namespace Tasin.Website.Controllers
 
         [HttpDelete]
         [Route("ProcessingType/DeleteProcessingTypeById/{processingTypeId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_PROCESSING_TYPE])]
         public async Task<Acknowledgement> DeleteProcessingTypeById([FromRoute] int processingTypeId)
         {
             return await _processingTypeService.DeleteProcessingTypeById(processingTypeId);
@@ -56,6 +61,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPost]
         [Route("ProcessingType/Create")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PROCESSING_TYPE])]
         public async Task<Acknowledgement> Create([FromBody] ProcessingTypeViewModel postData)
         {
             return await _processingTypeService.CreateOrUpdateProcessingType(postData);
@@ -63,6 +69,7 @@ namespace Tasin.Website.Controllers
 
         [HttpPut]
         [Route("ProcessingType/UpdateProcessingType/{processingTypeId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PROCESSING_TYPE])]
         public async Task<Acknowledgement> CreateOrUpdateProcessingType([FromRoute] int processingTypeId, [FromBody] ProcessingTypeViewModel postData)
         {
             postData.Id = processingTypeId;
@@ -80,6 +87,7 @@ namespace Tasin.Website.Controllers
         [ProducesResponseType(typeof(Acknowledgement<ProcessingTypeViewModel>), 200)]
         [ProducesResponseType(404)]
         [Route("ProcessingType/GetProcessingTypeById/{processingTypeId}")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PROCESSING_TYPE])]
         public async Task<Acknowledgement<ProcessingTypeViewModel>> GetProcessingTypeById(int processingTypeId)
         {
             var ack = await _processingTypeService.GetProcessingTypeById(processingTypeId);

@@ -199,7 +199,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     Value = i.ID.ToString(),
                     Text = $"{i.Name} ({i.Code})",
-                    Data = i
+                    Datas = i
                 }).ToList();
 
                 return new Acknowledgement<List<KendoDropdownListModel<string>>>()

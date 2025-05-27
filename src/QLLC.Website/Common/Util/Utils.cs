@@ -463,8 +463,8 @@ namespace Tasin.Website.Common.Util
                     return ELevelRole.SystemAdmin;
                 case ERoleType.Admin:
                     return ELevelRole.Admin;
-                case ERoleType.Reporter:
-                    return ELevelRole.Reporter;
+                //case ERoleType.Reporter:
+                //    return ELevelRole.Reporter;
                 default:
                     return ELevelRole.User; // Handle unmapped cases
             }

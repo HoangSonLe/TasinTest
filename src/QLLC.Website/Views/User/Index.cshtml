@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Người dùng";
 }
+@using Newtonsoft.Json
 
 <div>
 
@@ -26,7 +27,7 @@
 </script>
 <script type="text/javascript">
     let gridId = "#gridId";
-    var genderDatasource = @Html.Raw(Json.Serialize(@ViewBag.GenderDatasource));
+    // var genderDatasource = Html.Raw(Json.Serialize(@ViewBag.GenderDatasource));
     var roleDatasource = @Html.Raw(Json.Serialize(@ViewBag.RoleDatasource));
     function renderCreateOrEditForm(isCreate = true, dataUser = {}) {
         let myWindow = $("#window");
@@ -78,17 +79,12 @@
                     field: "email",
                     title: "Email",
                     label: "Email:",
-                    validation: {
-                        email: true
-                    },
                 },
                 {
                     field: "address",
                     title: "Địa chỉ",
                     label: "Địa chỉ:",
-                    validation: {
-                        address: true
-                    },
+                   
                 },
                 {
                     field: "password",
@@ -116,25 +112,26 @@
                         optionLabel: "Chọn người vai trò",
                         dataTextField: "text",
                         dataValueField: "value",
-                        filter: "contains",
+                        filter: filterCustom,
                         dataSource: {
-                            type: "json",
-                            serverFiltering: true,
-                            transport: {
-                                read: {
-                                    url: "/Role/GetRoleDropdownList",
-                                    dataType: "json",
-                                    data: function () {
-                                        return {
-                                            searchString: $("#roleIdList").data("kendoMultiSelect").input.val(), // The search string
-                                        };
-                                    }
-                                }
-                            },
-                            schema: {
-                                type: 'json',
-                                data: "data",
-                            },
+                            data:roleDatasource
+                            // type: "json",
+                            // serverFiltering: true,
+                            // transport: {
+                            //     read: {
+                            //         url: "/Role/GetRoleDropdownList",
+                            //         dataType: "json",
+                            //         data: function () {
+                            //             return {
+                            //                 searchString: $("#roleIdList").data("kendoMultiSelect").input.val(), // The search string
+                            //             };
+                            //         }
+                            //     }
+                            // },
+                            // schema: {
+                            //     type: 'json',
+                            //     data: "data",
+                            // },
 
                         }
                     }
@@ -150,10 +147,18 @@
                     ...e.model,
                     roleIdList: $("#roleIdList").data("kendoMultiSelect").value(),
                 };
-                var response = ajax("POST", "/User/CreateOrUpdateUser", dataItem, () => {
-                    $(gridId).data("kendoGrid").dataSource.filter({});
-                    myWindow.data("kendoWindow").close();
-                });
+                if( dataItem.id > 0){
+                    var response = ajax("PUT", "/User/UpdateUser/"+dataItem.id, dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+                else{
+                    var response = ajax("POST", "/User/Create" , dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
             },
             close: function (e) {
                 $(this.element).empty();
@@ -168,20 +173,20 @@
                 event.preventDefault(); // Prevent the default action (space input)
             }
         });
-        if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
-            $("#userName").data("kendoTextBox").enable(false);
-            $("#roleIdList").data("kendoMultiSelect").enable(false);
-        }
-        var multiSelect = $("#roleIdList").data("kendoMultiSelect");
-        // Apply debounce to the filter input
-        multiSelect.input.on("input", debounce(function () {
-            multiSelect.dataSource.filter({
-                logic: "or",
-                filters: [
-                    { field: multiSelect.options.dataTextField, operator: "contains", value: multiSelect.input.val() }
-                ]
-            });
-        }, debounceDelay));
+        // if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
+        //     $("#userName").data("kendoTextBox").enable(false);
+        //     $("#roleIdList").data("kendoMultiSelect").enable(false);
+        // }
+        // var multiSelect = $("#roleIdList").data("kendoMultiSelect");
+        // // Apply debounce to the filter input
+        // multiSelect.input.on("input", debounce(function () {
+        //     multiSelect.dataSource.filter({
+        //         logic: "or",
+        //         filters: [
+        //             { field: multiSelect.options.dataTextField, operator: "contains", value: multiSelect.input.val() }
+        //         ]
+        //     });
+        // }, debounceDelay));
 
         setTimeout(() => {
             $("input[title='name']").focus();
@@ -214,7 +219,7 @@
     }
 
     async function editUser(id) {
-        var response = ajax("GET", "/User/GetUserById", { userId: id }, (response) => {
+        var response = ajax("GET", "/User/GetUserById/"+id, { userId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -237,7 +242,7 @@
         })
 
         $("#window").after("<div id='dialog'></div>");
-    }    
+    }
     function resetPassword(id) {
         $('#dialog').kendoConfirm({
             title: "XÓA",
@@ -356,7 +361,7 @@
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
                                 <div class="pe-1">
                                     <label for="roleDropdownList">Vai trò:</label>
-                                    <input type="text" class=" w-100" id="roleDropdownList"/>
+                                    <input  class=" w-100" id="roleDropdownList" />
                                 </div>
                             </div>
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
@@ -393,6 +398,7 @@
                     },
                 },
                 serverPaging: true,
+                serverFiltering: true,
                 page: 1,
                 pageSize: 20,
                 schema: {
@@ -494,13 +500,13 @@
                     },
 
                 },
-             
+
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: "<button style='margin-right:5px;' onclick=editUser(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                                                               <button style='margin-right:5px;' onclick=deleteUser(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>\
-                                                               <button onclick=resetPassword(#=id#) title='Reset mật khẩu' class='k-button k-button-md k-rounded-md k-button-solid-primary _permission_' data-enum='8'><span class='k-icon k-i-lock k-button-icon'></span></button>",
+                            <button style='margin-right:5px;' onclick=deleteUser(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>\
+                            <button onclick=resetPassword(#=id#) title='Reset mật khẩu' class='k-button k-button-md k-rounded-md k-button-solid-primary _permission_' data-enum='8'><span class='k-icon k-i-lock k-button-icon'></span></button>",
                 }
             ],
             dataBound: function (e) {
@@ -531,7 +537,6 @@
         });
         $("#search").click(async function (e) {
             var grid = $(gridId).data("kendoGrid");
-            grid.dataSource.page(1);
             grid.dataSource.filter({});
         });
         $("#exportExcel").click(async function (e) {
@@ -548,7 +553,8 @@
             dataTextField: "text",
             dataValueField: "value",
             optionLabel: 'Lọc vai trò...',
-            dataSource: roleDatasource,
+            filter: filterCustom,
+            dataSource: roleDatasource
         });
         $("#create").kendoButton({
             icon: "plus"
@@ -569,9 +575,11 @@
 </script>
 <script type="text/javascript">
     InitGrid();
-    InitKendoToolBar();
     $(document).ready(function () {
-        $(window).trigger("resize");
+    InitKendoToolBar();
+        setTimeout(() => {
+            $(window).trigger("resize");
+        }, 500);
 
     });
 </script>

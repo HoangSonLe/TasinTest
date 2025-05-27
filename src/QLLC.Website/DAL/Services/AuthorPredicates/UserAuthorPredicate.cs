@@ -23,12 +23,13 @@ namespace Tasin.Website.DAL.Services.AuthorPredicates
             }
             else if (roleList.Contains(ERoleType.Admin))
             {
-                predicateInner = predicateInner.And(i => i.RoleIdList.Contains(((int)ERoleType.Reporter).ToString()) || i.RoleIdList.Contains(((int)ERoleType.User).ToString()));
-            }
-            else if (roleList.Contains(ERoleType.Reporter))
-            {
+                //predicateInner = predicateInner.And(i => i.RoleIdList.Contains(((int)ERoleType.Reporter).ToString()) || i.RoleIdList.Contains(((int)ERoleType.User).ToString()));
                 predicateInner = predicateInner.And(i => i.RoleIdList.Contains(((int)ERoleType.User).ToString()));
             }
+            //else if (roleList.Contains(ERoleType.Reporter))
+            //{
+            //    predicateInner = predicateInner.And(i => i.RoleIdList.Contains(((int)ERoleType.User).ToString()));
+            //}
             return predicateInner;
         }
     }

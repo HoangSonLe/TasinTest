@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Tasin.Website.styles.css" asp-append-version="true" />
     <link href="~/lib/fontawesome-free-6.5.2-web/css/all.min.css" rel="stylesheet" />
-    <script src="~/js/enum.js"></script>
+    <script src="~/js/enum.js" asp-append-version="true"></script>
     @* jquery *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     @* kendo *@
@@ -30,12 +30,12 @@
 
     <script src="~/lib/kendo/js/messages/kendo.messages.vi-VN.min.js"></script>
     <script src="~/lib/kendo/js/cultures/kendo.culture.vi-VN.min.js"></script>
-    <script src="~/js/login/changepassword.js"></script>
-    <script src="~/js/permission/index.js"></script>
+    <script src="~/js/login/changepassword.js" asp-append-version="true"></script>
+    <script src="~/js/permission/index.js" asp-append-version="true"></script>
     <script>
         kendo.culture("vi-VN");
     </script>
-    <script src="~/js/site.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
         const isMobile = {
@@ -69,8 +69,9 @@
             /* list-style-type: none; */
             text-align: justify;
         }
-        .k-grid table{
-            width:100% !important;
+
+        .k-grid table {
+            width: 100% !important;
         }
 
         /* Notifications */
@@ -85,7 +86,7 @@
             float: left;
         }
 
-        .k-notification{
+        .k-notification {
             margin-bottom: 8px;
         }
 
@@ -118,6 +119,10 @@
         .customClass {
             z-index: 999999 !important;
         }
+
+        span#badge-sent:hover {
+            color: white;
+        }
     </style>
 </head>
 <body class=" nav-fixed" style="background-color: rgb(0 0 0 / 20%);">
@@ -142,7 +147,7 @@
             </svg>
         </button>
 
-        <div class="navbar-brand ps-0 ms-sm-0 text-decoration-none" style="flex: 1;" >
+        <div class="navbar-brand ps-0 ms-sm-0 text-decoration-none" style="flex: 1;">
             <a class="d-flex align-items-center text-decoration-none" style="width: 184px;" href="/">
                 <img src="@AppSettings.WebsiteInfo.SiteUILogoUrl" style="height: 44px;">
                 <span id="titleHeader" class="text-primary text-decoration-none" style="font-size: 18px;color:white !important; margin: 0; padding-left: 10px;">@AppSettings.WebsiteInfo.NameWebsite</span>
@@ -219,8 +224,6 @@
             <nav class="sidenav shadow-right sidenav-light" style="background: transparent linear-gradient(180deg, #148F96 0%, #1C4485 100%) 0% 0% no-repeat padding-box;">
                 <div class="sidenav-menu" style="border-right: 1px solid var(--bs-color-global-gray40);">
                     <div class="nav accordion px-2" id="accordionSidenav">
-
-
                     </div>
                 </div>
             </nav>
@@ -255,7 +258,8 @@
                 <div class="modal-body text-center">
                     <img alt="QR Code" class="imgQR" src="" />
                 </div>
-                <div class="modal-footer" style="color:red;font-size:15px;">Lưu ý: cần dùng tài khoản telegram theo số điện thoại đã đăng ký!
+                <div class="modal-footer" style="color:red;font-size:15px;">
+                    Lưu ý: cần dùng tài khoản telegram theo số điện thoại đã đăng ký!
                 </div>
             </div>
         </div>
@@ -305,165 +309,189 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/css/scriptss.js"></script>
+    <script src="~/css/scriptss.js" asp-append-version="true"></script>
 
-    <script src="~/js/kendogridresize/notification.js"></script>
+    <script src="~/js/kendogridresize/notification.js" asp-append-version="true"></script>
 
-    <script src="~/js/kendogridresize/resize.js"></script>
-    <script src="~/js/notificationforuser/index.js"></script>
+    <script src="~/js/kendogridresize/resize.js" asp-append-version="true"></script>
+    <script src="~/js/notificationforuser/index.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
-        function menu(EnumRoleList) {
-            if (!EnumRoleList) return;
-            let html = "";
-            if (EnumRoleList.find(e => e == 11 || e == 7)) {
-                html += ` <a id="category_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-category" aria-expanded="false" aria-controls="menu-category">
-                                            <div class="nav-link-icon"><i class="fa-solid fa-bars-staggered fa-1_5x me-2"></i></div>
-                                            Danh mục
-                                            <div class="sidenav-collapse-arrow">
-                                                <i class="fas fa-angle-down"></i>
-                                            </div>
-                                        </a>`;
-                html += `
-                        <div class="nav collapse" id="menu-category" data-bs-parent="#accordionSidenav">
-                             <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">`;
-                if (EnumRoleList.find(e => e == 7)){
-                    html += `<a class="nav-link _permission_" data-enum="7" href="/User">Người dùng</a>`;
-                }
-                if (EnumRoleList.find(e => e == 11)){
-                    html += `<a class="nav-link _permission_" data-enum="11" href="/Tenants">Chùa</a>`;
-                }
-                html += `</nav>
-                                        </div>`;
-            }
-
-            if (EnumRoleList.find(e => e == 3)){
-                html += `<a class="nav-link my-1 _permission_" data-enum="3" href="/Urn">
-                            <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
-                            Quản lý linh cốt
-                        </a>`;
-            }
-            if (EnumRoleList.find(e => e == 17)){
-                html += `<a class="nav-link  my-1 _permission_" data-enum="17" href="/StorageMap">
-                            <i class="fa-solid fa-diagram-project fa-1_5x me-2"></i>
-                            Sơ đồ lưu trữ
-                        </a>`;
-            }
-            if (EnumRoleList.find(e => e == 21)){
-                html += `<a class="nav-link  my-1 _permission_" data-enum="21" href="/Reminder">
-                            <i class="fa-regular fa-note-sticky fa-1_5x me-2"></i>
-                            Nhắc nhở
-                        </a>`;
-            }
-            if (EnumRoleList.find(e => e == 14)){
-            html += `<a class="nav-link  my-1 _permission_" data-enum="14" href="/Configs">
-                        <i class="fa-solid fa-gear fa-1_5x me-2"></i>
-                        Cấu hình
-                    </a>`;
-            }
-            if (EnumRoleList.find(e => e == 14)) {
-                html += `<a class="nav-link  my-1 _permission_" data-enum="14" href="/HistoryLogin">
-                                <i class="fa-solid fa-gear fa-1_5x me-2"></i>
-                                Lịch sử đăng nhập
-                            </a>`;
-            }
-    if (Userdata.roleIdList.find(e => e == ERoleType.Admin || e == ERoleType.Reporter || e == ERoleType.User)) {
-                html += `<div id="div_user_QRcode" style="cursor: pointer;" class="nav-link  my-1" data-enum="14" href="">
-                            <i class="fa fa-qrcode fa-1_5x me-2"></i> QR Telegram
-                         </div>`;
-            }
-
-            $("#accordionSidenav").html(html)
-
-            let pathname = window.location.pathname;
-            let element_ = $("a[href='" + pathname + "']");
-            if (pathname == "/User" || pathname == "/Tenants" ) {
-                $("#category_").addClass("active");
-                $("#menu-category").addClass("show");
-            }
-            // else
-            {
-                if (element_.length > 0) element_.addClass("active")
-            }
-        }
-        function removeColumnNotEditAndDelete(){
-
-            let pathname = window.location.pathname;
-            switch (pathname) {
-                case "/User": {
-                    if (!checkPermissionGroupExist(["8", "9"], Userdata.enumActionList)) {
-                        $("#gridId").data("kendoGrid").hideColumn(8);
+            function menu(EnumRoleList) {
+                
+                if (!EnumRoleList) return;
+                    let listDanhMuc = [1,5,9,13,17,21,25,29,33,37];
+                    let html = "";
+                    if (EnumRoleList.find(e => listDanhMuc.includes(e))) {
+                    html += ` <a id="category_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-category" aria-expanded="false" aria-controls="menu-category">
+                                                <div class="nav-link-icon"><i class="fa-solid fa-bars-staggered fa-1_5x me-2"></i></div>
+                                                Danh mục
+                                                <div class="sidenav-collapse-arrow">
+                                                    <i class="fas fa-angle-down"></i>
+                                                </div>
+                                            </a>`;
+                    html += `
+                            <div class="nav collapse" id="menu-category" data-bs-parent="#accordionSidenav">
+                                 <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">`;
+                    if (EnumRoleList.find(e => e == 1)){
+                        html += `<a class="nav-link _permission_" data-enum="1" href="/User/Index">Người dùng</a>`;
                     }
-                    break;
-                }
-                case "/Tenants": {
-
-                    if (!checkPermissionGroupExist(["12", "13"], Userdata.enumActionList)) {
-                        $("#tenantListGrid").data("kendoGrid").hideColumn(4);
+                    if (EnumRoleList.find(e => e == 5)){
+                        html += `<a class="nav-link _permission_" data-enum="5" href="/Vendor/Index">Nhà cung cấp</a>`;
                     }
-                    break;
-                }
-                case "/Urn": {
-
-                    if (!checkPermissionGroupExist(["4", "5"], Userdata.enumActionList) && !(Userdata.roleIdList.includes(ERoleType.User) && _isMobile)) {
-                        $("#gridId").data("kendoGrid").hideColumn(8);
+                    if (EnumRoleList.find(e => e == 9)){
+                        html += `<a class="nav-link _permission_" data-enum="9" href="/Customer/Index">Khách hàng</a>`;
                     }
-                    break;
-                }
-                case "/StorageMap": {
-
-                    if (!checkPermissionGroupExist(["18", "19"], Userdata.enumActionList)) {
-                        $("#gridId").data("kendoGrid").hideColumn(5);
+                    if (EnumRoleList.find(e => e == 13)){
+                        html += `<a class="nav-link _permission_" data-enum="13" href="/Product/Index">Hàng hoá</a>`;
                     }
-                    break;
-                }
-                case "/Reminder": {
-
-                    // if (!checkPermissionGroupExist(["1"], Userdata.enumActionList)) {
-                    //     $(gridId).data("kendoGrid").hideColumn(5);
+                    if (EnumRoleList.find(e => e == 17)){
+                        html += `<a class="nav-link _permission_" data-enum="17" href="/Unit/Index">Đơn vị</a>`;
+                    }
+                    if (EnumRoleList.find(e => e == 21)){
+                        html += `<a class="nav-link _permission_" data-enum="21" href="/Category/Index">Quy cách</a>`;
+                    }
+                    //ko dùng nữa
+                    // if (EnumRoleList.find(e => e == 25)){
+                    //     html += `<a class="nav-link _permission_" data-enum="25" href="/">Cấu hình thuế</a>`;
                     // }
-                    break;
-                }
-                case "/Configs": {
-
-                    if (!checkPermissionGroupExist(["15"], Userdata.enumActionList)) {
-                        $("#configListGrid").data("kendoGrid").hideColumn(6);
+                    if (EnumRoleList.find(e => e == 29)){
+                            html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate/Index">Loại mặt hàng</a>`;
                     }
-                    break;
+                    if (EnumRoleList.find(e => e == 33)){
+                            html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index">Vật liệu</a>`;
+                    }
+                    if (EnumRoleList.find(e => e == 37)){
+                            html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index">Phân loại hàng hoá</a>`;
+                    }
+                    html += `</nav>
+                                            </div>`;
                 }
-                default:
-                    return;
+
+                if (EnumRoleList.find(e => e == 40)){
+                    html += `<a class="nav-link my-1 _permission_" data-enum="40" href="/PurchaseOrder/Index">
+                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
+                                Tạo đơn hàng
+                            </a>`;
+                }
+                if (EnumRoleList.find(e => e == 41)){
+                    html += `<a class="nav-link my-1 _permission_" data-enum="41" href="/PurchaseOrder/Index">
+                                <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
+                                Danh sách đơn hàng
+                            </a>`;
+                }
+                if (EnumRoleList.find(e => e == 44)){
+                    html += `<a class="nav-link  my-1 _permission_" data-enum="44" href="/PurchaseAgreement/Index">
+                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
+                                Tổng hợp đơn
+                                        <span id="badge-sent" data-role="badge" class="k-badge k-badge-solid k-badge-solid-success k-badge-md k-rounded-full k-badge-inline k-ml-2" style="background-color: var(--bs-danger);">34</span>
+                            </a>`;
+                }
+                if (EnumRoleList.find(e => e == 45)){
+                    html += `<a class="nav-link  my-1 _permission_" data-enum="45" href="/PurchaseAgreement/Index">
+                                <i class="fa-solid fa-diagram-project fa-1_5x me-2"></i>
+                                Danh sách tổng hợp đơn
+                            </a>`;
+                }
+
+        // if (Userdata.roleIdList.find(e => e == ERoleType.Admin || e == ERoleType.Reporter || e == ERoleType.User)) {
+        //             html += `<div id="div_user_QRcode" style="cursor: pointer;" class="nav-link  my-1" data-enum="14" href="">
+        //                         <i class="fa fa-qrcode fa-1_5x me-2"></i> QR Telegram
+        //                      </div>`;
+        //         }
+
+                $("#accordionSidenav").html(html)
+
+                let pathname = window.location.pathname;
+                let element_ = $("a[href='" + pathname + "']");
+                let listUrl = ["/User/Index", "/Vendor/Index", "/Customer/Index", "/Product/Index", "/Unit/Index", "/Category/Index", "/TaxRateConfig/Index", "/SpecialProductTaxRate/Index", "/Material/Index", "/ProcessingType/Index"];
+                if (listUrl.includes(pathname)) {
+                    $("#category_").addClass("active");
+                    $("#menu-category").addClass("show");
+                }
+                // else
+                {
+                    if (element_.length > 0) element_.addClass("active")
+                }
             }
-        }
+            function removeColumnNotEditAndDelete(){
+
+                let pathname = window.location.pathname;
+                switch (pathname) {
+                    // case "/User": {
+                    //     if (!checkPermissionGroupExist(["8", "9"], Userdata.enumActionList)) {
+                    //         $("#gridId").data("kendoGrid").hideColumn(8);
+                    //     }
+                    //     break;
+                    // }
+                    // case "/Tenants": {
+
+                    //     if (!checkPermissionGroupExist(["12", "13"], Userdata.enumActionList)) {
+                    //         $("#tenantListGrid").data("kendoGrid").hideColumn(4);
+                    //     }
+                    //     break;
+                    // }
+                    // case "/Urn": {
+
+                    //     if (!checkPermissionGroupExist(["4", "5"], Userdata.enumActionList) && !(Userdata.roleIdList.includes(ERoleType.User) && _isMobile)) {
+                    //         $("#gridId").data("kendoGrid").hideColumn(8);
+                    //     }
+                    //     break;
+                    // }
+                    // case "/StorageMap": {
+
+                    //     if (!checkPermissionGroupExist(["18", "19"], Userdata.enumActionList)) {
+                    //         $("#gridId").data("kendoGrid").hideColumn(5);
+                    //     }
+                    //     break;
+                    // }
+                    // case "/Reminder": {
+
+                    //     // if (!checkPermissionGroupExist(["1"], Userdata.enumActionList)) {
+                    //     //     $(gridId).data("kendoGrid").hideColumn(5);
+                    //     // }
+                    //     break;
+                    // }
+                    // case "/Configs": {
+
+                    //     if (!checkPermissionGroupExist(["15"], Userdata.enumActionList)) {
+                    //         $("#configListGrid").data("kendoGrid").hideColumn(6);
+                    //     }
+                    //     break;
+                    // }
+                    // default:
+                    //     return;
+                }
+            }
 
 
-        $(document).ready(function () {
-           
-            ajax("GET", "/User/Authentication", null, (response) => {
-                $("#pnAccount").text("Xin chào: " + response.data.name);
-              
-                // $("#titleHeader").text("An lạc tịnh đường " + response.data.tenantName);
-                Userdata = response.data;
-                menu(Userdata.enumActionList)
-                NotificationForUser.constructor();
-                CheckPermission()
-                removeColumnNotEditAndDelete()
-               
-                $("#div_user_QRcode").click(function (e) {
-                    e.preventDefault();
-                    ajax("GET", "/Home/QRCode", null, (res) => {
-                        $("#QRcode_Popup .modal-body img").prop("src", res.data);
-                        $("#QRcode_Popup").modal("show");
-                    }, null, false);
-                });
+            $(document).ready(function () {
 
-            },
-                () => {
-                    location.href = 'Account/Logout';
-                }, false);
-        });
+                ajax("GET", "/User/Authentication", null, (response) => {
+                    $("#pnAccount").text("Xin chào: " + response.data.name);
+
+                    // $("#titleHeader").text("An lạc tịnh đường " + response.data.tenantName);
+                    Userdata = response.data;
+                    menu(Userdata.enumActionList)
+                    // NotificationForUser.constructor();
+                    CheckPermission()
+                    removeColumnNotEditAndDelete()
+
+                    $("#div_user_QRcode").click(function (e) {
+                        e.preventDefault();
+                        ajax("GET", "/Home/QRCode", null, (res) => {
+                            $("#QRcode_Popup .modal-body img").prop("src", res.data);
+                            $("#QRcode_Popup").modal("show");
+                        }, null, false);
+                    });
+
+                },
+                    () => {
+                        location.href = 'Account/Logout';
+                    }, false);
+            });
     </script>
 </body>
 </html>

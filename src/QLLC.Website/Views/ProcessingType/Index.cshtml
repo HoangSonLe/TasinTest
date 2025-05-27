@@ -32,7 +32,6 @@
 
         let formData = {
             id: 0,
-            code: "",
             name: "",
             name_EN: "",
             description :"",
@@ -52,15 +51,6 @@
             type: "group",
             items: [
 
-                {
-                    field: "code",
-                    title: "Mã phân loại",
-                    label: "Mã phân loại (*):",
-                    validation: {
-                        validationMessage: "Vui lòng nhập mã phân loại",
-                        required: true
-                    },
-                },
                 {
                     field: "name",
                     title: "Phân loại",
@@ -222,6 +212,7 @@
                     },
                 },
                 serverPaging: true,
+                serverFiltering: true,
                 page: 1,
                 pageSize: 20,
                 schema: {
@@ -322,7 +313,6 @@
         });
         $("#search").click(async function (e) {
             var grid = $(gridId).data("kendoGrid");
-            grid.dataSource.page(1);
             grid.dataSource.filter({});
         });
         $("#exportExcel").click(async function (e) {

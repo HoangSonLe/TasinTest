@@ -19,21 +19,19 @@ namespace Tasin.Website.Common.Enums
         SystemAdmin = 1,
         [Description("Admin")]
         Admin,
-        [Description("Reporter")]
-        Reporter,
         [Description("Người dùng")]
-        User
+        User,
+        //[Description("Reporter")]
+        //Reporter,
     }
     public enum ELevelRole
     {
         SystemAdmin = 1,
         Admin,
-        Reporter,
-        User
+        User,
+        //Reporter,
     }
-    public enum EActionRole
-    {
-    }
+
     public enum EGender
     {
         [Description("Không xác định")]
@@ -64,4 +62,68 @@ namespace Tasin.Website.Common.Enums
         UrlAndAccount,
     }
 
+    public enum EActionRole
+    {
+        CREATE_USER,
+        READ_USER,
+        UPDATE_USER,
+        DELETE_USER,
+
+        CREATE_VENDOR,
+        READ_VENDOR,
+        UPDATE_VENDOR,
+        DELETE_VENDOR,
+
+        CREATE_CUSTOMER,
+        READ_CUSTOMER,
+        UPDATE_CUSTOMER,
+        DELETE_CUSTOMER,
+
+        CREATE_PRODUCT,
+        READ_PRODUCT,
+        UPDATE_PRODUCT,
+        DELETE_PRODUCT,
+
+        CREATE_UNIT,
+        READ_UNIT,
+        UPDATE_UNIT,
+        DELETE_UNIT,
+
+        CREATE_CATEGORY,
+        READ_CATEGORY,
+        UPDATE_CATEGORY,
+        DELETE_CATEGORY,
+
+        CREATE_TAXRATECONFIG,
+        READ_TAXRATECONFIG,
+        UPDATE_TAXRATECONFIG,
+        DELETE_TAXRATECONFIG,
+
+        CREATE_SPECIALPRODUCTTAXRATE,
+        READ_SPECIALPRODUCTTAXRATE,
+        UPDATE_SPECIALPRODUCTTAXRATE,
+        DELETE_SPECIALPRODUCTTAXRATE,
+
+        CREATE_MATERIAL,
+        READ_MATERIAL,
+        UPDATE_MATERIAL,
+        DELETE_MATERIAL,
+        
+        CREATE_PROCESSING_TYPE,
+        READ_PROCESSING_TYPE,
+        UPDATE_PROCESSING_TYPE,
+        DELETE_PROCESSING_TYPE,
+
+        CREATE_PURCHASE_ORDER,
+        READ_PURCHASE_ORDER,
+        UPDATE_PURCHASE_ORDER,
+        DELETE_PURCHASE_ORDER,
+
+        CREATE_PURCHASE_AGREEMENT,
+        READ_PURCHASE_AGREEMENT,
+        UPDATE_PURCHASE_AGREEMENT,
+        DELETE_PURCHASE_AGREEMENT,
+
+
+    }
 }
