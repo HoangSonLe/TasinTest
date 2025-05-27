@@ -60,7 +60,7 @@
                     },
                 },
                 {
-                    field: "name",
+                    field: "name_EN",
                     title: "Loại mặt hàng tiếng anh",
                     label: "Loại mặt hàng tiếng anh (*):",
                     validation: {
@@ -144,7 +144,7 @@
     }
 
     async function editSpecialProductTaxRate(id) {
-        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById", { specialProductTaxRateId: id }, (response) => {
+        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById/"+id, { specialProductTaxRateId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
