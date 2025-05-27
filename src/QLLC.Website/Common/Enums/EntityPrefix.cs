@@ -17,5 +17,6 @@ namespace Tasin.Website.Common.Enums
         public const string PurchaseOrder = "PURCHASE_ORDER";
         public const string PurchaseAgreement = "PURCHASE_AGREEMENT";
         public const string PAGroupCode = "PA_GROUP";
+        public const string Invoice = "INVOICE";
     }
 }

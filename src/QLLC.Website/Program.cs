@@ -16,6 +16,7 @@ using Tasin.Website.Common.Util;
 using Tasin.Website.DAL.Interfaces;
 using Tasin.Website.DAL.Repository;
 using Tasin.Website.DAL.Services;
+using Tasin.Website.DAL.Services.Interfaces;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.DAL.Services.WebServices;
 using Tasin.Website.Domains.DBContexts;
@@ -223,6 +224,7 @@ try
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
     builder.Services.AddScoped<IPurchaseAgreementService, PurchaseAgreementService>();
+    builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
