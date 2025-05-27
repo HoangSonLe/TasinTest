@@ -88,10 +88,18 @@
                     ...formData,
                     ...e.model,
                 };
-                var response = ajax("POST", "/ProcessingType/CreateOrUpdateProcessingType", dataItem, () => {
-                    $(gridId).data("kendoGrid").dataSource.filter({});
-                    myWindow.data("kendoWindow").close();
-                });
+                if( dataItem.id > 0){
+                    var response = ajax("PUT", "/ProcessingType/UpdateProcessingType/"+dataItem.id, dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+                else{
+                    var response = ajax("POST", "/ProcessingType/Create" , dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
             },
             close: function (e) {
                 $(this.element).empty();
@@ -137,7 +145,7 @@
     }
 
     async function editProcessingType(id) {
-        var response = ajax("GET", "/ProcessingType/GetProcessingTypeById", { userId: id }, (response) => {
+        var response = ajax("GET", "/ProcessingType/GetProcessingTypeById/"+id, { processingTypeId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -152,8 +160,8 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("GET", "/ProcessingType/DeleteProcessingTypeById", {
-                userId: id
+            var response = ajax("GET", "/ProcessingType/DeleteProcessingTypeById/"+id, {
+                processingTypeId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
@@ -226,6 +234,15 @@
                             }
                         }
                         return response.data;
+                    },
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
                     },
                     data: "data",
                     total: "total"

@@ -87,8 +87,8 @@ namespace Tasin.Website.Controllers
         /// <returns>Result of the operation</returns>
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.DELETE_USER])]
         [HttpDelete]
-        [Route("User/DeleteUserById")]
-        public async Task<Acknowledgement> DeleteUserById(int userId)
+        [Route("User/DeleteUserById/{userId}")]
+        public async Task<Acknowledgement> DeleteUserById([FromRoute] int userId)
         {
             return await _userService.DeleteUserById(userId);
         }
@@ -98,10 +98,10 @@ namespace Tasin.Website.Controllers
         /// </summary>
         /// <param name="userId">User ID</param>
         /// <returns>Result of the operation</returns>
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER])]
-        [HttpPost]
-        [Route("User/ResetUserPasswordById")]
-        public async Task<Acknowledgement> ResetUserPasswordById(int userId)
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_USER, (int)EActionRole.CREATE_USER])]
+        [HttpPut]
+        [Route("User/ResetUserPasswordById/{userId}")]
+        public async Task<Acknowledgement> ResetUserPasswordById([FromRoute] int userId)
         {
             return await _userService.ResetUserPasswordById(userId);
         }
