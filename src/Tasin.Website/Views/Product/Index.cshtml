@@ -1,5 +1,642 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Hàng hoá";
 }
+
+<div>
+
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    @*   <div class="demo-section wide title">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <nav id="breadcrumb"></nav>
+    </div> *@
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+<script type="text/x-kendo-template" id="template_form_header">
+    <div style="width:100%">
+        <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base _permission_' data-enum='6' style='margin-right: 5px;'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
+        <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
+    </div>
+</script>
+<script type="text/javascript">
+    let gridId = "#gridId";
+
+    function renderCreateOrEditForm(isCreate = true, dataProduct = {}) {
+        let myWindow = $("#window");
+        $("#window").html("<form id='formCreateAndEdit'></form>");
+
+        let formData = {
+            id: 0,
+            name: "",
+            name_EN: "",
+            unit_ID: null,
+            category_ID: null,
+            processingType_ID: null,
+            taxRate: null,
+            companyTaxRate: null,
+            consumerTaxRate: null,
+            specialProductTaxRate_ID: null,
+            lossRate: null,
+            material_ID: null,
+            profitMargin: null,
+            note: null,
+            isDiscontinued: null,
+            processingFee: null,
+            // status: "",
+            ...dataProduct
+        };
+        let strSubmit = "Thêm";
+        let title = "THÊM MỚI"
+        let element;
+        if (isCreate == false) {
+            strSubmit = "Sửa";
+            title = "CẬP NHẬT";
+        }
+        $("#formCreateAndEdit").kendoForm({
+            layout: "grid",
+            grid: {
+                cols: 2,
+                gutter: "1rem"
+            },
+            formData: formData,
+            type: "group",
+            items: [
+                {
+                    field: "name",
+                    title: "Hàng hoá",
+                    label: "Hàng hoá (*):",
+                    colSpan: 1,
+                    validation: {
+                        validationMessage: "Vui lòng nhập hàng hoá",
+                        required: true
+                    },
+                },
+                {
+                    field: "name_EN",
+                    title: "Hàng hoá tiếng anh",
+                    label: "Hàng hoá tiếng anh:",
+                    colSpan: 1,
+                },
+                {
+                    field: "unit_ID",
+                    title: "Đơn vị",
+                    label: "Đơn vị:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn đơn vị",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Unit/GetUnitList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
+                },
+                {
+                    field: "category_ID",
+                    title: "Quy cách",
+                    label: "Quy cách:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn quy cách",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Category/GetCategoryList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
+                },
+                {
+                    field: "processingType_ID",
+                    title: "Phân loại hàng hoá",
+                    label: "Phân loại hàng hoá:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn phân loại hàng hoá",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/ProcessingType/GetProcessingTypeList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
+                },
+                {
+                    field: "taxRate",
+                    title: "Mức thuế",
+                    label: "Mức thuế:",
+                    colSpan: 1,
+                },
+                {
+                    field: "companyTaxRate",
+                    title: "Mức thuế doanh nghiệp",
+                    label: "Mức thuế doanh nghiệp:",
+                    colSpan: 1,
+                },
+                {
+                    field: "consumerTaxRate",
+                    title: "Mức thuế người tiêu dùng",
+                    label: "Mức thuế người tiêu dùng:",
+                    colSpan: 1,
+                },
+                {
+                    field: "specialProductTaxRate_ID",
+                    title: "Loại mặt hàng",
+                    label: "Loại mặt hàng:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn loại mặt hàng",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/SpecialProductTaxRate/GetSpecialProductTaxRateList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
+                },
+                {
+                    field: "lossRate",
+                    title: "Hao hụt",
+                    label: "Hao hụt:",
+                    colSpan: 1,
+                },
+                {
+                    field: "material_ID",
+                    title: "Nguyên liệu",
+                    label: "Nguyên liệu:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn nguyên liệu",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Material/GetMaterialList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
+                },
+                {
+                    field: "profitMargin",
+                    title: "Lợi nhuận",
+                    label: "Lợi nhuận:",
+                    colSpan: 1,
+                },
+                {
+                    field: "note",
+                    title: "Ghi chú",
+                    label: "Ghi chú:",
+                    colSpan: 2,
+                },
+                {
+                    field: "isDiscontinued",
+                    title: "Ngừng sử dụng",
+                    label: "Ngừng sử dụng:",
+                    colSpan: 1,
+                },
+                {
+                    field: "processingFee",
+                    title: "Mức phí",
+                    label: "Mức phí:",
+                    colSpan: 1,
+                },
+            ],
+            messages: {
+                submit: strSubmit, clear: "Đặt lại"
+            },
+            submit: function (e) {
+                e.preventDefault();
+                let dataItem = {
+                    ...formData,
+                    ...e.model,
+                };
+                if( dataItem.id > 0){
+                    var response = ajax("PUT", "/Product/UpdateProduct/"+dataItem.id, dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+                else{
+                    var response = ajax("POST", "/Product/Create" , dataItem, () => {
+                        $(gridId).data("kendoGrid").dataSource.filter({});
+                        myWindow.data("kendoWindow").close();
+                    });
+                }
+            },
+            close: function (e) {
+                $(this.element).empty();
+            },
+        });
+        if(!isCreate){
+
+        }
+
+        // if (Userdata.roleIdList?.includes(ERoleType.Admin) == false) {
+        //     $("#userName").data("kendoTextBox").enable(false);
+        // }
+
+
+        setTimeout(() => {
+            $("input[title='name']").focus();
+        }, 500);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "800px",
+            // height: "50vh",
+            title: "",
+            visible: false,
+            actions: ["Close"],
+            resizable: false,
+            draggable: false,
+            modal: true,
+            close: function (e) {
+                //$("#window").empty();
+                remove();
+            },
+        }).data("kendoWindow").title(title).center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    async function editProduct(id) {
+        var response = ajax("GET", "/Product/GetProductById/"+id, { productId: id }, (response) => {
+            renderCreateOrEditForm(false, response.data);
+        }, null, false);
+    }
+    function deleteProduct(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA HÀNG HOÁ",
+            content: "Bạn có chắc chắn xóa hàng hoá này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            var response = ajax("DELETE", "/Product/DeleteProductById/"+id, {
+                productId: id
+            }, () => {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            });
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
+
+
+    function getSearchModel() {
+        let searchString = $("#searchString").val();
+
+        return {
+            searchString,
+        };
+    }
+    function InitGrid() {
+        let htmlToolbar = `
+                <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                       <div class="row gx-0 row-gap-2 w-100">
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                                <div class="pe-1">
+                                    <label for="searchString">Tìm kiếm:</label>
+                                    <input type="text" class=" w-100" id="searchString"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                                <div class="pe-1">
+                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+            `;
+
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Product/GetProductList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+
+                    },
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+
+                        }
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            toolbar: htmlToolbar,
+            // toolbar: "<div id='toolbar' style='width:100%'></div><div class='report-toolbar'>\</div>",
+            columns: [
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100
+                },
+                {
+                    field: "code",
+                    title: "Mã hàng hoá",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "name",
+                    title: "Hàng hoá",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "name_EN",
+                    title: "Hàng hoá tiếng anh",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 200,
+                },
+                {
+                    field: "description",
+                    title: "Mô tả",
+                    width: 200,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                },
+                {
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
+                    width: 200,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm:ss")#',
+                },
+                {
+                    field: "updatedByName",
+                    title: "Người cập nhật",
+                    width: 150,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                },
+                {
+                    field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                        template: "<button style='margin-right:5px;' onclick=editProduct(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                        <button style='margin-right:5px;' onclick=deleteProduct(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                }
+            ],
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+
+
+    }
+    function InitKendoToolBar() {
+
+        $("#search").kendoButton({
+            icon: "search"
+        });
+        $("#search").click(async function (e) {
+            var grid = $(gridId).data("kendoGrid");
+            grid.dataSource.filter({});
+        });
+        $("#exportExcel").click(async function (e) {
+            ExportExcel();
+        });
+        $("#searchString").kendoTextBox({
+            icon: {
+                type: "search",
+                position: "end"  // Có thể là "start" hoặc "end"
+            },
+            placeholder: "Nhập từ khóa tìm kiếm..."
+        });
+        $("#create").kendoButton({
+            icon: "plus"
+        });
+
+        $("#export").click(async function (e) {
+            let grid = $(gridId).data("kendoGrid");
+            grid.saveAsExcel();
+        });
+
+
+        $("#create").on('click', function () {
+            renderCreateOrEditForm();
+        });
+
+    };
+
+</script>
+<script type="text/javascript">
+    InitGrid();
+    InitKendoToolBar();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+
+    });
+</script>
+<style>
+    .k-form-buttons {
+        justify-content: flex-end;
+    }
+
+    /* Responsive grid layout for product form */
+    @@media (max-width: 768px) {
+        #formCreateAndEdit .k-form-layout {
+            grid-template-columns: 1fr !important;
+        }
+
+        #formCreateAndEdit .k-form-field {
+            grid-column: 1 !important;
+        }
+
+        /* Adjust window width for mobile */
+        .k-window {
+            width: 95% !important;
+            max-width: 500px !important;
+        }
+    }
+
+    /* Ensure proper spacing in grid layout */
+    #formCreateAndEdit .k-form-layout {
+        gap: 1rem;
+    }
+
+    #formCreateAndEdit .k-form-field {
+        margin-bottom: 0;
+    }
+</style>

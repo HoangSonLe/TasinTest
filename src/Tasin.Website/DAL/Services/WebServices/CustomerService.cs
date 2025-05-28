@@ -131,13 +131,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return ack;
             }
             var phone = postData.PhoneContact;
-            var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
-            if (validatePhoneMessage != null)
+            if (!string.IsNullOrEmpty(phone))
             {
-                ack.AddMessage(validatePhoneMessage);
-                return ack;
+                var validatePhoneMessage = Validate.ValidPhoneNumber(ref phone);
+                if (validatePhoneMessage != null)
+                {
+                    ack.AddMessage(validatePhoneMessage);
+                    return ack;
+                }
+                postData.PhoneContact = phone;
+
             }
-            postData.PhoneContact = phone;
             if (!string.IsNullOrWhiteSpace(postData.Email))
             {
                 var isValidEmail = Validate.ValidEmail(postData.Email);
