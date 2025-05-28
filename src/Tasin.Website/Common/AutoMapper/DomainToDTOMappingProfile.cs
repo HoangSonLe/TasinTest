@@ -68,7 +68,7 @@ namespace Tasin.Website.Common.AutoMapper
             // PurchaseOrder mapping
             CreateMap<Purchase_Order, PurchaseOrderViewModel>()
                 .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID))
-                //.ForMember(dest => dest.Status, opts => opts.MapFrom(src => ParsePOStatus(src.Status)))
+                .ForMember(dest => dest.Status, opts => opts.MapFrom(src => ParsePOStatus(src.Status)))
                 .ForMember(dest => dest.CustomerName, opts => opts.Ignore());
             CreateMap<PurchaseOrderViewModel, Purchase_Order>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id))
@@ -119,15 +119,20 @@ namespace Tasin.Website.Common.AutoMapper
             return EPAStatus.New;
         }
 
-        //private static EPOStatus ParsePOStatus(string status)
-        //{
-        //    if (string.IsNullOrEmpty(status))
-        //        return EPOStatus.New;
+        private static EPOStatus ParsePOStatus(string status)
+        {
+            if (string.IsNullOrEmpty(status))
+                return EPOStatus.New;
 
-        //    if (int.TryParse(status, out var statusInt) && Enum.IsDefined(typeof(EPOStatus), statusInt))
-        //        return (EPOStatus)statusInt;
+            // Try to parse as enum name first (e.g., "New", "Pending", etc.)
+            if (Enum.TryParse<EPOStatus>(status, out var enumResult))
+                return enumResult;
 
-        //    return EPOStatus.New;
-        //}
+            // Try to parse as integer value (e.g., "0", "1", "2", etc.)
+            if (int.TryParse(status, out var statusInt) && Enum.IsDefined(typeof(EPOStatus), statusInt))
+                return (EPOStatus)statusInt;
+
+            return EPOStatus.New;
+        }
     }
 }

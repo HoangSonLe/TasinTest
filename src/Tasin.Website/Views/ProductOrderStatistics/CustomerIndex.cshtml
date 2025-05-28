@@ -276,6 +276,18 @@
             dataTextField: "text",
             dataValueField: "value",
             optionLabel: "-- Chọn khách hàng --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn khách hàng --";
+                }
+                return dataItem.text;
+            },
             dataSource: {
                 transport: {
                     read: {
@@ -285,7 +297,12 @@
                 },
                 schema: {
                     parse: function (response) {
-                        return response.isSuccess ? response.data : [];
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
                     }
                 }
             }

@@ -97,7 +97,76 @@ namespace Tasin.Website.DAL.Services.WebServices
                     filter: c => customerIds.Contains(c.ID)
                 );
 
-                // Populate customer names
+                // Get purchase order items for all purchase orders
+                var purchaseOrderIds = purchaseOrderViewModels.Select(p => p.Id).ToList();
+                var allPurchaseOrderItems = await _purchaseOrderItemRepository.ReadOnlyRespository.GetAsync(
+                    filter: poi => purchaseOrderIds.Contains(poi.PO_ID)
+                );
+
+                var purchaseOrderItemViewModels = _mapper.Map<List<PurchaseOrderItemViewModel>>(allPurchaseOrderItems);
+
+                // Get product, unit, and processing type names for all items (only if there are items)
+                List<Product> products = new List<Product>();
+                List<Unit> units = new List<Unit>();
+                List<ProcessingType> processingTypes = new List<ProcessingType>();
+
+                if (purchaseOrderItemViewModels.Any())
+                {
+                    var productIds = purchaseOrderItemViewModels.Select(p => p.Product_ID).Distinct().ToList();
+                    var unitIds = purchaseOrderItemViewModels.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
+                    var processingTypeIds = purchaseOrderItemViewModels.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
+
+                    if (productIds.Any())
+                    {
+                        products = await _productRepository.ReadOnlyRespository.GetAsync(
+                            filter: p => productIds.Contains(p.ID)
+                        );
+                    }
+
+                    if (unitIds.Any())
+                    {
+                        units = await _unitRepository.ReadOnlyRespository.GetAsync(
+                            filter: u => unitIds.Contains(u.ID)
+                        );
+                    }
+
+                    if (processingTypeIds.Any())
+                    {
+                        processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(
+                            filter: pt => processingTypeIds.Contains(pt.ID)
+                        );
+                    }
+                }
+
+                // Populate names for purchase order items
+                foreach (var item in purchaseOrderItemViewModels)
+                {
+                    var product = products.FirstOrDefault(p => p.ID == item.Product_ID);
+                    if (product != null)
+                    {
+                        item.ProductName = product.Name;
+                    }
+
+                    if (item.Unit_ID.HasValue)
+                    {
+                        var unit = units.FirstOrDefault(u => u.ID == item.Unit_ID.Value);
+                        if (unit != null)
+                        {
+                            item.UnitName = unit.Name;
+                        }
+                    }
+
+                    if (item.ProcessingType_ID.HasValue)
+                    {
+                        var processingType = processingTypes.FirstOrDefault(pt => pt.ID == item.ProcessingType_ID.Value);
+                        if (processingType != null)
+                        {
+                            item.ProcessingTypeName = processingType.Name;
+                        }
+                    }
+                }
+
+                // Populate customer names and purchase order items
                 foreach (var purchaseOrder in purchaseOrderViewModels)
                 {
                     var customer = customers.FirstOrDefault(c => c.ID == purchaseOrder.Customer_ID);
@@ -105,6 +174,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         purchaseOrder.CustomerName = customer.Name;
                     }
+
+                    // Assign purchase order items to each purchase order
+                    purchaseOrder.PurchaseOrderItems = purchaseOrderItemViewModels
+                        .Where(poi => poi.PO_ID == purchaseOrder.Id)
+                        .ToList();
                 }
 
                 var result = new JsonResultPaging<List<PurchaseOrderViewModel>>
@@ -375,7 +449,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                if(purchaseOrder.Status != EPOStatus.New.ToString())
+                if (purchaseOrder.Status != EPOStatus.New.ToString())
                 {
                     ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng trạng thái mới).");
                     return ack;

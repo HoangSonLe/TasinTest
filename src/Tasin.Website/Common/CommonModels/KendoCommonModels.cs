@@ -96,7 +96,7 @@ namespace Tasin.Website.Common.CommonModels
     {
         public string Value { get; set; }
         public string Text { get; set; }
-        public dynamic Datas { get; set; }
+        public dynamic Data { get; set; }
     }
     public class DropdownListModel
     {

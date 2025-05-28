@@ -21,21 +21,24 @@ namespace Tasin.Website.Controllers
     {
         private IPurchaseOrderService _purchaseOrderService;
         private IInvoiceService _invoiceService;
+        private ICommonService _commonService;
         public PurchaseOrderController(
             IPurchaseOrderService purchaseOrderService,
             IInvoiceService invoiceService,
+            ICommonService commonService,
             IUserService userService,
             ILogger<PurchaseOrderController> logger,
             ICurrentUserContext currentUserContext) : base(logger, userService, currentUserContext)
         {
             _purchaseOrderService = purchaseOrderService;
             _invoiceService = invoiceService;
+            _commonService = commonService;
         }
 
         [HttpGet]
         [Route("PurchaseOrder/Index")]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_ORDER])]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             return View();
         }

@@ -33,7 +33,8 @@ namespace Tasin.Website.Common.Enums
         Vendor,
         Customer,
         Product,
-        User
+        User,
+        POStatus
     }
 
     public enum ECommonStatus

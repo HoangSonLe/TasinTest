@@ -332,16 +332,33 @@
             dataTextField: "text",
             dataValueField: "value",
             optionLabel: "-- Chọn nhà cung cấp --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn nhà cung cấp --";
+                }
+                return dataItem.text;
+            },
             dataSource: {
                 transport: {
                     read: {
                         url: "/Common/GetDataOptionsDropdown",
-                        data: { categoryType: "Vendor" }
+                        data: { type: "Vendor" }
                     }
                 },
                 schema: {
                     parse: function (response) {
-                        return response.isSuccess ? response.data : [];
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
                     }
                 }
             }
