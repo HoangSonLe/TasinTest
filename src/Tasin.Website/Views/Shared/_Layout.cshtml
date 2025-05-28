@@ -351,7 +351,7 @@
                     html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate/Index">Loại mặt hàng</a>`;
                 }
                 if (EnumRoleList.find(e => e == 33)) {
-                    html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index">Vật liệu</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index">Nguyên liệu</a>`;
                 }
                 if (EnumRoleList.find(e => e == 37)) {
                     html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index">Phân loại hàng hoá</a>`;
@@ -387,7 +387,7 @@
             }
 
             // Báo cáo menu
-            let listBaoCao = [46, 44]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
+            let listBaoCao = [41, 45]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
             if (EnumRoleList.find(e => listBaoCao.includes(e))) {
                 html += ` <a id="report_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-report" aria-expanded="false" aria-controls="menu-report">
                                                 <div class="nav-link-icon"><i class="fa-solid fa-chart-line fa-1_5x me-2"></i></div>
@@ -400,11 +400,11 @@
                             <div class="nav collapse" id="menu-report" data-bs-parent="#accordionSidenav">
                                  <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavReport">`;
 
-                if (EnumRoleList.find(e => e == 46)) { // READ_PURCHASE_AGREEMENT
-                    html += `<a class="nav-link _permission_" data-enum="106" href="/ProductOrderStatistics/Index">Thống kê sản phẩm đặt hàng</a>`;
+                if (EnumRoleList.find(e => e == 45)) { // READ_PURCHASE_AGREEMENT
+                    html += `<a class="nav-link _permission_" data-enum="45" href="/ProductOrderStatistics/Index">Thống kê sản phẩm đặt hàng</a>`;
                 }
-                if (EnumRoleList.find(e => e == 44)) { // READ_PURCHASE_ORDER
-                    html += `<a class="nav-link _permission_" data-enum="107" href="/ProductOrderStatistics/CustomerIndex">Thống kê khách hàng đặt hàng</a>`;
+                if (EnumRoleList.find(e => e == 41)) { // READ_PURCHASE_ORDER
+                    html += `<a class="nav-link _permission_" data-enum="41" href="/ProductOrderStatistics/CustomerIndex">Thống kê khách hàng đặt hàng</a>`;
                 }
 
                 html += `</nav>

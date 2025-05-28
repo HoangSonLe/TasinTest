@@ -52,7 +52,7 @@
 
         public static string ValidPhoneNumber(ref string phoneNumber)
         {
-            phoneNumber = Utils.ReplaceWhitespace(phoneNumber?.Trim(), "");
+            phoneNumber = Utils.ReplaceWhitespace(phoneNumber?.Trim() ?? "", "");
             if (string.IsNullOrEmpty(phoneNumber))
             {
                 return "Vui lòng nhập số điện thoại!";

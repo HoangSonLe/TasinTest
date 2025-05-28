@@ -33,7 +33,7 @@ namespace Tasin.Website.Controllers
         [Route("Customer/Index")]
         public IActionResult Index()
         {
-            ViewBag.CustomerTypeDatasource = EnumHelper.ToDropdownList<ECustomerType>();
+            ViewBag.CustomerTypeDatasource = EnumHelper.ToDropdownListStr<ECustomerType>();
             return View();
         }
 

@@ -60,6 +60,22 @@ namespace Tasin.Website.Common.Helper
             }
             return result;
         }
+        public static List<KendoDropdownListModel<string>> ToDropdownListStr<TEnum>()
+        {
+            var enumValues = Enum.GetValues(typeof(TEnum));
+            var result = new List<KendoDropdownListModel<string>>();
+            foreach(Enum e in enumValues)
+            {
+                var description = e.GetEnumDescription();
+                result.Add(new KendoDropdownListModel<string>
+                {
+                    Text = description,
+                    Value = e.ToString(),
+                    //Data = e.ToString()
+                });
+            }
+            return result;
+        }
 
     }
 }

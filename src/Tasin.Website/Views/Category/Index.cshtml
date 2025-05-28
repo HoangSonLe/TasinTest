@@ -64,16 +64,46 @@
                 {
                     field: "name_EN",
                     title: "Quy cách tiếng anh",
-                    label: "Quy cách tiếng anh (*):",
-                    validation: {
-                        validationMessage: "Vui lòng nhập quy cách tiếng anh",
-                        required: true
-                    },
+                    label: "Quy cách tiếng anh:",
                 },
                 {
                     field: "parent_ID",
                     title: "Quy cách cấp trên",
-                    label: "Quy cách cấp trên:",
+                    label: "Quy cách cấp trên:",editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn quy cách cấp trên",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        //filter: "contains",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Category/GetCategoryList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        // let filterStr = data?.filter?.filters[0]?.value || "";
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                            //searchString: filterStr
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
                     // validation: {
                     //     required: true
                     // },

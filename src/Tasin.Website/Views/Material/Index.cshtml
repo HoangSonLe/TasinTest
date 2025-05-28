@@ -63,16 +63,47 @@
                 {
                     field: "name_EN",
                     title: "Nguyên liệu tiếng anh",
-                    label: "Nguyên liệu tiếng anh (*):",
-                    validation: {
-                        validationMessage: "Vui lòng nhập nguyên liệu tiếng anh",
-                        required: true
-                    },
+                    label: "Nguyên liệu tiếng anh:",
                 },
                 {
                     field: "parent_ID",
                     title: "Nguyên liệu cấp trên",
                     label: "Nguyên liệu cấp trên:",
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn nguyên liệu cấp trên",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        //filter: "contains",
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Material/GetMaterialList",
+                                    dataType: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+
+                                        // let filterStr = data?.filter?.filters[0]?.value || "";
+                                        return {
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                            //searchString: filterStr
+                                        }
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering:true,
+                            page: 1,
+                            pageSize: 9999,
+                            schema: {
+                                data: "data.data",
+                                total: "data.total"
+                            },
+                        },
+                    },
                     // validation: {
                     //     required: true
                     // },

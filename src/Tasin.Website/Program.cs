@@ -222,6 +222,7 @@ try
     builder.Services.AddScoped<IMaterialService, MaterialService>();
     builder.Services.AddScoped<ISpecialProductTaxRateService, SpecialProductTaxRateService>();
     builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<IProductVendorService, ProductVendorService>();
     builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
     builder.Services.AddScoped<IPurchaseAgreementService, PurchaseAgreementService>();
     builder.Services.AddScoped<IInvoiceService, InvoiceService>();

@@ -26,6 +26,237 @@
 </script>
 <script type="text/javascript">
     let gridId = "#gridId";
+    function addVendorProduct(vendorId) {
+        let myWindow = $("#window");
+        $("#window").html("<div id='productVendorGrid'></div>");
+
+        let title = "THÊM NHIỀU HÀNG HOÁ CHO NHÀ CUNG CẤP";
+        let productVendorData = [];
+
+        // Initialize grid for adding multiple products
+        $("#productVendorGrid").kendoGrid({
+            dataSource: {
+                data: productVendorData,
+                schema: {
+                    model: {
+                        id: "Product_ID",
+                        fields: {
+                            Product_ID: { type: "number", validation: { required: true } },
+                            ProductName: { type: "string", editable: false },
+                            Price: { type: "number" },
+                            UnitPrice: { type: "number" },
+                            Priority: { type: "number" },
+                            Description: { type: "string" }
+                        }
+                    }
+                }
+            },
+            height: 400,
+            scrollable: true,
+            sortable: true,
+            filterable: false,
+            editable: {
+                mode: "incell",
+                createAt: "bottom"
+            },
+            toolbar: [
+                { name: "create", text: "Thêm sản phẩm" },
+                { name: "save", text: "Lưu tất cả" },
+                { name: "cancel", text: "Hủy" }
+            ],
+            columns: [
+                {
+                    field: "Product_ID",
+                    title: "Sản phẩm (*)",
+                    width: 200,
+                    editor: function(container, options) {
+                        $('<input required data-bind="value:' + options.field + '"/>')
+                            .appendTo(container)
+                            .kendoDropDownList({
+                                dataTextField: "name",
+                                dataValueField: "id",
+                                dataSource: {
+                                    transport: {
+                                        read: {
+                                            url: "/Product/GetProductList",
+                                            datatype: "json",
+                                        },
+                                        parameterMap: function (data, type) {
+                                            if (type == "read") {
+                                                return {
+                                                    pageSize: 100,
+                                                    pageNumber: 1
+                                                }
+                                            }
+                                        },
+                                    },
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    pageSize: 100,
+                                    schema: {
+                                        type: 'json',
+                                        parse: function (response) {
+                                            if (response.isSuccess == false) {
+                                                showErrorMessages(response.errorMessageList);
+                                                return { data: [], total: 0 }
+                                            }
+                                            return response.data;
+                                        },
+                                        model: {
+                                            id: "id",
+                                            fields: {
+                                                name: { type: "string" },
+                                                code: { type: "string" }
+                                            }
+                                        },
+                                        data: "data",
+                                        total: "total"
+                                    },
+                                },
+                                change: function(e) {
+                                    var selectedItem = this.dataItem();
+                                    if (selectedItem) {debugger
+                                        var grid = $("#productVendorGrid").data("kendoGrid");
+                                        var dataItem = grid.dataItem(container.closest("tr"));
+                                        dataItem.set("ProductName", selectedItem.name);
+                                    }
+                                }
+                            });
+                    },
+                    template: "#= ProductName || '' #"
+                },
+                {
+                    field: "Price",
+                    title: "Giá bán",
+                    width: 120,
+                    format: "{0:n0}",
+                    editor: function(container, options) {
+                        $('<input data-bind="value:' + options.field + '"/>')
+                            .appendTo(container)
+                            .kendoNumericTextBox({
+                                format: "n0",
+                                decimals: 0
+                            });
+                    }
+                },
+                {
+                    field: "UnitPrice",
+                    title: "Đơn giá",
+                    width: 120,
+                    format: "{0:n0}",
+                    editor: function(container, options) {
+                        $('<input data-bind="value:' + options.field + '"/>')
+                            .appendTo(container)
+                            .kendoNumericTextBox({
+                                format: "n0",
+                                decimals: 0
+                            });
+                    }
+                },
+                {
+                    field: "Priority",
+                    title: "Ưu tiên",
+                    width: 100,
+                    editor: function(container, options) {
+                        $('<input data-bind="value:' + options.field + '"/>')
+                            .appendTo(container)
+                            .kendoNumericTextBox({
+                                format: "n0",
+                                decimals: 0,
+                                min: 1
+                            });
+                    }
+                },
+                {
+                    field: "Description",
+                    title: "Mô tả",
+                    width: 200
+                },
+                {
+                    command: ["destroy"],
+                    title: "Thao tác",
+                    width: 100
+                }
+            ],
+            save: function(e) {
+                // Handle save event for individual rows
+            }
+        });
+
+        // Handle toolbar save button
+        $("#productVendorGrid").on("click", ".k-grid-save-changes", function(e) {
+            e.preventDefault();
+            saveAllProductVendors(vendorId);
+        });
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "900px",
+            height: "600px",
+            title: "",
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                remove();
+            },
+        }).data("kendoWindow").title(title).center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function saveAllProductVendors(vendorId) {
+        var grid = $("#productVendorGrid").data("kendoGrid");
+        var data = grid.dataSource.data();
+
+        if (data.length === 0) {
+            showErrorMessages(["Vui lòng thêm ít nhất một sản phẩm."]);
+            return;
+        }
+
+        // Validate required fields
+        var hasErrors = false;
+        var products = [];
+
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            if (!item.Product_ID) {
+                showErrorMessages(["Vui lòng chọn sản phẩm cho tất cả các dòng."]);
+                hasErrors = true;
+                break;
+            }
+
+            products.push({
+                Product_ID: item.Product_ID,
+                Price: item.Price || 0,
+                UnitPrice: item.UnitPrice || 0,
+                Priority: item.Priority || 1,
+                Description: item.Description || ""
+            });
+        }
+
+        if (hasErrors) return;
+
+        var requestData = {
+            VendorId: vendorId,
+            Products: products
+        };
+
+        var response = ajax("POST", "/ProductVendor/BulkAddProductsToVendor", requestData, () => {
+            $(gridId).data("kendoGrid").dataSource.filter({});
+            $("#window").data("kendoWindow").close();
+            showSuccessMessages(["Thêm sản phẩm thành công!"]);
+        });
+    }
 
     function renderCreateOrEditForm(isCreate = true, dataVendor = {}) {
         let myWindow = $("#window");
@@ -356,7 +587,8 @@
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=editVendor(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                        template: "<button style='margin-right:5px;' onclick=addVendorProduct(#=id#) title='Thêm hàng hoá' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_1' data-enum='8'><span class='k-icon k-i-plus k-button-icon'></span></button>\
+                        <button style='margin-right:5px;' onclick=editVendor(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
                         <button style='margin-right:5px;' onclick=deleteVendor(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
                 }
             ],
