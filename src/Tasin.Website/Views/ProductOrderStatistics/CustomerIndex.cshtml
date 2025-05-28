@@ -1,0 +1,745 @@
+@{
+    ViewData["Title"] = "Báo cáo thống kê sản phẩm đặt hàng theo khách hàng";
+}
+
+<div>
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+
+<script type="text/javascript">
+    let gridId = "#gridId";
+
+    function getSearchModel() {
+        return {
+            productName: $("#productName").val(),
+            customer_ID: $("#customerId").val(),
+            dateFrom: $("#dateFrom").val(),
+            dateTo: $("#dateTo").val(),
+            includeDetails: $("#includeDetails").is(":checked")
+        };
+    }
+
+    async function exportToExcel() {
+        // Create header for Excel export
+        let dataSheet1 = [
+            {
+                cells: [
+                    { value: "Khách hàng", textAlign: "center", background: "#428dd8" },
+                    { value: "Mã sản phẩm", textAlign: "center", background: "#428dd8" },
+                    { value: "Tên sản phẩm", textAlign: "center", background: "#428dd8" },
+                    { value: "Đơn vị", textAlign: "center", background: "#428dd8" },
+                    { value: "Tổng số lượng", textAlign: "center", background: "#428dd8" },
+                    { value: "Giá thấp nhất", textAlign: "center", background: "#428dd8" },
+                    { value: "Giá cao nhất", textAlign: "center", background: "#428dd8" },
+                    { value: "Giá trung bình", textAlign: "center", background: "#428dd8" },
+                    { value: "Giá hiện tại", textAlign: "center", background: "#428dd8" },
+                    { value: "Tổng giá trị", textAlign: "center", background: "#428dd8" },
+                    { value: "Tổng tiền đặt hàng", textAlign: "center", background: "#428dd8" },
+                    { value: "Số PO", textAlign: "center", background: "#428dd8" }
+                ]
+            }];
+
+        var searchModel = getSearchModel();
+        let postData = {
+            ...searchModel,
+            pageSize: 999999999,
+            pageNumber: 1
+        }
+        let dataSourceStatistics = null;
+        var response = await ajax("GET", "/ProductOrderStatistics/GetCustomerProductOrderStatistics", postData, (response) => {
+            dataSourceStatistics = response.data.data;
+        }, null, false);
+        if (dataSourceStatistics == null) return;
+
+        // Process data for Excel export
+        for (let customerStat of dataSourceStatistics) {
+            for (let product of customerStat.products) {
+                dataSheet1.push({
+                    cells: [
+                        { value: customerStat.customer.name },
+                        { value: product.productCode },
+                        { value: product.productName },
+                        { value: product.unitName || "" },
+                        { value: product.totalQuantity, format: "#,##0.00" },
+                        { value: product.minPrice || 0, format: "#,##0" },
+                        { value: product.maxPrice || 0, format: "#,##0" },
+                        { value: product.averagePrice || 0, format: "#,##0" },
+                        { value: product.currentPrice || 0, format: "#,##0" },
+                        { value: product.totalValue, format: "#,##0" },
+                        { value: product.totalOrderAmount, format: "#,##0" },
+                        { value: product.poCount }
+                    ]
+                });
+            }
+        }
+
+        var workbook = new kendo.ooxml.Workbook({
+            sheets: [
+                {
+                    name: "Báo cáo thống kê khách hàng",
+                    columns: [
+                        { autoWidth: true }, { autoWidth: true }, { autoWidth: true },
+                        { autoWidth: true }, { autoWidth: true }, { autoWidth: true },
+                        { autoWidth: true }, { autoWidth: true }, { autoWidth: true },
+                        { autoWidth: true }, { autoWidth: true }, { autoWidth: true }
+                    ],
+                    rows: dataSheet1
+                }
+            ]
+        });
+        kendo.saveAs({
+            dataURI: workbook.toDataURL(),
+            fileName: "Báo cáo thống kê khách hàng _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
+        });
+    }
+
+    $(document).ready(function () {
+        // Initialize toolbar
+        let toolbar = `
+            <div id='toolbar' class='statistics-toolbar'>
+                <div class="toolbar-filters">
+                    <div class="filter-group">
+                        <label class="filter-label">Tên sản phẩm:</label>
+                        <div class="filter-input">
+                            <input type="text" id="productName" placeholder="Nhập tên sản phẩm..."/>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Khách hàng:</label>
+                        <div class="filter-input">
+                            <select id="customerId"></select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Từ ngày:</label>
+                        <div class="filter-input">
+                            <input type="date" id="dateFrom"/>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Đến ngày:</label>
+                        <div class="filter-input">
+                            <input type="date" id="dateTo"/>
+                        </div>
+                    </div>
+                    <div class="filter-group checkbox-group">
+                        <div class="filter-input">
+                            <input type="checkbox" id="includeDetails"/>
+                            <label for="includeDetails" class="checkbox-label">Chi tiết PO</label>
+                        </div>
+                    </div>
+                    <div class="filter-group action-group">
+                        <button id="search" title="Tìm kiếm" class="btn-search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="filter-group action-group">
+                        <button id="export" title="Xuất Excel" class="btn-export" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i>
+                            Xuất Excel
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+
+        // Set default date range to current month
+        let now = new Date();
+        let firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        let lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        $("#dateFrom").val(kendo.toString(firstDay, "yyyy-MM-dd"));
+        $("#dateTo").val(kendo.toString(lastDay, "yyyy-MM-dd"));
+
+        // Initialize main grid
+        $(gridId).kendoGrid({
+            toolbar: toolbar,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/ProductOrderStatistics/GetCustomerProductOrderStatistics",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+                    },
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    model: {
+                        id: "customer.id",
+                        fields: {
+                            totalValue: { type: "number" },
+                            totalOrderAmount: { type: "number" },
+                            confirmedPOCount: { type: "number" }
+                        }
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                showLoading();
+            },
+            dataBound: function (e) {
+                hideLoading();
+            },
+            scrollable: false,
+            sortable: true,
+            columns: [
+                {
+                    field: "customer.code",
+                    title: "Mã khách hàng",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:left;" },
+                    width: 120,
+                },
+                {
+                    field: "customer.name",
+                    title: "Tên khách hàng",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:left;" },
+                    width: 200,
+                },
+                {
+                    field: "confirmedPOCount",
+                    title: "Số PO đã xác nhận",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 120,
+                },
+                {
+                    field: "totalValue",
+                    title: "Tổng giá trị",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:right;" },
+                    width: 150,
+                    template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n0') + ' VNĐ</span>' #"
+                },
+                {
+                    field: "totalOrderAmount",
+                    title: "Tổng tiền đặt hàng",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:right;" },
+                    width: 150,
+                    template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n0') + ' VNĐ</span>' #"
+                }
+            ],
+            detailInit: detailInit,
+            detailExpand: function (e) {
+                this.collapseRow(this.tbody.find(' > tr.k-detail-row').not(e.detailRow));
+            }
+        });
+
+        // Search button click event
+        $("#search").click(function () {
+            $(gridId).data("kendoGrid").dataSource.page(1);
+        });
+
+        // Export Excel button click event
+        $("#exportExcel").click(function () {
+            ExportExcel();
+        });
+
+        // Initialize customer dropdown
+        $("#customerId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value",
+            optionLabel: "-- Chọn khách hàng --",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Customer" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        return response.isSuccess ? response.data : [];
+                    }
+                }
+            }
+        });
+
+        // Set default date range to last 1 month
+        var today = new Date();
+        var oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+
+        // Format dates for input fields (YYYY-MM-DD)
+        var todayStr = today.getFullYear() + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            String(today.getDate()).padStart(2, '0');
+        var oneMonthAgoStr = oneMonthAgo.getFullYear() + '-' +
+            String(oneMonthAgo.getMonth() + 1).padStart(2, '0') + '-' +
+            String(oneMonthAgo.getDate()).padStart(2, '0');
+
+        // Set default values for date inputs
+        $("#dateFrom").val(oneMonthAgoStr);
+        $("#dateTo").val(todayStr);
+
+        // Auto load data with default filter (last 1 month)
+        setTimeout(function () {
+            var grid = $(gridId).data("kendoGrid");
+            if (grid) {
+                grid.dataSource.read();
+            }
+        }, 500);
+    });
+
+    function detailInit(e) {
+        $("<div/>").appendTo(e.detailCell).kendoGrid({
+            dataSource: {
+                data: e.data.products,
+                pageSize: 10
+            },
+            scrollable: false,
+            sortable: true,
+            pageable: false,
+            columns: [
+                { field: "productCode", title: "Mã sản phẩm", width: "120px" },
+                { field: "productName", title: "Tên sản phẩm", width: "200px" },
+                { field: "unitName", title: "Đơn vị", width: "100px" },
+                { field: "totalQuantity", title: "Tổng SL", width: "100px", template: "#= '<span class=\"number\">' + kendo.toString(totalQuantity, 'n2') + '</span>' #" },
+                { field: "minPrice", title: "Giá thấp nhất", width: "120px", template: "#= minPrice ? '<span class=\"currency\">' + kendo.toString(minPrice, 'n0') + ' VNĐ</span>' : '' #" },
+                { field: "maxPrice", title: "Giá cao nhất", width: "120px", template: "#= maxPrice ? '<span class=\"currency\">' + kendo.toString(maxPrice, 'n0') + ' VNĐ</span>' : '' #" },
+                { field: "averagePrice", title: "Giá TB", width: "120px", template: "#= averagePrice ? '<span class=\"currency\">' + kendo.toString(averagePrice, 'n0') + ' VNĐ</span>' : '' #" },
+                { field: "currentPrice", title: "Giá hiện tại", width: "120px", template: "#= currentPrice ? '<span class=\"currency\">' + kendo.toString(currentPrice, 'n0') + ' VNĐ</span>' : '' #" },
+                { field: "totalValue", title: "Tổng giá trị", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n0') + ' VNĐ</span>' #" },
+                { field: "totalOrderAmount", title: "Tổng tiền đặt hàng", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n0') + ' VNĐ</span>' #" },
+                { field: "poCount", title: "Số PO", width: "80px", template: "#= '<span class=\"number\">' + poCount + '</span>' #" }
+            ]
+        });
+    }
+</script>
+
+<style>
+    .k-form-buttons {
+        justify-content: flex-end;
+    }
+
+    /* Statistics Toolbar Styles */
+    .statistics-toolbar {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Override any global label styles */
+    .statistics-toolbar label,
+    .statistics-toolbar .filter-label {
+        text-align: left !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+    }
+
+    .toolbar-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-end;
+        margin-bottom: 16px;
+        width: 100%;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 200px;
+        flex: 1 1 200px;
+        max-width: 280px;
+        margin-right: 8px;
+        align-items: flex-start;
+    }
+
+    .filter-group:last-child {
+        margin-right: 0;
+    }
+
+    .filter-group.checkbox-group {
+        min-width: 140px;
+        flex: 0 0 140px;
+        max-width: 140px;
+    }
+
+    .filter-group.action-group {
+        min-width: 80px;
+        flex: 0 0 80px;
+        max-width: 80px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 6px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left !important;
+        display: block;
+        width: 100%;
+    }
+
+    .filter-input {
+        position: relative;
+        width: 100%;
+    }
+
+    .filter-input input[type="text"],
+    .filter-input input[type="date"],
+    .filter-input select {
+        width: 100% !important;
+        height: 42px !important;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: white;
+        box-sizing: border-box;
+        line-height: 1.4;
+    }
+
+    /* Force Kendo DropDownList to use full width and height */
+    .filter-input .k-dropdown,
+    .filter-input .k-dropdownlist {
+        width: 100% !important;
+        height: 42px !important;
+    }
+
+    .filter-input .k-dropdown .k-dropdown-wrap,
+    .filter-input .k-dropdownlist .k-dropdown-wrap {
+        width: 100% !important;
+        height: 42px !important;
+        box-sizing: border-box;
+    }
+
+    .filter-input .k-dropdown .k-input,
+    .filter-input .k-dropdownlist .k-input {
+        height: 40px !important;
+        line-height: 40px !important;
+        padding: 0 12px !important;
+    }
+
+    .filter-input input[type="text"]:focus,
+    .filter-input input[type="date"]:focus,
+    .filter-input select:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
+
+    .filter-input input[type="text"]::placeholder {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Checkbox styling */
+    .checkbox-group .filter-input {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px !important;
+        height: 18px !important;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .checkbox-label {
+        font-size: 14px;
+        color: #495057;
+        cursor: pointer;
+        margin: 0;
+        font-weight: normal;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    /* Button styling */
+    .btn-search {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+        margin-top: 24px;
+        height: 42px;
+        width: 42px;
+        min-width: 42px;
+    }
+
+    .btn-search:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-search i {
+        font-size: 16px;
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(25, 135, 84, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+        height: 42px;
+    }
+
+    .btn-export:hover {
+        background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-export i {
+        font-size: 16px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 1200px) {
+        .filter-group {
+            min-width: 180px;
+            max-width: 220px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .toolbar-filters {
+            gap: 12px;
+        }
+
+        .filter-group {
+            min-width: 160px;
+            max-width: 200px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .toolbar-filters {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            min-width: 100%;
+            max-width: 100%;
+            margin-right: 0;
+            margin-bottom: 8px;
+        }
+
+        .filter-group.action-group {
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .btn-search,
+        .btn-export {
+            margin-top: 0;
+            flex: 1;
+        }
+    }
+
+    /* Grid styling */
+    .k-grid {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-top: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+
+    .k-grid .k-grid-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .k-grid .k-grid-header .k-header {
+        background: transparent;
+        border-color: #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        padding: 12px 8px;
+        text-align: center;
+    }
+
+    .k-grid .k-alt {
+        background-color: #f8f9fa;
+    }
+
+    .k-grid .k-grid-content tr:hover {
+        background-color: #e3f2fd !important;
+    }
+
+    .k-grid .k-grid-content td {
+        padding: 10px 8px;
+        border-color: #e9ecef;
+        vertical-align: middle;
+    }
+
+    /* Currency and number formatting */
+    .currency {
+        font-weight: 600;
+        color: #198754;
+    }
+
+    .number {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    /* Detail grid styling */
+    .k-grid .k-detail-row .k-grid {
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        margin: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .k-grid .k-detail-row .k-grid .k-grid-header {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-bottom: 1px solid #f1c40f;
+    }
+
+    .k-grid .k-detail-row .k-grid .k-grid-header .k-header {
+        font-size: 13px;
+        font-weight: 600;
+        color: #856404;
+        padding: 8px 6px;
+    }
+
+    .k-grid .k-detail-row .k-grid .k-grid-content td {
+        padding: 8px 6px;
+        font-size: 13px;
+        border-color: #f8f9fa;
+    }
+
+    .k-grid .k-detail-row .k-grid .k-alt {
+        background-color: #fffbf0;
+    }
+
+    .k-grid .k-detail-row .k-grid .k-grid-content tr:hover {
+        background-color: #fff3cd !important;
+    }
+
+    /* Toolbar actions styling */
+    .toolbar-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    @@media (max-width: 768px) {
+        .toolbar-actions {
+            justify-content: stretch;
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .toolbar-actions .btn-export {
+            flex: 1;
+            margin-top: 12px;
+        }
+    }
+
+    /* Pagination styling */
+    .k-grid .k-pager-wrap {
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 12px;
+    }
+
+    .k-grid .k-pager-wrap .k-pager-numbers .k-current-page {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+    }
+
+    /* Loading Overlay */
+    .k-grid .k-loading-mask {
+        background: rgba(248, 249, 250, 0.9);
+    }
+
+    .k-grid .k-loading-text {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    /* Responsive table */
+    @@media (max-width: 768px) {
+
+        .k-grid .k-grid-header,
+        .k-grid .k-grid-content {
+            font-size: 12px;
+        }
+
+        .k-grid .k-grid-content td,
+        .k-grid .k-grid-header .k-header {
+            padding: 6px 4px;
+        }
+    }
+</style>

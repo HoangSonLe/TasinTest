@@ -222,5 +222,193 @@ namespace Tasin.Website.DAL.Services.WebServices
                 return response;
             }
         }
+
+        public async Task<Acknowledgement<JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>>> GetCustomerProductOrderStatistics(CustomerProductOrderStatisticsSearchModel searchModel)
+        {
+            var response = new Acknowledgement<JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>>();
+            try
+            {
+                // Use optimized single query with proper JOINs for Purchase Orders with Confirmed status
+                var query = from po in DbContext.PurchaseOrders
+                            join customer in DbContext.Customers on po.Customer_ID equals customer.ID
+                            join poItem in DbContext.PurchaseOrderItems on po.ID equals poItem.PO_ID
+                            join product in DbContext.Products on poItem.Product_ID equals product.ID
+                            join unit in DbContext.Units on poItem.Unit_ID equals unit.ID into unitGroup
+                            from unit in unitGroup.DefaultIfEmpty()
+                            where po.IsActive == true &&
+                                  po.Status == EPOStatus.Confirmed.ToString()
+                            select new
+                            {
+                                PO = po,
+                                Customer = customer,
+                                POItem = poItem,
+                                Product = product,
+                                Unit = unit
+                            };
+
+                // Apply filters
+                if (searchModel.DateFrom.HasValue)
+                {
+                    query = query.Where(x => x.PO.CreatedDate >= searchModel.DateFrom.Value);
+                }
+
+                if (searchModel.DateTo.HasValue)
+                {
+                    query = query.Where(x => x.PO.CreatedDate <= searchModel.DateTo.Value);
+                }
+
+                if (searchModel.Customer_ID.HasValue)
+                {
+                    query = query.Where(x => x.PO.Customer_ID == searchModel.Customer_ID.Value);
+                }
+
+                // Apply product name filter if provided
+                if (!string.IsNullOrWhiteSpace(searchModel.ProductName))
+                {
+                    var productNameFilter = searchModel.ProductName.Trim().ToLower();
+                    query = query.Where(x => x.Product.Name.ToLower().Contains(productNameFilter) ||
+                                           (x.Product.NameNonUnicode != null && x.Product.NameNonUnicode.ToLower().Contains(productNameFilter)));
+                }
+
+                // Execute query and group in database
+                var rawData = await query.ToListAsync();
+
+                if (!rawData.Any())
+                {
+                    response.Data = new JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>
+                    {
+                        Data = new List<CustomerProductOrderStatisticsViewModel>(),
+                        PageNumber = searchModel.PageNumber,
+                        PageSize = searchModel.PageSize,
+                        Total = 0
+                    };
+                    response.IsSuccess = true;
+                    return response;
+                }
+
+                // Efficient in-memory grouping using the optimized data
+                var customerGroups = rawData
+                    .GroupBy(x => new { x.Customer.ID, x.Customer.Code, x.Customer.Name, x.Customer.Email, x.Customer.PhoneContact, x.Customer.Address, x.Customer.TaxCode })
+                    .ToList();
+
+                var statisticsViewModels = new List<CustomerProductOrderStatisticsViewModel>();
+
+                foreach (var customerGroup in customerGroups)
+                {
+                    var customerKey = customerGroup.Key;
+                    var customerData = customerGroup.ToList();
+
+                    // Group by product within this customer
+                    var productGroups = customerData
+                        .GroupBy(x => new { x.Product.ID, x.Product.Code, x.Product.Name, UnitName = x.Unit?.Name })
+                        .ToList();
+
+                    var productStatistics = new List<CustomerProductStatisticsViewModel>();
+
+                    foreach (var productGroup in productGroups)
+                    {
+                        var productKey = productGroup.Key;
+                        var productItems = productGroup.ToList();
+
+                        // Efficient calculations using LINQ aggregations
+                        var totalQuantity = productItems.Sum(x => x.POItem.Quantity);
+                        var totalValue = productItems.Sum(x => (x.POItem.Price ?? 0) * x.POItem.Quantity);
+                        var totalOrderAmount = totalValue;
+
+                        // Calculate price statistics efficiently
+                        var validPrices = productItems
+                            .Where(x => x.POItem.Price.HasValue && x.POItem.Price.Value > 0)
+                            .Select(x => x.POItem.Price!.Value)
+                            .ToList();
+
+                        var minPrice = validPrices.Any() ? validPrices.Min() : (decimal?)null;
+                        var maxPrice = validPrices.Any() ? validPrices.Max() : (decimal?)null;
+                        var averagePrice = validPrices.Any() ? validPrices.Average() : (decimal?)null;
+
+                        // Current price = latest PO price
+                        var currentPrice = productItems
+                            .Where(x => x.POItem.Price.HasValue && x.POItem.Price.Value > 0)
+                            .OrderByDescending(x => x.PO.CreatedDate)
+                            .FirstOrDefault()?.POItem.Price;
+
+                        // Efficient PO details creation
+                        var poDetails = searchModel.IncludeDetails
+                            ? productItems.Select(x => new POProductDetailViewModel
+                            {
+                                PO_ID = x.PO.ID,
+                                POCode = x.PO.Code,
+                                Quantity = x.POItem.Quantity,
+                                Price = x.POItem.Price,
+                                Value = (x.POItem.Price ?? 0) * x.POItem.Quantity,
+                                CreatedDate = x.PO.CreatedDate
+                            }).ToList()
+                            : new List<POProductDetailViewModel>();
+
+                        productStatistics.Add(new CustomerProductStatisticsViewModel
+                        {
+                            ProductID = productKey.ID,
+                            ProductCode = productKey.Code,
+                            ProductName = productKey.Name,
+                            UnitName = productKey.UnitName,
+                            TotalQuantity = totalQuantity,
+                            MinPrice = minPrice,
+                            MaxPrice = maxPrice,
+                            AveragePrice = averagePrice,
+                            CurrentPrice = currentPrice,
+                            TotalValue = totalValue,
+                            TotalOrderAmount = totalOrderAmount,
+                            POCount = productItems.Select(x => x.PO.ID).Distinct().Count(),
+                            PODetails = poDetails
+                        });
+                    }
+
+                    // Efficient customer statistics calculation
+                    var orderedProducts = productStatistics.OrderBy(p => p.ProductName).ToList();
+                    var confirmedPOCount = customerData.Select(x => x.PO.ID).Distinct().Count();
+
+                    statisticsViewModels.Add(new CustomerProductOrderStatisticsViewModel
+                    {
+                        Customer = new CustomerStatisticsViewModel
+                        {
+                            ID = customerKey.ID,
+                            Code = customerKey.Code,
+                            Name = customerKey.Name,
+                            Email = customerKey.Email,
+                            PhoneContact = customerKey.PhoneContact,
+                            Address = customerKey.Address,
+                            TaxCode = customerKey.TaxCode
+                        },
+                        Products = orderedProducts,
+                        TotalValue = orderedProducts.Sum(p => p.TotalValue),
+                        TotalOrderAmount = orderedProducts.Sum(p => p.TotalOrderAmount),
+                        ConfirmedPOCount = confirmedPOCount
+                    });
+                }
+
+                // Efficient pagination with early ordering
+                var totalRecords = statisticsViewModels.Count;
+                var pagedData = statisticsViewModels
+                    .OrderBy(s => s.Customer.Name)
+                    .Skip((searchModel.PageNumber - 1) * searchModel.PageSize)
+                    .Take(searchModel.PageSize)
+                    .ToList();
+
+                response.Data = new JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>
+                {
+                    Data = pagedData,
+                    PageNumber = searchModel.PageNumber,
+                    PageSize = searchModel.PageSize,
+                    Total = totalRecords
+                };
+                response.IsSuccess = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.ExtractMessage(ex);
+                _logger.LogError($"GetCustomerProductOrderStatistics: {ex.Message}");
+                return response;
+            }
+        }
     }
 }
