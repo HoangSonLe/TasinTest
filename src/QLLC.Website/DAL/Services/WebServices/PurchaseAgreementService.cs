@@ -566,7 +566,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 // Get all confirmed purchase orders with items in one query
                 var confirmedOrders = await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
-                    filter: po => po.Status == ((int)EPOStatus.Confirmed).ToString() && po.IsActive,
+                    filter: po => po.Status == EPOStatus.Confirmed.ToString() && po.IsActive,
                     includeProperties: "PurchaseOrderItems"
                 );
 

@@ -16,5 +16,12 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         /// <param name="searchModel">Search parameters including filters</param>
         /// <returns>Statistics grouped by vendor</returns>
         Task<Acknowledgement<JsonResultPaging<List<ProductOrderStatisticsViewModel>>>> GetProductOrderStatistics(ProductOrderStatisticsSearchModel searchModel);
+
+        /// <summary>
+        /// Get customer product order statistics grouped by customer for confirmed POs
+        /// </summary>
+        /// <param name="searchModel">Search parameters including filters</param>
+        /// <returns>Statistics grouped by customer</returns>
+        Task<Acknowledgement<JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>>> GetCustomerProductOrderStatistics(CustomerProductOrderStatisticsSearchModel searchModel);
     }
 }

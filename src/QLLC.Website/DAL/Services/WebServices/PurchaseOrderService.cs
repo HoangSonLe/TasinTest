@@ -375,7 +375,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                if(purchaseOrder.Status != ((int)EPOStatus.New).ToString())
+                if(purchaseOrder.Status != EPOStatus.New.ToString())
                 {
                     ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng trạng thái mới).");
                     return ack;

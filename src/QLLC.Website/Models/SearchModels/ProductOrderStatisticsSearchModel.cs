@@ -39,4 +39,40 @@ namespace Tasin.Website.Models.SearchModels
         [Display(Name = "IncludeDetails")]
         public bool IncludeDetails { get; set; } = false;
     }
+
+    /// <summary>
+    /// Search model for customer product order statistics
+    /// </summary>
+    public class CustomerProductOrderStatisticsSearchModel : SearchPagingModel<CustomerProductOrderStatisticsViewModel>
+    {
+        /// <summary>
+        /// Product name filter (supports Vietnamese non-unicode search)
+        /// </summary>
+        [Display(Name = "ProductName")]
+        public string? ProductName { get; set; }
+
+        /// <summary>
+        /// Customer ID filter
+        /// </summary>
+        [Display(Name = "Customer_ID")]
+        public int? Customer_ID { get; set; }
+
+        /// <summary>
+        /// Date from filter (PO creation date)
+        /// </summary>
+        [Display(Name = "DateFrom")]
+        public DateTime? DateFrom { get; set; }
+
+        /// <summary>
+        /// Date to filter (PO creation date)
+        /// </summary>
+        [Display(Name = "DateTo")]
+        public DateTime? DateTo { get; set; }
+
+        /// <summary>
+        /// Include PO details in response
+        /// </summary>
+        [Display(Name = "IncludeDetails")]
+        public bool IncludeDetails { get; set; } = false;
+    }
 }

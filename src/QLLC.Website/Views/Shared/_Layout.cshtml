@@ -387,7 +387,7 @@
             }
 
             // Báo cáo menu
-            let listBaoCao = [46]; // READ_PURCHASE_AGREEMENT permission
+            let listBaoCao = [46, 44]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
             if (EnumRoleList.find(e => listBaoCao.includes(e))) {
                 html += ` <a id="report_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-report" aria-expanded="false" aria-controls="menu-report">
                                                 <div class="nav-link-icon"><i class="fa-solid fa-chart-line fa-1_5x me-2"></i></div>
@@ -402,6 +402,9 @@
 
                 if (EnumRoleList.find(e => e == 46)) { // READ_PURCHASE_AGREEMENT
                     html += `<a class="nav-link _permission_" data-enum="106" href="/ProductOrderStatistics/Index">Thống kê sản phẩm đặt hàng</a>`;
+                }
+                if (EnumRoleList.find(e => e == 44)) { // READ_PURCHASE_ORDER
+                    html += `<a class="nav-link _permission_" data-enum="107" href="/ProductOrderStatistics/CustomerIndex">Thống kê khách hàng đặt hàng</a>`;
                 }
 
                 html += `</nav>
@@ -419,7 +422,7 @@
             let pathname = window.location.pathname;
             let element_ = $("a[href='" + pathname + "']");
             let listUrl = ["/User/Index", "/Vendor/Index", "/Customer/Index", "/Product/Index", "/Unit/Index", "/Category/Index", "/TaxRateConfig/Index", "/SpecialProductTaxRate/Index", "/Material/Index", "/ProcessingType/Index"];
-            let listReportUrl = ["/ProductOrderStatistics/Index"];
+            let listReportUrl = ["/ProductOrderStatistics/Index", "/ProductOrderStatistics/CustomerIndex"];
 
             if (listUrl.includes(pathname)) {
                 $("#category_").addClass("active");

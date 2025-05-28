@@ -194,7 +194,6 @@ namespace Tasin.Website.Controllers
                 #region Redirect after Login
                 if (returnUrl != null && Url.IsLocalUrl(returnUrl) && returnUrl != "/")
                     return Redirect(returnUrl);
-                //if (userDB.RoleIdList.Count == 1 && userDB.RoleIdList.Contains((int)ERoleType.User)) return RedirectToAction("Index", "Urn");
                 return RedirectToAction("Index", "Home");
                 #endregion
             }
