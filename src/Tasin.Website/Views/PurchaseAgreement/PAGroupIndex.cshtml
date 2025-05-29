@@ -128,6 +128,29 @@
         showInfoMessage("Chức năng gửi cho nhà cung cấp đang được phát triển.");
     }
 
+    function completePAGroup(groupCode) {
+        $('#dialog').kendoConfirm({
+            title: "XÁC NHẬN HOÀN THÀNH PA TỔNG HỢP",
+            content: "Bạn có chắc chắn muốn hoàn thành PA tổng hợp '" + groupCode + "' không?<br/><br/>Sau khi hoàn thành, trạng thái sẽ được chuyển thành 'Hoàn thành' và không thể thay đổi.",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            ajax("PUT", "/PurchaseAgreement/CompletePAGroup?groupCode=" + encodeURIComponent(groupCode), {}, function (response) {
+                if (response.isSuccess) {
+                    showSuccessMessages(["Hoàn thành PA tổng hợp thành công!"]);
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                } else {
+                    showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi hoàn thành PA tổng hợp"]);
+                }
+            });
+        });
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
     function detailInit(e) {
         var detailRow = e.detailRow;
         var paData = e.data;
@@ -467,10 +490,25 @@
                     template: '#: updatedDate ? kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm") : "" #',
                 },
                 {
-                    field: "", title: "Thao tác", width: 150, attributes: { style: "text-align: center;" },
+                    field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=viewPAGroupDetail('#=groupCode#') title='Xem chi tiết' class='k-button k-button-md k-rounded-md k-button-solid-info _permission_' data-enum='45'><span class='k-icon k-i-eye k-button-icon'></span></button>\
-                                                               <button style='margin-right:5px;' onclick=sendToVendors('#=groupCode#') title='Gửi NCC' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_' data-enum='44'><span class='k-icon k-i-email k-button-icon'></span></button>",
+                    template: function (dataItem) {
+                        var completeButton = '';
+                        // Show complete button only for orders with status "SendVendor" (1)
+                        if (dataItem.status === "SendVendor" || dataItem.status === "1" || dataItem.status === 1) {
+                            completeButton = '<button style="margin-right:5px;" onclick="completePAGroup(\'' + dataItem.groupCode + '\')" title="Hoàn thành" class="k-button k-button-md k-rounded-md k-button-solid-warning _permission_" data-enum="44">' +
+                                '<span class="k-icon k-i-check k-button-icon"></span>' +
+                                '</button>';
+                        }
+
+                        return '<button style="margin-right:5px;" onclick="viewPAGroupDetail(\'' + dataItem.groupCode + '\')" title="Xem chi tiết" class="k-button k-button-md k-rounded-md k-button-solid-info _permission_" data-enum="45">' +
+                            '<span class="k-icon k-i-eye k-button-icon"></span>' +
+                            '</button>' +
+                            '<button style="margin-right:5px;" onclick="sendToVendors(\'' + dataItem.groupCode + '\')" title="Gửi NCC" class="k-button k-button-md k-rounded-md k-button-solid-success _permission_" data-enum="44">' +
+                            '<span class="k-icon k-i-email k-button-icon"></span>' +
+                            '</button>' +
+                            completeButton;
+                    }
                 }
             ],
             dataBound: function (e) {
@@ -676,6 +714,19 @@
 
     .preview-actions .k-button {
         min-width: 120px;
+    }
+
+    /* Complete button styling */
+    .k-button-solid-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+
+    .k-button-solid-warning:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+        color: #212529;
     }
 
     @@media (max-width: 768px) {

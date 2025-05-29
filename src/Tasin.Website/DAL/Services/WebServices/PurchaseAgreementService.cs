@@ -1080,7 +1080,71 @@ namespace Tasin.Website.DAL.Services.WebServices
             return ack;
         }
 
+        public async Task<Acknowledgement> CompletePAGroup(string groupCode)
+        {
+            var ack = new Acknowledgement();
+            try
+            {
+                if (string.IsNullOrWhiteSpace(groupCode))
+                {
+                    ack.AddMessage("Mã nhóm không được để trống.");
+                    return ack;
+                }
 
+                // Get all purchase agreements in this group
+                var purchaseAgreements = await _purchaseAgreementRepository.ReadOnlyRespository.GetAsync(
+                    filter: pa => pa.GroupCode == groupCode && pa.IsActive
+                );
+
+                if (!purchaseAgreements.Any())
+                {
+                    ack.AddMessage("Không tìm thấy PA tổng hợp với mã nhóm này.");
+                    return ack;
+                }
+
+                // Check if user has permission to update these PAs using author predicate
+                var predicate = PredicateBuilder.New<Purchase_Agreement>(true);
+                predicate = predicate.And(p => p.GroupCode == groupCode && p.IsActive);
+                predicate = PurchaseAgreementAuthorPredicate.GetPurchaseAgreementAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
+
+                var authorizedPurchaseAgreements = await _purchaseAgreementRepository.ReadOnlyRespository.GetAsync(filter: predicate);
+                if (!authorizedPurchaseAgreements.Any())
+                {
+                    ack.AddMessage("Bạn không có quyền cập nhật PA tổng hợp này.");
+                    return ack;
+                }
+
+                // Check if all PAs are in SendVendor status (can only complete from SendVendor status)
+                var invalidStatusPAs = purchaseAgreements.Where(pa => pa.Status != EPAStatus.SendVendor.ToString()).ToList();
+                if (invalidStatusPAs.Any())
+                {
+                    ack.AddMessage($"Chỉ có thể hoàn thành PA tổng hợp ở trạng thái 'Đã gửi NCC'. Có {invalidStatusPAs.Count} PA không ở trạng thái phù hợp.");
+                    return ack;
+                }
+
+                // Update all PAs in the group to Completed status
+                foreach (var pa in purchaseAgreements)
+                {
+                    pa.Status = EPAStatus.Completed.ToString();
+                    pa.UpdatedDate = DateTime.Now;
+                    pa.UpdatedBy = CurrentUserId;
+                }
+
+                // Save changes
+                await ack.TrySaveChangesAsync(res => res.UpdateRangeAsync(purchaseAgreements), _purchaseAgreementRepository.Repository);
+
+                if (ack.IsSuccess)
+                {
+                    ack.AddMessage($"Đã hoàn thành PA tổng hợp '{groupCode}' thành công.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ack.AddMessage($"Lỗi khi hoàn thành PA tổng hợp: {ex.Message}");
+                _logger.LogError(ex, "Error completing PA group");
+            }
+            return ack;
+        }
 
         private async Task SavePurchaseAgreementItems(int purchaseAgreementId, List<PurchaseAgreementItemViewModel>? items)
         {
