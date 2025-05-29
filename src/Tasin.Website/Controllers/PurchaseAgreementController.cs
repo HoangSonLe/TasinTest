@@ -35,6 +35,14 @@ namespace Tasin.Website.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Route("PurchaseAgreement/PAGroupIndex")]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PURCHASE_AGREEMENT])]
+        public IActionResult PAGroupIndex()
+        {
+            return View();
+        }
+
         /// <summary>
         /// Get a list of purchase agreements with pagination and filtering
         /// </summary>

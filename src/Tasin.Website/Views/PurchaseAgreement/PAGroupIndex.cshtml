@@ -1,0 +1,443 @@
+@{
+    ViewData["Title"] = "Tổng hợp đơn hàng";
+}
+
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+}
+
+<div>
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+
+<script type="text/x-kendo-template" id="paDetailTemplate">
+    <div class="pa-detail-container">
+        <h6><strong>Chi tiết hợp đồng: #=code#</strong></h6>
+        <div class="pa-info-row">
+            <div class="pa-info-col">
+                <p><strong>Nhà cung cấp:</strong> #=vendorName#</p>
+                <p><strong>Tổng tiền:</strong> #=kendo.toString(totalPrice, 'n0')# VNĐ</p>
+            </div>
+            <div class="pa-info-col">
+                <p><strong>Trạng thái:</strong> #=statusName#</p>
+                <p><strong>Ghi chú:</strong> #=note || ''#</p>
+            </div>
+        </div>
+        <div class="pa-items-detail">
+            <h6><strong>Danh sách sản phẩm:</strong></h6>
+            <div class="pa-items-grid" data-pa-id="#=id#"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    let gridId = "#gridId";
+    let record = 0;
+
+    function viewPAGroupDetail(groupCode) {
+        ajax("GET", "/PurchaseAgreement/GetPAByGroupCode", { groupCode: groupCode }, function(response) {
+            showPAGroupDetail(response.data);
+        }, null, false);
+    }
+
+    function showPAGroupDetail(data) {
+        let myWindow = $("#window");
+        let detailHtml = '<div class="pa-group-detail">' +
+            '<div class="pa-info-row">' +
+                '<div class="pa-info-col">' +
+                    '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
+                    '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
+                    '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
+                '</div>' +
+                '<div class="pa-info-col">' +
+                    '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
+                    '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
+                    '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
+                '</div>' +
+            '</div>' +
+            '<hr>' +
+            '<h5>Danh sách hợp đồng theo nhà cung cấp:</h5>' +
+            '<div id="childPAsGrid"></div>' +
+        '</div>';
+
+        myWindow.html(detailHtml);
+
+        $("#childPAsGrid").kendoGrid({
+            dataSource: {
+                data: data.childPAs || [],
+                schema: {
+                    model: {
+                        fields: {
+                            totalPrice: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "code", title: "Mã hợp đồng", width: "120px" },
+                { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
+                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
+                { field: "statusName", title: "Trạng thái", width: "120px" },
+                {
+                    title: "Số sản phẩm",
+                    width: "100px",
+                    template: "#= (purchaseAgreementItems && purchaseAgreementItems.length) || 0 #"
+                }
+            ],
+            detailTemplate: kendo.template($("#paDetailTemplate").html()),
+            detailInit: detailInit,
+            pageable: false,
+            scrollable: true,
+            height: 500
+        });
+
+        function remove() {
+            setTimeout(function() {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200);
+        }
+
+        myWindow.kendoWindow({
+            width: "1400px",
+            height: "800px",
+            title: "CHI TIẾT TỔNG HỢP ĐƠN",
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                remove();
+            },
+        }).data("kendoWindow").center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function sendToVendors(groupCode) {
+        showInfoMessage("Chức năng gửi cho nhà cung cấp đang được phát triển.");
+    }
+
+    function detailInit(e) {
+        var detailRow = e.detailRow;
+        var paData = e.data;
+
+        detailRow.find(".pa-items-grid").kendoGrid({
+            dataSource: {
+                data: paData.purchaseAgreementItems || [],
+                schema: {
+                    model: {
+                        fields: {
+                            quantity: { type: "number" },
+                            price: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "productName", title: "Sản phẩm", width: "200px" },
+                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n0') #", attributes: { style: "text-align: center;" } },
+                { field: "unitName", title: "Đơn vị", width: "80px", attributes: { style: "text-align: center;" } },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ", attributes: { style: "text-align: right;" } },
+                {
+                    title: "Thành tiền",
+                    width: "120px",
+                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ",
+                    attributes: { style: "text-align: right;" }
+                },
+                { field: "note", title: "Ghi chú", width: "150px" }
+            ],
+            pageable: false,
+            scrollable: false,
+            height: 300
+        });
+    }
+
+    function createPAGroupFromPO() {
+        $('#dialog').kendoConfirm({
+            title: "TẠO TỔNG HỢP ĐƠN",
+            content: "Bạn có chắc chắn muốn tạo tổng hợp đơn từ các PO đã xác nhận không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            ajax("POST", "/PurchaseAgreement/CreatePAGroup", {}, function(response) {
+                if (response.isSuccess) {
+                    showSuccessMessage("Tạo tổng hợp đơn thành công!");
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                } else {
+                    showErrorMessages(response.errorMessageList);
+                }
+            });
+        });
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
+    async function ExportExcel() {
+        var searchModel = getSearchModel();
+        var params = new URLSearchParams(searchModel).toString();
+        window.open("/PurchaseAgreement/ExportPAGroupExcel?" + params, '_blank');
+    }
+
+    function getSearchModel() {
+        let searchString = $("#searchString").val();
+        
+        return {
+            searchString,
+        };
+    }
+
+    function InitGrid() {
+        let htmlToolbar = `
+                <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                       <div class="row gx-0 row-gap-2 w-100">
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                                <div class="pe-1">
+                                    <label for="searchString">Tìm kiếm:</label>
+                                    <input type="text" class=" w-100" id="searchString"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                                <div class="pe-1">
+                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='createPAGroup' title="Tạo tổng hợp đơn"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                            <div class="d-flex mt-2 flex-row w-100">
+                            <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
+                        </div>
+                </div>
+            `;
+
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/PurchaseAgreement/GetPAGroupList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+                    },
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    model: {
+                        id: "groupCode",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+                            totalPrice: { type: "number" },
+                            vendorCount: { type: "number" },
+                            totalItemCount: { type: "number" }
+                        }
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            toolbar: htmlToolbar,
+            columns: [
+                {
+                    field: "",
+                    title: "STT",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: "#: ++record #",
+                    width: 100
+                },
+                {
+                    field: "groupCode",
+                    title: "Mã nhóm",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 150,
+                },
+                {
+                    field: "vendorCount",
+                    title: "Số NCC",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 100,
+                },
+                {
+                    field: "totalItemCount",
+                    title: "Số sản phẩm",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 120,
+                },
+                {
+                    field: "totalPrice",
+                    title: "Tổng tiền",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:right;" },
+                    template: "#= kendo.toString(totalPrice, 'n0') # VNĐ",
+                    width: 150,
+                },
+                {
+                    field: "statusName",
+                    title: "Trạng thái",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 120,
+                },
+                {
+                    field: "createdDate",
+                    title: "Ngày tạo",
+                    width: 180,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: createdDate ? kendo.toString(kendo.parseDate(createdDate), "dd/MM/yyyy HH:mm") : "" #',
+                },
+                {
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
+                    width: 180,
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    template: '#: updatedDate ? kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm") : "" #',
+                },
+                {
+                    field: "", title: "Thao tác", width: 150, attributes: { style: "text-align: center;" },
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    template: "<button style='margin-right:5px;' onclick=viewPAGroupDetail('#=groupCode#') title='Xem chi tiết' class='k-button k-button-md k-rounded-md k-button-solid-info _permission_' data-enum='45'><span class='k-icon k-i-eye k-button-icon'></span></button>\
+                                                               <button style='margin-right:5px;' onclick=sendToVendors('#=groupCode#') title='Gửi NCC' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_' data-enum='44'><span class='k-icon k-i-email k-button-icon'></span></button>",
+                }
+            ],
+            dataBound: function (e) {
+                CheckPermission();
+            }
+        });
+    }
+
+    function InitKendoToolBar() {
+        $("#search").kendoButton({
+            icon: "search"
+        });
+        $("#search").click(async function (e) {
+            var grid = $(gridId).data("kendoGrid");
+            grid.dataSource.filter({});
+        });
+        $("#exportExcel").click(async function (e) {
+            ExportExcel();
+        });
+        $("#searchString").kendoTextBox({
+            icon: {
+                type: "search",
+                position: "end"
+            },
+            placeholder: "Nhập mã nhóm tìm kiếm..."
+        });
+        $("#createPAGroup").kendoButton({
+            icon: "plus"
+        });
+
+        $("#createPAGroup").on('click', function () {
+            createPAGroupFromPO();
+        });
+    };
+
+</script>
+<script type="text/javascript">
+    InitGrid();
+    InitKendoToolBar();
+    $(document).ready(function () {
+        $(window).trigger("resize");
+    });
+</script>
+<style>
+    .k-form-buttons {
+        justify-content: flex-end;
+    }
+
+    .pa-detail-container {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+
+    .pa-detail-container h6 {
+        color: #495057;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 8px;
+    }
+
+    .pa-items-detail {
+        margin-top: 15px;
+    }
+
+    .pa-items-detail h6 {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .pa-info-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .pa-info-col {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pa-info-col p {
+        margin-bottom: 8px;
+        word-wrap: break-word;
+    }
+
+    @@media (max-width: 768px) {
+        .pa-info-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>

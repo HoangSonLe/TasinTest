@@ -219,7 +219,7 @@
             dataBound: function (e) {
                 hideLoading();
             },
-            scrollable: false,
+            scrollable: true,
             sortable: true,
             columns: [
                 {
@@ -329,6 +329,9 @@
         // Set default values for date inputs
         $("#dateFrom").val(oneMonthAgoStr);
         $("#dateTo").val(todayStr);
+
+        // Trigger resize to set fixed grid height like PurchaseOrderIndex
+        $(window).trigger("resize");
 
         // Auto load data with default filter (last 1 month)
         setTimeout(function () {

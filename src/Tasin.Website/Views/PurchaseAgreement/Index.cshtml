@@ -1,5 +1,858 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Danh sách hợp đồng mua hàng";
 }
+
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+    <link href="~/css/form-common.css" rel="stylesheet" />
+}
+
+<div>
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+    <div id="divContent">
+        <div id="gridId">
+        </div>
+    </div>
+    <div id="window"></div>
+    <div id="dialog"></div>
+</div>
+
+<script type="text/x-kendo-template" id="template_form_header">
+    <div></div>
+</script>
+
+<script type="text/javascript">
+    let gridId = "#gridId";
+    let record = 0;
+
+    $(document).ready(function () {
+        initializeGrid();
+        initializeToolbar();
+        initializeEventHandlers();
+    });
+
+    function initializeGrid() {
+        $(gridId).kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/PurchaseAgreement/GetPurchaseAgreementList",
+                        datatype: "json",
+                    },
+                    parameterMap: function (data, type) {
+                        if (type == "read") {
+                            var searchModel = getSearchModel();
+                            return {
+                                ...searchModel,
+                                pageSize: data.pageSize,
+                                pageNumber: data.page
+                            }
+                        }
+                    },
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                page: 1,
+                pageSize: 20,
+                schema: {
+                    type: 'json',
+                    parse: function (response) {
+                        if (response.isSuccess == false) {
+                            showErrorMessages(response.errorMessageList);
+                            return {
+                                data: [],
+                                total: 0
+                            }
+                        }
+                        return response.data;
+                    },
+                    model: {
+                        id: "id",
+                        fields: {
+                            createdDate: { type: "date" },
+                            updatedDate: { type: "date" },
+                            stt: { type: "number" },
+                            totalPrice: { type: "number" }
+                        }
+                    },
+                    data: "data",
+                    total: "total"
+                },
+            },
+            selectable: true,
+            pageable: {
+                pageSizes: [10, 20, 50],
+            },
+            dataBinding: function (e) {
+                record = (this.dataSource._page - 1) * this.dataSource._pageSize;
+            },
+            dataBound: function (e) {
+                hideLoading();
+            },
+            columns: [
+                {
+                    field: "stt",
+                    title: "STT",
+                    width: "60px",
+                    template: "#= ++record #",
+                    attributes: { style: "text-align: center;" }
+                },
+                {
+                    field: "code",
+                    title: "Mã hợp đồng",
+                    width: "120px",
+                    template: function (dataItem) {
+                        return dataItem.code || '';
+                    }
+                },
+                {
+                    field: "vendorName",
+                    title: "Nhà cung cấp",
+                    width: "150px",
+                    template: function (dataItem) {
+                        return dataItem.vendorName || '';
+                    }
+                },
+                {
+                    field: "groupCode",
+                    title: "Mã nhóm",
+                    width: "120px",
+                    template: function (dataItem) {
+                        return dataItem.groupCode || '';
+                    }
+                },
+                {
+                    field: "totalPrice",
+                    title: "Tổng tiền",
+                    width: "120px",
+                    template: "#= kendo.toString(totalPrice, 'n0') # VNĐ",
+                    attributes: { style: "text-align: right;" }
+                },
+                {
+                    field: "statusName",
+                    title: "Trạng thái",
+                    width: "120px",
+                    template: function (dataItem) {
+                        var statusClass = '';
+                        switch (dataItem.status) {
+                            case 0: // New
+                                statusClass = 'badge-secondary';
+                                break;
+                            case 1: // SendVendor
+                                statusClass = 'badge-warning';
+                                break;
+                            case 2: // Cancel
+                                statusClass = 'badge-danger';
+                                break;
+                            case 3: // Completed
+                                statusClass = 'badge-success';
+                                break;
+                            default:
+                                statusClass = 'badge-secondary';
+                        }
+                        return '<span class="badge ' + statusClass + '">' + (dataItem.statusName || '') + '</span>';
+                    }
+                },
+                {
+                    field: "createdDate",
+                    title: "Ngày tạo",
+                    width: "120px",
+                    template: "#= createdDate ? kendo.toString(kendo.parseDate(createdDate), 'dd/MM/yyyy HH:mm') : '' #"
+                },
+                {
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
+                    width: "120px",
+                    template: "#= updatedDate ? kendo.toString(kendo.parseDate(updatedDate), 'dd/MM/yyyy HH:mm') : '' #"
+                },
+                {
+                    title: "Thao tác",
+                    width: "150px",
+                    template: function (dataItem) {
+                        var actions = '';
+                        actions += '<button class="btn btn-sm btn-info me-1 _permission_" data-enum="33" onclick="viewPurchaseAgreementDetail(' + dataItem.id + ')" title="Xem chi tiết"><i class="fas fa-eye"></i></button>';
+                        actions += '<button class="btn btn-sm btn-warning me-1 _permission_" data-enum="34" onclick="editPurchaseAgreement(' + dataItem.id + ')" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>';
+                        actions += '<button class="btn btn-sm btn-danger _permission_" data-enum="35" onclick="deletePurchaseAgreement(' + dataItem.id + ')" title="Xóa"><i class="fas fa-trash"></i></button>';
+                        return actions;
+                    },
+                    attributes: { style: "text-align: center;" }
+                }
+            ],
+            toolbar: kendo.template($("#template_form_header").html())
+        });
+    }
+
+    function initializeToolbar() {
+        var toolbarHtml = `
+            <div class="purchase-order-toolbar">
+                <div class="toolbar-filters">
+                    <div class="filter-group">
+                        <label class="filter-label">Tìm kiếm:</label>
+                        <div class="filter-input">
+                            <input type="text" id="searchString" placeholder="Nhập mã hợp đồng..." />
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Nhà cung cấp:</label>
+                        <div class="filter-input">
+                            <select id="vendorId"></select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Trạng thái:</label>
+                        <div class="filter-input">
+                            <select id="status"></select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Từ ngày:</label>
+                        <div class="filter-input">
+                            <input type="date" id="dateFrom"/>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Đến ngày:</label>
+                        <div class="filter-input">
+                            <input type="date" id="dateTo"/>
+                        </div>
+                    </div>
+                    <div class="filter-group action-group">
+                        <button id="search" title="Tìm kiếm" class="btn-search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-actions">
+                    <button id='create' title="Thêm hợp đồng mới" class='btn-create _permission_' data-enum='32'>
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm mới</span>
+                    </button>
+                    <button id="exportExcel" class="btn-export">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        $(gridId).data("kendoGrid").wrapper.find(".k-grid-toolbar").html(toolbarHtml);
+
+        // Initialize vendor dropdown
+        $("#vendorId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn nhà cung cấp --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn nhà cung cấp --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Vendor" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize status dropdown
+        $("#status").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn trạng thái --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn trạng thái --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "PAStatus" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+    }
+
+    function initializeEventHandlers() {
+        // Search button click
+        $("#search").click(function () {
+            $(gridId).data("kendoGrid").dataSource.filter({});
+        });
+
+        // Create button click
+        $("#create").click(function () {
+            createPurchaseAgreement();
+        });
+
+        // Export Excel button click
+        $("#exportExcel").click(function () {
+            exportToExcel();
+        });
+
+        // Enter key press in search input
+        $("#searchString").keypress(function (e) {
+            if (e.which == 13) {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            }
+        });
+    }
+
+    function getSearchModel() {
+        var searchString = $("#searchString").val();
+        var vendorId = $("#vendorId").data("kendoDropDownList").value();
+        var status = $("#status").data("kendoDropDownList").value();
+        var dateFrom = $("#dateFrom").val();
+        var dateTo = $("#dateTo").val();
+
+        return {
+            searchString: searchString || null,
+            vendor_ID: vendorId && vendorId !== "" ? parseInt(vendorId) : null,
+            status: status && status !== "" ? parseInt(status) : null,
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        };
+    }
+
+    function deletePurchaseAgreement(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO XÓA HỢP ĐỒNG",
+            content: "Bạn có chắc chắn xóa hợp đồng này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            var response = ajax("DELETE", "/PurchaseAgreement/DeletePurchaseAgreementById/" + id, {}, () => {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            });
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
+    function viewPurchaseAgreementDetail(id) {
+        var response = ajax("GET", "/PurchaseAgreement/GetPurchaseAgreementById", { purchaseAgreementId: id }, (response) => {
+            showPurchaseAgreementDetail(response.data);
+        }, null, false);
+    }
+
+    function showPurchaseAgreementDetail(data) {
+        let myWindow = $("#window");
+        let detailHtml = `
+            <div class="purchase-agreement-detail">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Mã hợp đồng:</strong> ${data.code || ''}</p>
+                        <p><strong>Nhà cung cấp:</strong> ${data.vendorName || ''}</p>
+                        <p><strong>Mã nhóm:</strong> ${data.groupCode || ''}</p>
+                        <p><strong>Trạng thái:</strong> ${data.statusName || ''}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n0")} VNĐ</p>
+                        <p><strong>Ngày tạo:</strong> ${data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : ''}</p>
+                        <p><strong>Ghi chú:</strong> ${data.note || ''}</p>
+                    </div>
+                </div>
+                <hr>
+                <h5>Danh sách sản phẩm:</h5>
+                <div id="itemsGrid"></div>
+            </div>
+        `;
+
+        myWindow.html(detailHtml);
+
+        // Initialize items grid
+        $("#itemsGrid").kendoGrid({
+            dataSource: {
+                data: data.purchaseAgreementItems || [],
+                schema: {
+                    model: {
+                        fields: {
+                            quantity: { type: "number" },
+                            price: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "productName", title: "Sản phẩm", width: "200px" },
+                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n0') #" },
+                { field: "unitName", title: "Đơn vị", width: "80px" },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                {
+                    title: "Thành tiền",
+                    width: "120px",
+                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ"
+                }
+            ],
+            pageable: false,
+            scrollable: true,
+            height: 300
+        });
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "900px",
+            height: "600px",
+            title: "CHI TIẾT HỢP ĐỒNG MUA HÀNG",
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                remove();
+            },
+        }).data("kendoWindow").center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function createPurchaseAgreement() {
+        renderPurchaseAgreementForm();
+    }
+
+    function editPurchaseAgreement(id) {
+        var response = ajax("GET", "/PurchaseAgreement/GetPurchaseAgreementById", { purchaseAgreementId: id }, (response) => {
+            renderPurchaseAgreementForm(response.data);
+        }, null, false);
+    }
+
+    function renderPurchaseAgreementForm(data) {
+        let title = data ? "CHỈNH SỬA HỢP ĐỒNG MUA HÀNG" : "THÊM MỚI HỢP ĐỒNG MUA HÀNG";
+        let myWindow = $("#window");
+
+        let formHtml = `
+            <div class="purchase-agreement-form">
+                <div class="pa-header-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nhà cung cấp <span class="text-danger">*</span></label>
+                                <select id="formVendorId" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <select id="formStatus" class="form-control"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mã nhóm</label>
+                                <input type="text" id="formGroupCode" class="form-control" ${data ? 'readonly' : ''} value="${data?.groupCode || ''}" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tổng tiền</label>
+                                <input type="text" id="formTotalPrice" class="form-control" readonly value="${data ? kendo.toString(data.totalPrice, 'n0') : '0'}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Ghi chú</label>
+                                <textarea id="formNote" class="form-control" rows="3">${data?.note || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pa-items-section">
+                    <h5>Danh sách sản phẩm</h5>
+                    <div class="item-input-grid">
+                        <div class="grid-row">
+                            <div class="form-group">
+                                <label>Sản phẩm</label>
+                                <select id="itemProductId" class="form-control"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Số lượng</label>
+                                <input type="number" id="itemQuantity" class="form-control" min="1" step="1" />
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn vị</label>
+                                <input type="text" id="itemUnitName" class="form-control" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn giá</label>
+                                <input type="number" id="itemPrice" class="form-control" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" id="addItemBtn" class="btn btn-primary form-control">
+                                    <i class="fas fa-plus"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="paItemsGrid"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="savePABtn" class="btn btn-success">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="$('#window').data('kendoWindow').close()">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
+                </div>
+            </div>
+        `;
+
+        myWindow.html(formHtml);
+
+        // Initialize form dropdowns and grids
+        initializePAForm(data);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "1000px",
+            height: "700px",
+            title: title,
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                remove();
+            },
+        }).data("kendoWindow").center();
+        myWindow.data("kendoWindow").open();
+    }
+
+    function initializePAForm(data) {
+        var paItems = data?.purchaseAgreementItems || [];
+        var tempItemId = 1;
+
+        // Initialize vendor dropdown
+        $("#formVendorId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn nhà cung cấp --",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Vendor" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize status dropdown
+        $("#formStatus").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn trạng thái --",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "PAStatus" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize product dropdown
+        $("#itemProductId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn sản phẩm --",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Product" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            },
+            change: function (e) {
+                var productId = this.value();
+                if (productId) {
+                    loadProductInfo(productId);
+                } else {
+                    $("#itemUnitName").val("");
+                    $("#itemPrice").val("");
+                }
+            }
+        });
+
+        // Set form values if editing
+        if (data) {
+            $("#formVendorId").data("kendoDropDownList").value(data.vendor_ID);
+            $("#formStatus").data("kendoDropDownList").value(data.status);
+
+            // Add tempId to items for grid management
+            paItems.forEach((item, index) => {
+                item.tempId = tempItemId++;
+            });
+        }
+
+        // Initialize items grid
+        $("#paItemsGrid").kendoGrid({
+            dataSource: {
+                data: paItems,
+                schema: {
+                    model: {
+                        fields: {
+                            quantity: { type: "number" },
+                            price: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "productName", title: "Sản phẩm", width: "200px" },
+                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n0') #" },
+                { field: "unitName", title: "Đơn vị", width: "80px" },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                {
+                    title: "Thành tiền",
+                    width: "120px",
+                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ"
+                },
+                {
+                    title: "Thao tác",
+                    width: "80px",
+                    template: '<button class="btn btn-sm btn-danger" onclick="removeItem(\'#= tempId #\')"><i class="fas fa-trash"></i></button>'
+                }
+            ],
+            pageable: false,
+            scrollable: true,
+            height: 300
+        });
+
+        // Event Handlers
+        $("#addItemBtn").click(function () {
+            addItemToGrid();
+        });
+
+        $("#savePABtn").click(function () {
+            savePurchaseAgreement();
+        });
+
+        function addItemToGrid() {
+            var productId = $("#itemProductId").data("kendoDropDownList").value();
+            var productName = $("#itemProductId").data("kendoDropDownList").text();
+            var quantity = parseFloat($("#itemQuantity").val()) || 0;
+            var unitName = $("#itemUnitName").val();
+            var price = parseFloat($("#itemPrice").val()) || 0;
+
+            if (!productId || quantity <= 0 || price < 0) {
+                showErrorMessage("Vui lòng nhập đầy đủ thông tin sản phẩm hợp lệ.");
+                return;
+            }
+
+            var grid = $("#paItemsGrid").data("kendoGrid");
+            var dataSource = grid.dataSource;
+
+            // Check if product already exists
+            var existingItem = dataSource.data().find(item => item.product_ID == productId);
+            if (existingItem) {
+                showErrorMessage("Sản phẩm đã tồn tại trong danh sách.");
+                return;
+            }
+
+            var newItem = {
+                tempId: tempItemId++,
+                product_ID: parseInt(productId),
+                productName: productName,
+                quantity: quantity,
+                unitName: unitName,
+                price: price
+            };
+
+            dataSource.add(newItem);
+
+            // Clear form
+            $("#itemProductId").data("kendoDropDownList").value("");
+            $("#itemQuantity").val("");
+            $("#itemUnitName").val("");
+            $("#itemPrice").val("");
+
+            // Update total price
+            updateTotalPrice();
+        }
+
+        function updateTotalPrice() {
+            var grid = $("#paItemsGrid").data("kendoGrid");
+            var items = grid.dataSource.data();
+            var total = 0;
+
+            items.forEach(function (item) {
+                total += (item.quantity || 0) * (item.price || 0);
+            });
+
+            $("#formTotalPrice").val(kendo.toString(total, 'n0'));
+        }
+
+        // Global function for removing items
+        window.removeItem = function (tempId) {
+            var grid = $("#paItemsGrid").data("kendoGrid");
+            var dataSource = grid.dataSource;
+            var item = dataSource.data().find(item => item.tempId == tempId);
+
+            if (item) {
+                dataSource.remove(item);
+                updateTotalPrice();
+            }
+        };
+
+        function loadProductInfo(productId) {
+            ajax("GET", "/Common/GetProductInfo", { productId: productId }, function (response) {
+                if (response.isSuccess && response.data) {
+                    $("#itemUnitName").val(response.data.unitName || "");
+                    $("#itemPrice").val(response.data.defaultPrice || "");
+                }
+            });
+        }
+
+        function savePurchaseAgreement() {
+            var vendorId = $("#formVendorId").data("kendoDropDownList").value();
+            var status = $("#formStatus").data("kendoDropDownList").value();
+            var groupCode = $("#formGroupCode").val();
+            var note = $("#formNote").val();
+            var grid = $("#paItemsGrid").data("kendoGrid");
+            var items = grid.dataSource.data();
+
+            if (!vendorId) {
+                showErrorMessage("Vui lòng chọn nhà cung cấp.");
+                return;
+            }
+
+            if (items.length === 0) {
+                showErrorMessage("Vui lòng thêm ít nhất một sản phẩm.");
+                return;
+            }
+
+            var paData = {
+                id: data?.id || 0,
+                vendor_ID: parseInt(vendorId),
+                status: parseInt(status) || 0,
+                groupCode: groupCode,
+                note: note,
+                purchaseAgreementItems: items.map(item => ({
+                    id: item.id || 0,
+                    product_ID: item.product_ID,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            };
+
+            var url = "/PurchaseAgreement/UpdatePurchaseAgreement";
+            var method = "PUT";
+
+            ajax(method, url, paData, function (response) {
+                if (response.isSuccess) {
+                    showSuccessMessage(data ? "Cập nhật hợp đồng thành công!" : "Tạo hợp đồng thành công!");
+                    $("#window").data("kendoWindow").close();
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                } else {
+                    showErrorMessages(response.errorMessageList);
+                }
+            });
+        }
+    }
+
+    function exportToExcel() {
+        var searchModel = getSearchModel();
+        var params = new URLSearchParams(searchModel).toString();
+        window.open(`/PurchaseAgreement/ExportExcel?${params}`, '_blank');
+    }
+
+
+</script>
