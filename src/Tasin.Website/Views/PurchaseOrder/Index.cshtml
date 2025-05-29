@@ -197,7 +197,7 @@
                     editor: "DropDownList",
                     editorOptions: {
                         dataTextField: "text",
-                        dataValueField: "data",
+                        dataValueField: "dataRaw",
                         template: function (dataItem) {
                             if (!dataItem || !dataItem.text) {
                                 return "N/A";
@@ -221,7 +221,7 @@
                                 parse: function (response) {
                                     if (response && response.isSuccess && response.data) {
                                         return response.data.filter(function (item) {
-                                            return item && item.text && item.data !== undefined;
+                                            return item && item.text && item.dataRaw !== undefined;
                                         });
                                     }
                                     return [];
@@ -737,7 +737,7 @@
         // Initialize Status Dropdown
         $("#po-status").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn trạng thái --",
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
@@ -762,7 +762,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
@@ -1241,7 +1241,7 @@
         // Initialize status dropdown
         $("#status").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn trạng thái --",
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
@@ -1266,7 +1266,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];

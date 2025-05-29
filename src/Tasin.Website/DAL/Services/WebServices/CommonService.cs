@@ -68,6 +68,16 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             return options;
         }
+
+        private List<KendoDropdownListModel<string>> GetPAStatus(string? searchString)
+        {
+            var options = EnumHelper.ToDropdownList<EPAStatus>();
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                options = options.SearchWithoutDiacriticsInMemory(i => i.Text, searchString).ToList();
+            }
+            return options;
+        }
         public async Task<Acknowledgement<List<KendoDropdownListModel<string>>>> GetCustomerDataDropdownList(string searchString)
         {
             var predicate = PredicateBuilder.New<Customer>(i => i.IsActive == true);
@@ -106,6 +116,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 Value = i.ID.ToString(),
                 Text = $"{i.Name} ({i.Code})",
+                DataRaw = i
             }).ToList();
             return new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
@@ -129,6 +140,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 Value = i.ID.ToString(),
                 Text = $"{i.Name} ({i.Code})",
+                DataRaw = i
             }).ToList();
             return new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
@@ -175,6 +187,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 Value = i.ID.ToString(),
                 Text = $"{i.Name} ({i.Code})",
+                DataRaw = i
             }).ToList();
             return new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
@@ -209,7 +222,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     Value = i.ID.ToString(),
                     Text = $"{i.Name} ({i.Code})",
-                    Data = i
+                    DataRaw = i
                 }).ToList();
 
                 return new Acknowledgement<List<KendoDropdownListModel<string>>>()
@@ -251,6 +264,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 Value = i.Id.ToString(),
                 Text = $"{i.Name} - {i.Code}",
+                DataRaw = i
             }).ToList();
             return new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
@@ -352,6 +366,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                         break;
                     case ECategoryType.POStatus:
                         response.Data = GetPOStatus(searchString);
+                        break;
+                    case ECategoryType.PAStatus:
+                        response.Data = GetPAStatus(searchString);
                         break;
                     default: break;
                 }

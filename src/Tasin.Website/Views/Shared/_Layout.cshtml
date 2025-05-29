@@ -371,23 +371,15 @@
             if (EnumRoleList.find(e => e == 41)) {
                 html += `<a class="nav-link my-1 _permission_" data-enum="41" href="/PurchaseOrder/Index">
                                 <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
-                                Danh sách đơn hàng
+                                Đơn hàng
                             </a>`;
             }
             if (EnumRoleList.find(e => e == 44)) {
                 html += `<a class="nav-link  my-1 _permission_" data-enum="44" href="/PurchaseAgreement/PAGroupIndex">
                                 <i class="fa-solid fa-plus fa-1_5x me-2"></i>
-                                Tổng hợp đơn
-                                        <span id="badge-sent" data-role="badge" class="k-badge k-badge-solid k-badge-solid-success k-badge-md k-rounded-full k-badge-inline k-ml-2" style="background-color: var(--bs-danger);">34</span>
+                                Đơn tổng hợp
                             </a>`;
             }
-            if (EnumRoleList.find(e => e == 45)) {
-                html += `<a class="nav-link  my-1 _permission_" data-enum="45" href="/PurchaseAgreement/Index">
-                                <i class="fa-solid fa-diagram-project fa-1_5x me-2"></i>
-                                Danh sách hợp đồng mua hàng
-                            </a>`;
-            }
-
             // Báo cáo menu
             let listBaoCao = [41, 45]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
             if (EnumRoleList.find(e => listBaoCao.includes(e))) {

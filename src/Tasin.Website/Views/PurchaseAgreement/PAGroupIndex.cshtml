@@ -43,7 +43,7 @@
     let record = 0;
 
     function viewPAGroupDetail(groupCode) {
-        ajax("GET", "/PurchaseAgreement/GetPAByGroupCode", { groupCode: groupCode }, function(response) {
+        ajax("GET", "/PurchaseAgreement/GetPAByGroupCode", { groupCode: groupCode }, function (response) {
             showPAGroupDetail(response.data);
         }, null, false);
     }
@@ -52,21 +52,21 @@
         let myWindow = $("#window");
         let detailHtml = '<div class="pa-group-detail">' +
             '<div class="pa-info-row">' +
-                '<div class="pa-info-col">' +
-                    '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
-                    '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
-                    '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
-                '</div>' +
-                '<div class="pa-info-col">' +
-                    '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
-                    '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
-                    '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
-                '</div>' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
+            '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
+            '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
+            '</div>' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
+            '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
+            '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
+            '</div>' +
             '</div>' +
             '<hr>' +
             '<h5>Danh sách hợp đồng theo nhà cung cấp:</h5>' +
             '<div id="childPAsGrid"></div>' +
-        '</div>';
+            '</div>';
 
         myWindow.html(detailHtml);
 
@@ -100,7 +100,7 @@
         });
 
         function remove() {
-            setTimeout(function() {
+            setTimeout(function () {
                 if ($(".k-window #window").length > 0) {
                     $("#window").parent().remove();
                     $(gridId).after("<div id='window'></div>");
@@ -164,7 +164,7 @@
     }
 
     function showPAGroupPreview() {
-        ajax("GET", "/PurchaseAgreement/GetPAGroupPreview", {}, function(response) {
+        ajax("GET", "/PurchaseAgreement/GetPAGroupPreview", {}, function (response) {
             if (response.isSuccess && response.data) {
                 showPAGroupPreviewModal(response.data);
             } else {
@@ -177,34 +177,34 @@
         let previewWindow = $("#previewWindow");
         let previewHtml = '<div class="pa-group-preview">' +
             '<div class="preview-header">' +
-                '<h5 style="color: #007bff; margin-bottom: 15px;">PREVIEW - TỔNG HỢP ĐƠN SẼ ĐƯỢC TẠO</h5>' +
+            '<h5 style="color: #007bff; margin-bottom: 15px;">PREVIEW - TỔNG HỢP ĐƠN SẼ ĐƯỢC TẠO</h5>' +
             '</div>' +
             '<div class="pa-info-row">' +
-                '<div class="pa-info-col">' +
-                    '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
-                    '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
-                    '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
-                '</div>' +
-                '<div class="pa-info-col">' +
-                    '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
-                    '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
-                    '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
-                '</div>' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
+            '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
+            '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
+            '</div>' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
+            '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
+            '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
+            '</div>' +
             '</div>' +
             '<hr>' +
             '<h5>Danh sách hợp đồng theo nhà cung cấp (Preview):</h5>' +
             '<div id="previewChildPAsGrid"></div>' +
             '<div class="preview-actions" style="margin-top: 20px; text-align: center;">' +
-                '<button id="confirmCreatePA" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success" style="margin-right: 10px;">' +
-                    '<span class="k-icon k-i-check k-button-icon"></span>' +
-                    '<span class="k-button-text">Xác nhận tạo</span>' +
-                '</button>' +
-                '<button id="cancelPreview" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base">' +
-                    '<span class="k-icon k-i-cancel k-button-icon"></span>' +
-                    '<span class="k-button-text">Hủy</span>' +
-                '</button>' +
+            '<button id="confirmCreatePA" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success" style="margin-right: 10px;">' +
+            '<span class="k-icon k-i-check k-button-icon"></span>' +
+            '<span class="k-button-text">Xác nhận tạo</span>' +
+            '</button>' +
+            '<button id="cancelPreview" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base">' +
+            '<span class="k-icon k-i-cancel k-button-icon"></span>' +
+            '<span class="k-button-text">Hủy</span>' +
+            '</button>' +
             '</div>' +
-        '</div>';
+            '</div>';
 
         previewWindow.html(previewHtml);
 
@@ -238,7 +238,7 @@
         });
 
         function removePreview() {
-            setTimeout(function() {
+            setTimeout(function () {
                 if ($(".k-window #previewWindow").length > 0) {
                     $("#previewWindow").parent().remove();
                     $(gridId).after("<div id='previewWindow'></div>");
@@ -263,14 +263,14 @@
         // Bind button events
         $("#confirmCreatePA").kendoButton({
             icon: "check"
-        }).click(function() {
+        }).click(function () {
             previewWindow.data("kendoWindow").close();
             createPAGroupFromPO();
         });
 
         $("#cancelPreview").kendoButton({
             icon: "cancel"
-        }).click(function() {
+        }).click(function () {
             previewWindow.data("kendoWindow").close();
         });
 
@@ -287,7 +287,7 @@
                 cancel: "Hủy"
             },
         }).data("kendoConfirm").open().result.done(function () {
-            ajax("POST", "/PurchaseAgreement/CreatePAGroup", {}, function(response) {
+            ajax("POST", "/PurchaseAgreement/CreatePAGroup", {}, function (response) {
                 if (response.isSuccess) {
                     showSuccessMessage("Tạo tổng hợp đơn thành công!");
                     $(gridId).data("kendoGrid").dataSource.filter({});
@@ -308,9 +308,17 @@
 
     function getSearchModel() {
         let searchString = $("#searchString").val();
-        
+        let vendorId = $("#vendorDropdown").data("kendoDropDownList")?.value();
+        let status = $("#statusDropdown").data("kendoDropDownList")?.value();
+        let dateFrom = $("#dateFrom").data("kendoDatePicker")?.value();
+        let dateTo = $("#dateTo").data("kendoDatePicker")?.value();
+
         return {
             searchString,
+            vendor_ID: vendorId && vendorId !== "" ? vendorId : null,
+            status: status && status !== "" ? status : null,
+            dateFrom: dateFrom ? kendo.toString(dateFrom, "yyyy-MM-ddTHH:mm:ss") : null,
+            dateTo: dateTo ? kendo.toString(dateTo, "yyyy-MM-ddTHH:mm:ss") : null
         };
     }
 
@@ -318,13 +326,37 @@
         let htmlToolbar = `
                 <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
                        <div class="row gx-0 row-gap-2 w-100">
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
                                 <div class="pe-1">
                                     <label for="searchString">Tìm kiếm:</label>
                                     <input type="text" class=" w-100" id="searchString"/>
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="vendorDropdown">Nhà cung cấp:</label>
+                                    <select id="vendorDropdown" class="w-100"></select>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="statusDropdown">Trạng thái:</label>
+                                    <select id="statusDropdown" class="w-100"></select>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="dateFrom">Từ ngày:</label>
+                                    <input type="date" class="w-100" id="dateFrom"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="dateTo">Đến ngày:</label>
+                                    <input type="date" class="w-100" id="dateTo"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
                                 <div class="pe-1">
                                     <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
                                     <button id='createPAGroupWithPreview' title="Tạo tổng hợp đơn"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
@@ -487,6 +519,92 @@
             },
             placeholder: "Nhập mã nhóm tìm kiếm..."
         });
+
+        // Initialize Vendor Dropdown
+        $("#vendorDropdown").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value",
+            optionLabel: "-- Chọn nhà cung cấp --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn nhà cung cấp --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Vendor" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Status Dropdown
+        $("#statusDropdown").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "dataRaw",
+            optionLabel: "-- Chọn trạng thái --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn trạng thái --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "PAStatus" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.dataRaw !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Date Pickers
+        $("#dateFrom").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            culture: "vi-VN"
+        });
+
+        $("#dateTo").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            culture: "vi-VN"
+        });
+
         $("#createPAGroupWithPreview").kendoButton({
             icon: "plus"
         });

@@ -391,6 +391,16 @@ namespace Tasin.Website.DAL.Services.WebServices
                     predicate = predicate.And(p => p.Vendor_ID == searchModel.Vendor_ID.Value);
                 }
 
+                if (searchModel.DateFrom.HasValue)
+                {
+                    predicate = predicate.And(p => p.CreatedDate >= searchModel.DateFrom.Value);
+                }
+
+                if (searchModel.DateTo.HasValue)
+                {
+                    predicate = predicate.And(p => p.CreatedDate <= searchModel.DateTo.Value);
+                }
+
                 // Apply author predicate
                 predicate = PurchaseAgreementAuthorPredicate.GetPurchaseAgreementAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
 

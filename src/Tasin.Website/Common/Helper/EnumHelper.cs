@@ -48,14 +48,14 @@ namespace Tasin.Website.Common.Helper
         {
             var enumValues = Enum.GetValues(typeof(TEnum));
             var result = new List<KendoDropdownListModel<string>>();
-            foreach(Enum e in enumValues)
+            foreach (Enum e in enumValues)
             {
                 var description = e.GetEnumDescription();
                 result.Add(new KendoDropdownListModel<string>
                 {
                     Text = description,
                     Value = (Convert.ToInt32(e)).ToString(),
-                    Data = e.ToString()
+                    DataRaw = e.ToString()
                 });
             }
             return result;
@@ -64,7 +64,7 @@ namespace Tasin.Website.Common.Helper
         {
             var enumValues = Enum.GetValues(typeof(TEnum));
             var result = new List<KendoDropdownListModel<string>>();
-            foreach(Enum e in enumValues)
+            foreach (Enum e in enumValues)
             {
                 var description = e.GetEnumDescription();
                 result.Add(new KendoDropdownListModel<string>

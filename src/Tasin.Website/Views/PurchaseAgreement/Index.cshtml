@@ -241,7 +241,7 @@
         // Initialize vendor dropdown
         $("#vendorId").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn nhà cung cấp --",
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
@@ -266,7 +266,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
@@ -278,7 +278,7 @@
         // Initialize status dropdown
         $("#status").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn trạng thái --",
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
@@ -303,7 +303,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
@@ -590,7 +590,7 @@
         // Initialize vendor dropdown
         $("#formVendorId").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn nhà cung cấp --",
             dataSource: {
                 transport: {
@@ -603,7 +603,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
@@ -615,7 +615,7 @@
         // Initialize status dropdown
         $("#formStatus").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn trạng thái --",
             dataSource: {
                 transport: {
@@ -628,7 +628,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
@@ -640,7 +640,7 @@
         // Initialize product dropdown
         $("#itemProductId").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "data",
+            dataValueField: "dataRaw",
             optionLabel: "-- Chọn sản phẩm --",
             dataSource: {
                 transport: {
@@ -653,7 +653,7 @@
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.data !== undefined;
+                                return item && item.text && item.dataRaw !== undefined;
                             });
                         }
                         return [];
