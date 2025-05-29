@@ -3,6 +3,11 @@
 }
 @using Newtonsoft.Json
 
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+}
+
 <div>
 
     <h4 class="demo-section wide title">@ViewData["Title"]</h4>
@@ -37,11 +42,11 @@
             id: 0,
             name: "",
             userName: "",
-            email:null,
-            address:"",
+            email: null,
+            address: "",
             password: null,
             phone: null,
-            roleIdList:[],
+            roleIdList: [],
             ...dataUser
         };
         let strSubmit = "Thêm";
@@ -84,7 +89,7 @@
                     field: "address",
                     title: "Địa chỉ",
                     label: "Địa chỉ:",
-                   
+
                 },
                 {
                     field: "password",
@@ -114,7 +119,7 @@
                         dataValueField: "value",
                         filter: filterCustom,
                         dataSource: {
-                            data:roleDatasource
+                            data: roleDatasource
                             // type: "json",
                             // serverFiltering: true,
                             // transport: {
@@ -147,14 +152,14 @@
                     ...e.model,
                     roleIdList: $("#roleIdList").data("kendoMultiSelect").value(),
                 };
-                if( dataItem.id > 0){
-                    var response = ajax("PUT", "/User/UpdateUser/"+dataItem.id, dataItem, () => {
+                if (dataItem.id > 0) {
+                    var response = ajax("PUT", "/User/UpdateUser/" + dataItem.id, dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
                 }
-                else{
-                    var response = ajax("POST", "/User/Create" , dataItem, () => {
+                else {
+                    var response = ajax("POST", "/User/Create", dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
@@ -164,7 +169,7 @@
                 $(this.element).empty();
             },
         });
-        if(!isCreate){
+        if (!isCreate) {
             $("#password").closest("div").hide();
             $("#password-form-label").closest("div").hide();
         }
@@ -219,7 +224,7 @@
     }
 
     async function editUser(id) {
-        var response = ajax("GET", "/User/GetUserById/"+id, { userId: id }, (response) => {
+        var response = ajax("GET", "/User/GetUserById/" + id, { userId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -234,7 +239,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/User/DeleteUserById/"+id, {
+            var response = ajax("DELETE", "/User/DeleteUserById/" + id, {
                 userId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -253,7 +258,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("PUT", "/User/ResetUserPasswordById/"+id, {
+            var response = ajax("PUT", "/User/ResetUserPasswordById/" + id, {
                 userId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -355,25 +360,22 @@
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
                                 <div class="pe-1">
                                     <label for="searchString">Tìm kiếm:</label>
-                                    <input type="text" class=" w-100" id="searchString"/>
+                                    <input type="text" class="w-100" id="searchString"/>
                                 </div>
                             </div>
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
                                 <div class="pe-1">
                                     <label for="roleDropdownList">Vai trò:</label>
-                                    <input  class=" w-100" id="roleDropdownList" />
+                                    <input class="w-100" id="roleDropdownList" />
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
-                                <div class="pe-1">
+                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-end">
+                                <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
                                     <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
-                        </div>
-
-                            <div class="d-flex mt-2 flex-row w-100">
-                            <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
                         </div>
                 </div>
             `;
@@ -585,7 +587,7 @@
 <script type="text/javascript">
     InitGrid();
     $(document).ready(function () {
-    InitKendoToolBar();
+        InitKendoToolBar();
         setTimeout(() => {
             $(window).trigger("resize");
         }, 500);

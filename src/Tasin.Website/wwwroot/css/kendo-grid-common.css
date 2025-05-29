@@ -1,4 +1,4 @@
-/* Kendo Grid Common Styles - CustomerIndex Style */
+/* Kendo Grid Common Styles - Unified Design System */
 
 /* Main Grid Styling */
 .k-grid {
@@ -9,6 +9,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
     table-layout: auto;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Ensure consistent table layout for both scrollable and non-scrollable */
@@ -43,65 +44,6 @@
 }
 
 /* Alternating row colors for both grid types */
-.k-grid .k-alt {
-    background-color: #f8f9fa !important;
-}
-
-.k-grid .k-alt td {
-    background-color: #f8f9fa !important;
-}
-
-.k-grid .k-grid-content .k-table tr.k-alt {
-    background-color: #f8f9fa !important;
-}
-
-.k-grid .k-grid-content .k-table tr.k-alt td {
-    background-color: #f8f9fa !important;
-}
-
-/* Specific for non-scrollable grids */
-.k-grid:not(.k-grid-scrollable) tbody tr:nth-child(even) {
-    background-color: #f8f9fa !important;
-}
-
-.k-grid:not(.k-grid-scrollable) tbody tr:nth-child(even) td {
-    background-color: #f8f9fa !important;
-}
-
-/* Hover effects for both scrollable and non-scrollable grids */
-.k-grid .k-grid-content tr:hover {
-    background-color: #e3f2fd !important;
-}
-
-.k-grid .k-grid-content tr:hover td {
-    background-color: #e3f2fd !important;
-}
-
-.k-grid .k-grid-content .k-table tr:hover {
-    background-color: #e3f2fd !important;
-}
-
-.k-grid .k-grid-content .k-table tr:hover td {
-    background-color: #e3f2fd !important;
-}
-
-/* Specific for non-scrollable grids (CustomerIndex style) */
-.k-grid:not(.k-grid-scrollable) tbody tr:hover {
-    background-color: #e3f2fd !important;
-}
-
-.k-grid:not(.k-grid-scrollable) tbody tr:hover td {
-    background-color: #e3f2fd !important;
-}
-
-/* Specific for scrollable grids (PurchaseOrder style) */
-.k-grid.k-grid-scrollable .k-grid-content tr:hover {
-    background-color: #e3f2fd !important;
-}
-
-.k-grid.k-grid-scrollable .k-grid-content tr:hover td {
-    background-color: #e3f2fd !important;
-}
 
 .k-grid .k-grid-content td {
     padding: 10px 8px;
@@ -129,6 +71,21 @@
 .k-grid .k-grid-content td .number {
     font-weight: 500;
     color: #495057 !important;
+}
+
+/* Override currency and number colors in selected rows for better readability */
+.k-grid .k-state-selected .currency,
+.k-grid .k-state-selected td .currency,
+.k-grid tbody tr.k-state-selected .currency,
+.k-grid tbody tr.k-state-selected td .currency {
+    color: #ffffff !important;
+}
+
+.k-grid .k-state-selected .number,
+.k-grid .k-state-selected td .number,
+.k-grid tbody tr.k-state-selected .number,
+.k-grid tbody tr.k-state-selected td .number {
+    color: #ffffff !important;
 }
 
 /* Detail grid currency and number styling */
@@ -172,10 +129,6 @@
     background-color: #fffbf0;
 }
 
-.k-grid .k-detail-row .k-grid .k-grid-content tr:hover {
-    background-color: #fff3cd !important;
-}
-
 /* Pagination Styling */
 .k-grid .k-pager-wrap {
     background: #f8f9fa;
@@ -187,16 +140,6 @@
     background: #0d6efd;
     border-color: #0d6efd;
     color: white;
-}
-
-/* Loading Overlay */
-.k-grid .k-loading-mask {
-    background: rgba(248, 249, 250, 0.9);
-}
-
-.k-grid .k-loading-text {
-    color: #495057;
-    font-weight: 500;
 }
 
 /* Status Badges */
@@ -252,19 +195,9 @@
     color: #212529;
 }
 
-.btn-edit:hover {
-    background: #e0a800;
-    transform: scale(1.1);
-}
-
 .btn-delete {
     background: #dc3545;
     color: white;
-}
-
-.btn-delete:hover {
-    background: #c82333;
-    transform: scale(1.1);
 }
 
 .btn-invoice {
@@ -272,19 +205,9 @@
     color: white;
 }
 
-.btn-invoice:hover {
-    background: #545b62;
-    transform: scale(1.1);
-}
-
 .btn-view {
     background: #17a2b8;
     color: white;
-}
-
-.btn-view:hover {
-    background: #138496;
-    transform: scale(1.1);
 }
 
 /* Dropdown Menu Styling */
@@ -302,8 +225,46 @@
     align-items: center;
 }
 
-.dropdown-item:hover {
-    background-color: #f8f9fa;
+/* Grid Performance Optimizations */
+.k-grid .k-virtual-scrollable-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* Grid Loading States */
+.k-grid .k-loading-mask {
+    background: rgba(248, 249, 250, 0.95);
+    backdrop-filter: blur(2px);
+}
+
+.k-grid .k-loading-text {
+    color: #495057;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Grid Empty State */
+.k-grid .k-grid-norecords {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Improved Scrollbar Styling */
+.k-grid .k-grid-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.k-grid .k-grid-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.k-grid .k-grid-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
 }
 
 /* Responsive Design for Grid */
@@ -322,5 +283,178 @@
         width: 28px;
         height: 28px;
         font-size: 12px;
+    }
+
+    /* Mobile-specific grid adjustments */
+    .k-grid {
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .k-grid .k-grid-header .k-header {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 576px) {
+    .k-grid .k-grid-content td {
+        padding: 4px 2px;
+        font-size: 11px;
+    }
+
+    .btn-action {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+        margin: 0 1px;
+    }
+}
+
+/* Grid Utility Classes */
+.grid-text-center {
+    text-align: center !important;
+}
+
+.grid-text-left {
+    text-align: left !important;
+}
+
+.grid-text-right {
+    text-align: right !important;
+}
+
+.grid-nowrap {
+    white-space: nowrap !important;
+}
+
+.grid-ellipsis {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 200px !important;
+}
+
+/* Grid Column Width Utilities */
+.grid-col-narrow {
+    width: 80px !important;
+    min-width: 80px !important;
+}
+
+.grid-col-small {
+    width: 120px !important;
+    min-width: 120px !important;
+}
+
+.grid-col-medium {
+    width: 150px !important;
+    min-width: 150px !important;
+}
+
+.grid-col-large {
+    width: 200px !important;
+    min-width: 200px !important;
+}
+
+.grid-col-wide {
+    width: 250px !important;
+    min-width: 250px !important;
+}
+
+/* Grid Action Column Styling */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn-action {
+    flex-shrink: 0;
+}
+
+/* Grid Status Indicators */
+.status-active {
+    color: #28a745 !important;
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+.status-pending {
+    color: #ffc107 !important;
+    font-weight: 600;
+}
+
+.status-processing {
+    color: #17a2b8 !important;
+    font-weight: 600;
+}
+
+/* Override status colors in selected rows for better readability */
+.k-grid .k-state-selected .status-active,
+.k-grid .k-state-selected .status-inactive,
+.k-grid .k-state-selected .status-pending,
+.k-grid .k-state-selected .status-processing,
+.k-grid tbody tr.k-state-selected .status-active,
+.k-grid tbody tr.k-state-selected .status-inactive,
+.k-grid tbody tr.k-state-selected .status-pending,
+.k-grid tbody tr.k-state-selected .status-processing {
+    color: #ffffff !important;
+}
+
+/* Ensure all text in selected rows is white for better contrast */
+.k-grid .k-state-selected,
+.k-grid .k-state-selected td,
+.k-grid tbody tr.k-state-selected,
+.k-grid tbody tr.k-state-selected td {
+    color: #ffffff !important;
+}
+
+/* Override any specific text colors in selected rows */
+.k-grid .k-state-selected *,
+.k-grid tbody tr.k-state-selected * {
+    color: #ffffff !important;
+}
+
+/* Grid Toolbar Integration */
+.k-grid .k-grid-toolbar {
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    padding: 0;
+}
+
+.k-grid .k-grid-toolbar #toolbar {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 15px;
+}
+
+/* Print Styles */
+@media print {
+    .k-grid {
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+
+    .k-grid .k-grid-header {
+        background: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+
+    .btn-action,
+    .action-buttons {
+        display: none !important;
+    }
+
+    .k-grid .k-pager-wrap {
+        display: none !important;
     }
 }
