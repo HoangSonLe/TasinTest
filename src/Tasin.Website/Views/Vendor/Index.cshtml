@@ -2,6 +2,11 @@
     ViewData["Title"] = "Nhà cung cấp";
 }
 
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+}
+
 <div>
 
     <h4 class="demo-section wide title">@ViewData["Title"]</h4>
@@ -77,7 +82,7 @@
                     field: "Product_ID",
                     title: "Sản phẩm (*)",
                     width: 200,
-                    editor: function(container, options) {
+                    editor: function (container, options) {
                         $('<input required data-bind="value:' + options.field + '"/>')
                             .appendTo(container)
                             .kendoDropDownList({
@@ -122,7 +127,7 @@
                                         total: "total"
                                     },
                                 },
-                                change: function(e) {
+                                change: function (e) {
                                     var selectedItem = this.dataItem();
                                     if (selectedItem) {
                                         var grid = $("#productVendorGrid").data("kendoGrid");
@@ -145,7 +150,7 @@
                     title: "Giá bán",
                     width: 120,
                     format: "{0:n0}",
-                    editor: function(container, options) {
+                    editor: function (container, options) {
                         $('<input data-bind="value:' + options.field + '"/>')
                             .appendTo(container)
                             .kendoNumericTextBox({
@@ -159,7 +164,7 @@
                     title: "Đơn giá",
                     width: 120,
                     format: "{0:n0}",
-                    editor: function(container, options) {
+                    editor: function (container, options) {
                         $('<input data-bind="value:' + options.field + '"/>')
                             .appendTo(container)
                             .kendoNumericTextBox({
@@ -172,7 +177,7 @@
                     field: "Priority",
                     title: "Ưu tiên",
                     width: 100,
-                    editor: function(container, options) {
+                    editor: function (container, options) {
                         $('<input data-bind="value:' + options.field + '"/>')
                             .appendTo(container)
                             .kendoNumericTextBox({
@@ -193,13 +198,13 @@
                     width: 100
                 }
             ],
-            save: function(e) {
+            save: function (e) {
                 // Handle save event for individual rows
             }
         });
 
         // Handle toolbar save button
-        $("#productVendorGrid").on("click", ".k-grid-save-changes", function(e) {
+        $("#productVendorGrid").on("click", ".k-grid-save-changes", function (e) {
             e.preventDefault();
             saveAllProductVendors(vendorId);
         });
@@ -325,7 +330,7 @@
         let formData = {
             id: 0,
             name: "",
-            address:"",
+            address: "",
             // status: "",
             ...dataVendor
         };
@@ -371,14 +376,14 @@
                     ...e.model,
                 };
 
-                if( dataItem.id > 0){
-                    var response = ajax("PUT", "/Vendor/UpdateVendor/"+dataItem.id, dataItem, () => {
+                if (dataItem.id > 0) {
+                    var response = ajax("PUT", "/Vendor/UpdateVendor/" + dataItem.id, dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
                 }
-                else{
-                    var response = ajax("POST", "/Vendor/Create" , dataItem, () => {
+                else {
+                    var response = ajax("POST", "/Vendor/Create", dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
@@ -388,7 +393,7 @@
                 $(this.element).empty();
             },
         });
-        if(!isCreate){
+        if (!isCreate) {
 
         }
 
@@ -428,7 +433,7 @@
     }
 
     async function editVendor(id) {
-        var response = ajax("GET", "/Vendor/GetVendorById/"+id, { vendorId: id }, (response) => {
+        var response = ajax("GET", "/Vendor/GetVendorById/" + id, { vendorId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -443,7 +448,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/Vendor/DeleteVendorById/"+id, {
+            var response = ajax("DELETE", "/Vendor/DeleteVendorById/" + id, {
                 vendorId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -522,22 +527,19 @@
         let htmlToolbar = `
                 <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
                        <div class="row gx-0 row-gap-2 w-100">
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
                                 <div class="pe-1">
                                     <label for="searchString">Tìm kiếm:</label>
-                                    <input type="text" class=" w-100" id="searchString"/>
+                                    <input type="text" class="w-100" id="searchString"/>
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
-                                <div class="pe-1">
-                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
+                                <div class="pe-1 d-flex gap-2">
+                                    <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='create' title="Thêm" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
-                        </div>
-
-                            <div class="d-flex mt-2 flex-row w-100">
-                            <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
                         </div>
                 </div>
             `;
@@ -647,7 +649,7 @@
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                        template: "<button style='margin-right:5px;' onclick=addVendorProduct(#=id#) title='Thêm hàng hoá' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_1' data-enum='8'><span class='k-icon k-i-plus k-button-icon'></span></button>\
+                    template: "<button style='margin-right:5px;' onclick=addVendorProduct(#=id#) title='Thêm hàng hoá' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_1' data-enum='8'><span class='k-icon k-i-plus k-button-icon'></span></button>\
                         <button style='margin-right:5px;' onclick=editVendor(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
                         <button style='margin-right:5px;' onclick=deleteVendor(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
                 }

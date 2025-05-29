@@ -2,6 +2,11 @@
     ViewData["Title"] = "Loại mặt hàng";
 }
 
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+}
+
 <div>
 
     <h4 class="demo-section wide title">@ViewData["Title"]</h4>
@@ -34,7 +39,7 @@
             id: 0,
             name: "",
             name_EN: "",
-            description :"",
+            description: "",
             // status: "",
             ...dataSpecialProductTaxRate
         };
@@ -83,14 +88,14 @@
                     ...formData,
                     ...e.model,
                 };
-                if( dataItem.id > 0){
-                    var response = ajax("PUT", "/SpecialProductTaxRate/UpdateSpecialProductTaxRate/"+dataItem.id, dataItem, () => {
+                if (dataItem.id > 0) {
+                    var response = ajax("PUT", "/SpecialProductTaxRate/UpdateSpecialProductTaxRate/" + dataItem.id, dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
                 }
-                else{
-                    var response = ajax("POST", "/SpecialProductTaxRate/Create" , dataItem, () => {
+                else {
+                    var response = ajax("POST", "/SpecialProductTaxRate/Create", dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
@@ -100,7 +105,7 @@
                 $(this.element).empty();
             },
         });
-        if(!isCreate){
+        if (!isCreate) {
 
         }
 
@@ -140,7 +145,7 @@
     }
 
     async function editSpecialProductTaxRate(id) {
-        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById/"+id, { specialProductTaxRateId: id }, (response) => {
+        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById/" + id, { specialProductTaxRateId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -155,7 +160,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/"+id, {
+            var response = ajax("DELETE", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/" + id, {
                 specialProductTaxRateId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});

@@ -2,6 +2,11 @@
     ViewData["Title"] = "Hàng hoá";
 }
 
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+}
+
 <div>
 
     <h4 class="demo-section wide title">@ViewData["Title"]</h4>
@@ -110,7 +115,7 @@
                                 },
                             },
                             serverPaging: true,
-                            serverFiltering:true,
+                            serverFiltering: true,
                             page: 1,
                             pageSize: 9999,
                             schema: {
@@ -148,7 +153,7 @@
                                 },
                             },
                             serverPaging: true,
-                            serverFiltering:true,
+                            serverFiltering: true,
                             page: 1,
                             pageSize: 9999,
                             schema: {
@@ -186,7 +191,7 @@
                                 },
                             },
                             serverPaging: true,
-                            serverFiltering:true,
+                            serverFiltering: true,
                             page: 1,
                             pageSize: 9999,
                             schema: {
@@ -242,7 +247,7 @@
                                 },
                             },
                             serverPaging: true,
-                            serverFiltering:true,
+                            serverFiltering: true,
                             page: 1,
                             pageSize: 9999,
                             schema: {
@@ -286,7 +291,7 @@
                                 },
                             },
                             serverPaging: true,
-                            serverFiltering:true,
+                            serverFiltering: true,
                             page: 1,
                             pageSize: 9999,
                             schema: {
@@ -330,14 +335,14 @@
                     ...formData,
                     ...e.model,
                 };
-                if( dataItem.id > 0){
-                    var response = ajax("PUT", "/Product/UpdateProduct/"+dataItem.id, dataItem, () => {
+                if (dataItem.id > 0) {
+                    var response = ajax("PUT", "/Product/UpdateProduct/" + dataItem.id, dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
                 }
-                else{
-                    var response = ajax("POST", "/Product/Create" , dataItem, () => {
+                else {
+                    var response = ajax("POST", "/Product/Create", dataItem, () => {
                         $(gridId).data("kendoGrid").dataSource.filter({});
                         myWindow.data("kendoWindow").close();
                     });
@@ -347,7 +352,7 @@
                 $(this.element).empty();
             },
         });
-        if(!isCreate){
+        if (!isCreate) {
 
         }
 
@@ -387,7 +392,7 @@
     }
 
     async function editProduct(id) {
-        var response = ajax("GET", "/Product/GetProductById/"+id, { productId: id }, (response) => {
+        var response = ajax("GET", "/Product/GetProductById/" + id, { productId: id }, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -402,7 +407,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/Product/DeleteProductById/"+id, {
+            var response = ajax("DELETE", "/Product/DeleteProductById/" + id, {
                 productId: id
             }, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
@@ -413,6 +418,62 @@
     }
 
 
+
+    async function ExportExcel() {
+        let dataSheet1 = [
+            {
+                cells: [
+                    { value: "Mã hàng hoá", textAlign: "center", background: "#428dd8" },
+                    { value: "Hàng hoá", textAlign: "center", background: "#428dd8" },
+                    { value: "Hàng hoá tiếng anh", textAlign: "center", background: "#428dd8" },
+                    { value: "Mô tả", textAlign: "center", background: "#428dd8" },
+                    { value: "Ngày cập nhật", textAlign: "center", background: "#428dd8" },
+                    { value: "Người cập nhật", textAlign: "center", background: "#428dd8" },
+                ]
+            }];
+
+        var searchModel = getSearchModel();
+        let postData = {
+            ...searchModel,
+            pageSize: 999999999,
+            pageNumber: 1
+        }
+        let dataSourceProduct = null;
+        var response = await ajax("GET", "/Product/GetProductList", postData, (urnResponse) => {
+            dataSourceProduct = urnResponse.data.data;
+        }, null, false);
+        if (dataSourceProduct == null) return;
+
+        for (let index = 0; index < dataSourceProduct.length; index++) {
+            dataSheet1.push({
+                cells: [
+                    { value: dataSourceProduct[index].code },
+                    { value: dataSourceProduct[index].name },
+                    { value: dataSourceProduct[index].name_EN },
+                    { value: dataSourceProduct[index].description },
+                    { value: kendo.toString(kendo.parseDate(dataSourceProduct[index].updatedDate), "dd/MM/yyyy") },
+                    { value: dataSourceProduct[index].updatedByName },
+                ]
+            })
+        }
+
+        var workbook = new kendo.ooxml.Workbook({
+            sheets: [
+                {
+                    name: "Danh sách hàng hoá",
+                    columns: [
+                        { width: 150 }, { width: 200 }, { width: 200 },
+                        { width: 250 }, { autoWidth: true }, { autoWidth: true }
+                    ],
+                    rows: dataSheet1,
+                }
+            ]
+        });
+        kendo.saveAs({
+            dataURI: workbook.toDataURL(),
+            fileName: "Danh sách hàng hoá _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
+        });
+    }
 
     function getSearchModel() {
         let searchString = $("#searchString").val();
@@ -425,16 +486,17 @@
         let htmlToolbar = `
                 <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
                        <div class="row gx-0 row-gap-2 w-100">
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
                                 <div class="pe-1">
                                     <label for="searchString">Tìm kiếm:</label>
-                                    <input type="text" class=" w-100" id="searchString"/>
+                                    <input type="text" class="w-100" id="searchString"/>
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
-                                <div class="pe-1">
-                                    <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
+                                <div class="pe-1 d-flex gap-2">
+                                    <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='create' title="Thêm" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
                         </div>
@@ -554,7 +616,7 @@
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                        template: "<button style='margin-right:5px;' onclick=editProduct(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
+                    template: "<button style='margin-right:5px;' onclick=editProduct(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
                         <button style='margin-right:5px;' onclick=deleteProduct(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
                 }
             ],
