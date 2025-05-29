@@ -3,8 +3,8 @@
 }
 
 @section Styles {
-    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
-    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+   <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+        <link href="~/css/toolbar-common.css" rel="stylesheet" /> 
 }
 
 <div>
@@ -19,29 +19,17 @@
 
 <script type="text/javascript">
     let gridId = "#gridId";
+    let record = 0;
+    let monday = ModayInLastWeekNearlest();
+    let sunday = SundayInWeekNearlest();
 
     function getSearchModel() {
         let productName = $("#productName").val();
-        let vendorId = $("#vendorId").data("kendoDropDownList")?.value();
-        let dateFromStr = $("#dateFrom").val();
-        let dateToStr = $("#dateTo").val();
+        let vendorId = $("#vendorId").data("kendoDropDownList")?.value() ;
         let includeDetails = $("#includeDetails").prop("checked");
 
-        // Convert date strings to ISO format if they exist
-        let dateFrom = null;
-        let dateTo = null;
-
-        if (dateFromStr) {
-            let dateFromObj = new Date(dateFromStr);
-            dateFrom = dateFromObj.toISOString();
-        }
-
-        if (dateToStr) {
-            let dateToObj = new Date(dateToStr);
-            // Set to end of day
-            dateToObj.setHours(23, 59, 59, 999);
-            dateTo = dateToObj.toISOString();
-        }
+        let dateFrom = kendo.toString($("#dateFrom")?.val() ? $("#dateFrom").data("kendoDatePicker").value() : monday, "MM/dd/yyyy");
+        let dateTo = kendo.toString($("#dateTo")?.val() ? $("#dateTo").data("kendoDatePicker").value() : sunday, "MM/dd/yyyy");
 
         return {
             productName: productName || null,
@@ -126,52 +114,100 @@
     }
 
     function InitGrid() {
+        // let htmlToolbar = `
+        //     <div id='toolbar' class='statistics-toolbar'>
+        //         <div class="toolbar-filters">
+        //             <div class="filter-group">
+        //                 <label class="filter-label">Tên sản phẩm:</label>
+        //                 <div class="filter-input">
+        //                     <input type="text" id="productName" placeholder="Nhập tên sản phẩm..."/>
+        //                 </div>
+        //             </div>
+        //             <div class="filter-group">
+        //                 <label class="filter-label">Nhà cung cấp:</label>
+        //                 <div class="filter-input">
+        //                     <select id="vendorId"></select>
+        //                 </div>
+        //             </div>
+        //             <div class="filter-group">
+        //                 <label class="filter-label">Từ ngày:</label>
+        //                 <div class="filter-input">
+        //                     <input type="date" id="dateFrom"/>
+        //                 </div>
+        //             </div>
+        //             <div class="filter-group">
+        //                 <label class="filter-label">Đến ngày:</label>
+        //                 <div class="filter-input">
+        //                     <input type="date" id="dateTo"/>
+        //                 </div>
+        //             </div>
+        //             <div class="filter-group checkbox-group">
+        //                 <div class="filter-input">
+        //                     <input type="checkbox" id="includeDetails"/>
+        //                     <label for="includeDetails" class="checkbox-label">Chi tiết PA</label>
+        //                 </div>
+        //             </div>
+        //             <div class="filter-group action-group">
+        //                 <button id="search" title="Tìm kiếm" class="btn-search">
+        //                     <i class="fas fa-search"></i>
+        //                 </button>
+        //             </div>
+        //         </div>
+        //         <div class="toolbar-actions">
+        //             <button id="exportExcel" class="btn-export">
+        //                 <i class="fas fa-file-excel"></i>
+        //                 <span>Export Excel</span>
+        //             </button>
+        //         </div>
+        //     </div>
+        // `;
+
         let htmlToolbar = `
-            <div id='toolbar' class='statistics-toolbar'>
-                <div class="toolbar-filters">
-                    <div class="filter-group">
-                        <label class="filter-label">Tên sản phẩm:</label>
-                        <div class="filter-input">
-                            <input type="text" id="productName" placeholder="Nhập tên sản phẩm..."/>
+        <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                <div class="row gx-0 row-gap-2 w-100">
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                        <div class="pe-1">
+                            <label for="productName">Tên sản phẩm:</label>
+                            <input type="text" class=" w-100" id="productName" placeholder="Nhập tên sản phẩm..."/>
                         </div>
                     </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Nhà cung cấp:</label>
-                        <div class="filter-input">
-                            <select id="vendorId"></select>
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                        <div class="pe-1">
+                            <label for="vendorId">Nhà cung cấp:</label>
+                            <select class=" w-100" id="vendorId"></select>
                         </div>
                     </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Từ ngày:</label>
-                        <div class="filter-input">
-                            <input type="date" id="dateFrom"/>
+
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                        <div class="pe-1">
+                            <label for="dateFrom">Từ ngày:</label>
+                            <input class=" w-100" type="date" id="dateFrom"/>
                         </div>
                     </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Đến ngày:</label>
-                        <div class="filter-input">
-                            <input type="date" id="dateTo"/>
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                        <div class="pe-1">
+                            <label for="dateTo">Đến ngày:</label>
+                            <input class=" w-100" type="date" id="dateTo"/>
                         </div>
                     </div>
-                    <div class="filter-group checkbox-group">
-                        <div class="filter-input">
-                            <input type="checkbox" id="includeDetails"/>
-                            <label for="includeDetails" class="checkbox-label">Chi tiết PA</label>
+
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                        <div class="pe-1">
+                            <label for="includeDetails" style="visibility: hidden;">:</label>
+                            <div class="checkBoxFilter">
+                                <input type="checkbox" id="includeDetails"/>
+                            </div>
                         </div>
                     </div>
-                    <div class="filter-group action-group">
-                        <button id="search" title="Tìm kiếm" class="btn-search">
-                            <i class="fas fa-search"></i>
-                        </button>
+
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
+                        <div class="pe-1">
+                            <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                            <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>
+                        </div>
                     </div>
                 </div>
-                <div class="toolbar-actions">
-                    <button id="exportExcel" class="btn-export">
-                        <i class="fas fa-file-excel"></i>
-                        <span>Export Excel</span>
-                    </button>
-                </div>
-            </div>
+        </div>
         `;
 
         $(gridId).kendoGrid({
@@ -332,23 +368,27 @@
             ExportExcel();
         });
 
+        $("#productName").kendoTextBox({
+            placeholder: "Nhập từ khóa tìm kiếm..."
+        });
+
         // Initialize vendor dropdown with Kendo DropDownList
         $("#vendorId").kendoDropDownList({
             dataTextField: "text",
             dataValueField: "value",
-            optionLabel: "-- Chọn nhà cung cấp --",
-            template: function (dataItem) {
-                if (!dataItem || !dataItem.text) {
-                    return "N/A";
-                }
-                return dataItem.text;
-            },
-            valueTemplate: function (dataItem) {
-                if (!dataItem || !dataItem.text) {
-                    return "-- Chọn nhà cung cấp --";
-                }
-                return dataItem.text;
-            },
+            optionLabel: "Chọn nhà cung cấp",
+            // template: function (dataItem) {
+            //     if (!dataItem || !dataItem.text) {
+            //         return "N/A";
+            //     }
+            //     return dataItem.text;
+            // },
+            // valueTemplate: function (dataItem) {
+            //     if (!dataItem || !dataItem.text) {
+            //         return "-- Chọn nhà cung cấp --";
+            //     }
+            //     return dataItem.text;
+            // },
             dataSource: {
                 transport: {
                     read: {
@@ -369,22 +409,13 @@
             }
         });
 
-        // Set default date range to last 1 month
-        var today = new Date();
-        var oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(today.getMonth() - 1);
+        $("#dateFrom").kendoDatePicker({ value: monday });
+        $("#dateTo").kendoDatePicker({ value: sunday });
+        $("#includeDetails").kendoCheckBox({
+            label: "Chi tiết PA"
+        });
 
-        // Format dates for input fields (YYYY-MM-DD)
-        var todayStr = today.getFullYear() + '-' +
-            String(today.getMonth() + 1).padStart(2, '0') + '-' +
-            String(today.getDate()).padStart(2, '0');
-        var oneMonthAgoStr = oneMonthAgo.getFullYear() + '-' +
-            String(oneMonthAgo.getMonth() + 1).padStart(2, '0') + '-' +
-            String(oneMonthAgo.getDate()).padStart(2, '0');
 
-        // Set default values for date inputs
-        $("#dateFrom").val(oneMonthAgoStr);
-        $("#dateTo").val(todayStr);
     }
 </script>
 
@@ -392,15 +423,16 @@
     InitGrid();
     InitKendoToolBar();
     $(document).ready(function () {
-        $(window).trigger("resize");
 
         // Auto load data with default filter (last 1 month)
         setTimeout(function () {
-            var grid = $(gridId).data("kendoGrid");
-            if (grid) {
-                grid.dataSource.read();
-            }
-        }, 500);
+            // var grid = $(gridId).data("kendoGrid");
+            // if (grid) {
+            //     grid.dataSource.read();
+            // }
+
+        $(window).trigger("resize");
+        }, 300);
     });
 </script>
 

@@ -2284,3 +2284,12 @@ header, footer, nav, section {
     .k-color-success {
         color: green !important;
     }
+
+
+.checkBoxFilter {
+    height: 34px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
