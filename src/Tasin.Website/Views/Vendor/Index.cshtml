@@ -26,31 +26,39 @@
 </script>
 <script type="text/javascript">
     let gridId = "#gridId";
+    let ListProduct_ID =[];
+
+
     function addVendorProduct(vendorId) {
         let myWindow = $("#window");
         $("#window").html("<div id='productVendorGrid'></div>");
 
         let title = "THÊM NHIỀU HÀNG HOÁ CHO NHÀ CUNG CẤP";
-        let productVendorData = [];
 
-        // Initialize grid for adding multiple products
-        $("#productVendorGrid").kendoGrid({
-            dataSource: {
-                data: productVendorData,
-                schema: {
-                    model: {
-                        id: "Product_ID",
-                        fields: {
-                            Product_ID: { type: "number", validation: { required: true } },
-                            ProductName: { type: "string", editable: false },
-                            Price: { type: "number" },
-                            UnitPrice: { type: "number" },
-                            Priority: { type: "number" },
-                            Description: { type: "string" }
-                        }
+        // Function to initialize the grid with data
+        function initializeGrid(productVendorData) {
+            // Initialize grid for adding multiple products
+            $("#productVendorGrid").kendoGrid({
+                dataSource: {
+                    data: productVendorData,
+                    schema: {
+                        model: {
+                            id: "Product_ID",
+                            fields: {
+                                Product_ID: { type: "number", validation: { required: true } },
+                                ProductName: { type: "string", editable: false },
+                                Price: { type: "number" },
+                                UnitPrice: { type: "number" },
+                                Priority: { type: "number" },
+                                Description: { type: "string" }
+                            }
+                        },
+                        parse: function (response) {
+                            ListProduct_ID = response.map(e=>e.Product_ID);
+                            return response;
+                        },
                     }
-                }
-            },
+                },
             height: 400,
             scrollable: true,
             sortable: true,
@@ -100,6 +108,7 @@
                                                 showErrorMessages(response.errorMessageList);
                                                 return { data: [], total: 0 }
                                             }
+                                            // return response.data.data.filter(e=> !ListProduct_ID.includes(e.id));
                                             return response.data;
                                         },
                                         model: {
@@ -115,15 +124,21 @@
                                 },
                                 change: function(e) {
                                     var selectedItem = this.dataItem();
-                                    if (selectedItem) {debugger
+                                    if (selectedItem) {
                                         var grid = $("#productVendorGrid").data("kendoGrid");
                                         var dataItem = grid.dataItem(container.closest("tr"));
                                         dataItem.set("ProductName", selectedItem.name);
+                                        dataItem.ProductName=selectedItem.name;
+                                        ListProduct_ID.push(selectedItem.id);
                                     }
                                 }
                             });
                     },
-                    template: "#= ProductName || '' #"
+                    // template: "#= ProductName || '' #"
+                    template: function(dataItem) {
+                        
+                        return dataItem.ProductName || "";
+                    }
                 },
                 {
                     field: "Price",
@@ -210,8 +225,53 @@
             close: function (e) {
                 remove();
             },
-        }).data("kendoWindow").title(title).center();
-        myWindow.data("kendoWindow").open();
+        });
+
+
+            function remove() {
+                setTimeout(() => {
+                    if ($(".k-window #window").length > 0) {
+                        $("#window").parent().remove();
+                        $(gridId).after("<div id='window'></div>");
+                    }
+                }, 200)
+            }
+
+            myWindow.kendoWindow({
+                width: "900px",
+                height: "600px",
+                title: "",
+                visible: false,
+                actions: ["Close"],
+                resizable: true,
+                draggable: true,
+                modal: true,
+                close: function (e) {
+                    remove();
+                },
+            }).data("kendoWindow").title(title).center();
+            myWindow.data("kendoWindow").open();
+        }
+
+        // Load existing products for this vendor
+        ajax("GET", "/ProductVendor/GetProductsByVendorId/" + vendorId, null, (response) => {
+            let productVendorData = [];
+            if (response.isSuccess && response.data) {
+                // Convert API response to grid format
+                productVendorData = response.data.map(item => ({
+                    Product_ID: item.product_ID,
+                    ProductName: item.productName,
+                    Price: item.price,
+                    UnitPrice: item.unitPrice,
+                    Priority: item.priority,
+                    Description: item.description
+                }));
+            }
+            initializeGrid(productVendorData);
+        }, (error) => {
+            // Error callback - initialize grid with empty data if API call fails
+            initializeGrid([]);
+        }, false); // End of ajax call
     }
 
     function saveAllProductVendors(vendorId) {

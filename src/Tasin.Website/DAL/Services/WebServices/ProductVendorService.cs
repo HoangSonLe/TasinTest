@@ -124,25 +124,23 @@ namespace Tasin.Website.DAL.Services.WebServices
                     pv => pv.Vendor_ID == vendorId,
                     q => q.OrderBy(pv => pv.Priority ?? int.MaxValue),
                     null,
-                    "Product"
+                    "Product", 
+                    e => new ProductVendorViewModel
+                    {
+                        Vendor_ID = e.Vendor_ID,
+                        Product_ID = e.Product_ID,
+                        Price = e.Price,
+                        UnitPrice = e.UnitPrice,
+                        Priority = e.Priority,
+                        Description = e.Description,
+                        VendorName = e.Vendor.Name,
+                        ProductName = e.Product.Name,
+                        ProductCode = e.Product.Code,
+
+                    }
                 );
 
-                var viewModels = _mapper.Map<List<ProductVendorViewModel>>(productVendors);
-                
-                // Set display names
-                foreach (var item in viewModels)
-                {
-                    var productVendor = productVendors.FirstOrDefault(pv => 
-                        pv.Vendor_ID == item.Vendor_ID && pv.Product_ID == item.Product_ID);
-                    
-                    if (productVendor?.Product != null)
-                    {
-                        item.ProductName = productVendor.Product.Name;
-                        item.ProductCode = productVendor.Product.Code;
-                    }
-                }
-
-                response.Data = viewModels;
+                response.Data = productVendors;
                 response.IsSuccess = true;
                 return response;
             }
