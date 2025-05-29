@@ -129,6 +129,21 @@ namespace Tasin.Website.Controllers
         }
 
         /// <summary>
+        /// Cancel a purchase order by ID
+        /// </summary>
+        /// <param name="purchaseOrderId">Purchase order ID</param>
+        /// <returns>Result of the operation</returns>
+        /// <response code="200">Returns the result of the operation</response>
+        [HttpPut]
+        [Route("PurchaseOrder/CancelPurchaseOrderById/{purchaseOrderId}")]
+        [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PURCHASE_ORDER])]
+        public async Task<Acknowledgement> CancelPurchaseOrderById([FromRoute] int purchaseOrderId)
+        {
+            return await _purchaseOrderService.CancelPurchaseOrderById(purchaseOrderId);
+        }
+
+        /// <summary>
         /// Generate invoice from purchase order
         /// </summary>
         /// <param name="purchaseOrderId">Purchase order ID</param>

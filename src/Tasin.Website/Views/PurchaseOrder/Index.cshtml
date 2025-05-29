@@ -331,6 +331,24 @@
         $("#window").after("<div id='dialog'></div>");
     }
 
+    function cancelPurchaseOrder(id) {
+        $('#dialog').kendoConfirm({
+            title: "THÔNG BÁO HỦY ĐƠN HÀNG PO",
+            content: "Bạn có chắc chắn hủy đơn hàng PO này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            var response = ajax("PUT", "/PurchaseOrder/CancelPurchaseOrderById/" + id, {}, () => {
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            });
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
     function viewPurchaseOrderDetail(id) {
         var response = ajax("GET", "/PurchaseOrder/GetPurchaseOrderById", { purchaseOrderId: id }, (response) => {
             showPurchaseOrderDetail(response.data);
@@ -425,6 +443,107 @@
     function exportInvoiceWord(id) {
         window.open(`/PurchaseOrder/ExportInvoiceWord?purchaseOrderId=${id}`, '_blank');
     }
+
+    function toggleInvoiceDropdown(button, id) {
+        // Close all existing dropdowns
+        $('.invoice-dropdown-overlay').remove();
+
+        // Create dropdown menu HTML
+        var dropdownHtml = `
+            <div class="invoice-dropdown-overlay" style="
+                position: fixed;
+                z-index: 99999;
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                min-width: 180px;
+                padding: 8px 0;
+                font-size: 14px;
+            ">
+                <a href="javascript:void(0)" onclick="generateInvoice(${id}); $('.invoice-dropdown-overlay').remove();"
+                   style="display: block; padding: 8px 16px; color: #212529; text-decoration: none; cursor: pointer;">
+                    <i class="fas fa-eye" style="margin-right: 8px; width: 16px;"></i>Xem trước
+                </a>
+                <a href="javascript:void(0)" onclick="exportInvoicePdf(${id}); $('.invoice-dropdown-overlay').remove();"
+                   style="display: block; padding: 8px 16px; color: #212529; text-decoration: none; cursor: pointer;">
+                    <i class="fas fa-file-pdf" style="margin-right: 8px; width: 16px; color: #dc3545;"></i>Xuất PDF
+                </a>
+                <a href="javascript:void(0)" onclick="exportInvoiceExcel(${id}); $('.invoice-dropdown-overlay').remove();"
+                   style="display: block; padding: 8px 16px; color: #212529; text-decoration: none; cursor: pointer;">
+                    <i class="fas fa-file-excel" style="margin-right: 8px; width: 16px; color: #198754;"></i>Xuất Excel
+                </a>
+                <a href="javascript:void(0)" onclick="exportInvoiceWord(${id}); $('.invoice-dropdown-overlay').remove();"
+                   style="display: block; padding: 8px 16px; color: #212529; text-decoration: none; cursor: pointer;">
+                    <i class="fas fa-file-word" style="margin-right: 8px; width: 16px; color: #0d6efd;"></i>Xuất Word
+                </a>
+            </div>
+        `;
+
+        // Get button position
+        var buttonOffset = $(button).offset();
+        var buttonHeight = $(button).outerHeight();
+        var buttonWidth = $(button).outerWidth();
+
+        // Calculate position
+        var top = buttonOffset.top + buttonHeight + 4;
+        var left = buttonOffset.left;
+
+        // Adjust if menu would go off screen
+        var windowWidth = $(window).width();
+        var windowHeight = $(window).height();
+
+        // Create temporary element to measure dropdown size
+        var $tempDropdown = $(dropdownHtml).css({
+            'position': 'fixed',
+            'top': '-9999px',
+            'left': '-9999px',
+            'visibility': 'hidden'
+        });
+        $('body').append($tempDropdown);
+
+        var menuWidth = $tempDropdown.outerWidth();
+        var menuHeight = $tempDropdown.outerHeight();
+        $tempDropdown.remove();
+
+        // Adjust position if needed
+        if (left + menuWidth > windowWidth - 20) {
+            left = buttonOffset.left + buttonWidth - menuWidth;
+        }
+
+        if (top + menuHeight > windowHeight - 20) {
+            top = buttonOffset.top - menuHeight - 4;
+        }
+
+        // Create and position the dropdown
+        var $dropdown = $(dropdownHtml).css({
+            'top': top + 'px',
+            'left': left + 'px'
+        });
+
+        // Add hover effects
+        $dropdown.find('a').hover(
+            function () {
+                $(this).css('background-color', '#f8f9fa');
+            },
+            function () {
+                $(this).css('background-color', 'transparent');
+            }
+        );
+
+        // Append to body
+        $('body').append($dropdown);
+
+        // Add fade in effect
+        $dropdown.hide().fadeIn(150);
+    }
+
+    // Close dropdown when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.dropdown').length && !$(e.target).closest('.invoice-dropdown-overlay').length && !$(e.target).closest('.btn-invoice').length) {
+            $('.invoice-dropdown-overlay').remove();
+        }
+    });
 
     function renderPurchaseOrderForm(data = null) {
         var isEdit = data !== null && data !== undefined;
@@ -1029,21 +1148,12 @@
                             <button onclick='deletePurchaseOrder(#=id#)' title='Xoá' class='btn-action btn-delete _permission_' data-enum='34'>
                                 <i class='fas fa-trash'></i>
                             </button>
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-action btn-invoice dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Xuất hóa đơn">
-                                    <i class="fas fa-file-invoice"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="generateInvoice(#=id#)">
-                                        <i class="fas fa-eye me-2"></i>Xem trước</a></li>
-                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportInvoicePdf(#=id#)">
-                                        <i class="fas fa-file-pdf me-2"></i>Xuất PDF</a></li>
-                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportInvoiceExcel(#=id#)">
-                                        <i class="fas fa-file-excel me-2"></i>Xuất Excel</a></li>
-                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportInvoiceWord(#=id#)">
-                                        <i class="fas fa-file-word me-2"></i>Xuất Word</a></li>
-                                </ul>
-                            </div>
+                            <button onclick='cancelPurchaseOrder(#=id#)' title='Hủy đơn hàng' class='btn-action btn-cancel _permission_' data-enum='33'>
+                                <i class='fas fa-ban'></i>
+                            </button>
+                            <button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, #=id#)" title="Xuất hóa đơn">
+                                <i class="fas fa-file-invoice"></i>
+                            </button>
                         </div>
                     `
                 }
@@ -1442,5 +1552,19 @@
         padding: 20px;
         margin-bottom: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Custom dropdown overlay styling */
+    .invoice-dropdown-overlay {
+        font-family: inherit;
+        line-height: 1.5;
+    }
+
+    .invoice-dropdown-overlay a {
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .invoice-dropdown-overlay a:hover {
+        background-color: #f8f9fa !important;
     }
 </style>

@@ -200,6 +200,11 @@
     color: white;
 }
 
+.btn-cancel {
+    background: #fd7e14;
+    color: white;
+}
+
 .btn-invoice {
     background: #6c757d;
     color: white;
@@ -216,6 +221,7 @@
     border-radius: 6px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     min-width: 160px;
+    z-index: 10000 !important;
 }
 
 .dropdown-item {
@@ -223,6 +229,31 @@
     font-size: 14px;
     display: flex;
     align-items: center;
+}
+
+/* Fix dropdown visibility in Kendo Grid */
+.k-grid .dropdown-menu {
+    z-index: 10000 !important;
+    position: absolute !important;
+}
+
+.k-grid .action-buttons .dropdown {
+    position: relative;
+}
+
+/* Prevent grid overflow from hiding dropdowns */
+.k-grid .k-grid-content {
+    overflow: visible !important;
+}
+
+.k-grid .k-grid-content table {
+    overflow: visible !important;
+}
+
+/* Ensure dropdown shows above all grid content */
+.k-grid .dropdown.show .dropdown-menu {
+    z-index: 10001 !important;
+    position: absolute !important;
 }
 
 /* Grid Performance Optimizations */

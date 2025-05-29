@@ -449,9 +449,16 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                if (purchaseOrder.Status != EPOStatus.New.ToString())
+                // Allow deletion for New, Pending, and Confirmed statuses only
+                var allowedStatuses = new[] {
+                    EPOStatus.New.ToString(),
+                    EPOStatus.Pending.ToString(),
+                    EPOStatus.Confirmed.ToString()
+                };
+
+                if (!allowedStatuses.Contains(purchaseOrder.Status))
                 {
-                    ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng trạng thái mới).");
+                    ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng ở trạng thái: Mới, Đang chờ xác nhận, Đã xác nhận).");
                     return ack;
                 }
 
@@ -465,6 +472,62 @@ namespace Tasin.Website.DAL.Services.WebServices
             catch (Exception ex)
             {
                 _logger.LogError($"DeletePurchaseOrderById: {ex.Message}");
+                ack.AddMessage(ex.Message);
+            }
+
+            return ack;
+        }
+
+        public async Task<Acknowledgement> CancelPurchaseOrderById(int purchaseOrderId)
+        {
+            var ack = new Acknowledgement();
+            try
+            {
+                var purchaseOrder = await _purchaseOrderRepository.Repository.FindAsync(purchaseOrderId);
+                if (purchaseOrder == null)
+                {
+                    ack.AddMessage("Không tìm thấy đơn hàng.");
+                    return ack;
+                }
+
+                // Check author predicate
+                var predicate = PredicateBuilder.New<Purchase_Order>(true);
+                predicate = predicate.And(p => p.ID == purchaseOrderId);
+                predicate = PurchaseOrderAuthorPredicate.GetPurchaseOrderAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
+
+                var authorizedPurchaseOrders = await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                    filter: predicate
+                );
+
+                if (authorizedPurchaseOrders.Count == 0)
+                {
+                    ack.AddMessage("Bạn không có quyền hủy đơn hàng này.");
+                    return ack;
+                }
+
+                // Check if order can be cancelled
+                if (purchaseOrder.Status == EPOStatus.Cancel.ToString())
+                {
+                    ack.AddMessage("Đơn hàng đã được hủy trước đó.");
+                    return ack;
+                }
+
+                if (purchaseOrder.Status == EPOStatus.Executed.ToString())
+                {
+                    ack.AddMessage("Không thể hủy đơn hàng đã được tạo đơn tổng hợp.");
+                    return ack;
+                }
+
+                // Update status to Cancel
+                purchaseOrder.Status = EPOStatus.Cancel.ToString();
+                purchaseOrder.UpdatedDate = DateTime.Now;
+                purchaseOrder.UpdatedBy = CurrentUserId;
+
+                await ack.TrySaveChangesAsync(res => res.UpdateAsync(purchaseOrder), _purchaseOrderRepository.Repository);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"CancelPurchaseOrderById: {ex.Message}");
                 ack.AddMessage(ex.Message);
             }
 
