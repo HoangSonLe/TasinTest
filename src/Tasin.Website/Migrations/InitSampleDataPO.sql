@@ -7,28 +7,29 @@ ALTER SEQUENCE "Purchase_Order_ID_seq" RESTART WITH 1;
 ALTER SEQUENCE "Purchase_Order_Item_ID_seq" RESTART WITH 1;
 
 -- Thêm dữ liệu mẫu cho bảng Purchase_Order
+-- Status values: New, Confirmed, Executed, Cancel (Pending removed)
 INSERT INTO "Purchase_Order" ("Customer_ID", "TotalPrice", "TotalPriceNoTax", "Code", "Status", "CreatedBy", "UpdatedBy")
 VALUES
-(1, 1500000.00, 1400000.00, 'PO001', '1', 1, 1),
-(2, 1200000.00, 1100000.00, 'PO002', '2', 1, 1),
-(3, 800000.00, 750000.00, 'PO003', '0', 1, 1),
-(4, 900000.00, 850000.00, 'PO004', '4', 1, 1),
-(1, 1300000.00, 1200000.00, 'PO005', '1', 1, 1),
-(2, 1100000.00, 1050000.00, 'PO006', '2', 1, 1),
-(3, 700000.00, 670000.00, 'PO007', '0', 1, 1),
-(4, 950000.00, 900000.00, 'PO008', '4', 1, 1),
-(1, 1600000.00, 1550000.00, 'PO009', '1', 1, 1),
-(2, 1250000.00, 1200000.00, 'PO010', '2', 1, 1),
-(3, 850000.00, 820000.00, 'PO011', '0', 1, 1),
-(4, 970000.00, 930000.00, 'PO012', '4', 1, 1),
-(1, 1400000.00, 1350000.00, 'PO013', '1', 1, 1),
-(2, 1150000.00, 1120000.00, 'PO014', '2', 1, 1),
-(3, 780000.00, 750000.00, 'PO015', '0', 1, 1),
-(4, 920000.00, 890000.00, 'PO016', '4', 1, 1),
-(1, 1350000.00, 1300000.00, 'PO017', '1', 1, 1),
-(2, 1180000.00, 1150000.00, 'PO018', '2', 1, 1),
-(3, 810000.00, 780000.00, 'PO019', '0', 1, 1),
-(4, 940000.00, 910000.00, 'PO020', '4', 1, 1);
+(1, 1500000.00, 1400000.00, 'PO001', 'Confirmed', 1, 1),  -- Confirmed
+(2, 1200000.00, 1100000.00, 'PO002', 'Confirmed', 1, 1),  -- Confirmed
+(3, 800000.00, 750000.00, 'PO003', 'New', 1, 1),         -- New
+(4, 900000.00, 850000.00, 'PO004', 'Cancel', 1, 1),      -- Cancel
+(1, 1300000.00, 1200000.00, 'PO005', 'Confirmed', 1, 1),  -- Confirmed
+(2, 1100000.00, 1050000.00, 'PO006', 'Confirmed', 1, 1),  -- Confirmed
+(3, 700000.00, 670000.00, 'PO007', 'New', 1, 1),         -- New
+(4, 950000.00, 900000.00, 'PO008', 'Cancel', 1, 1),      -- Cancel
+(1, 1600000.00, 1550000.00, 'PO009', 'Confirmed', 1, 1),  -- Confirmed
+(2, 1250000.00, 1200000.00, 'PO010', 'Confirmed', 1, 1),  -- Confirmed
+(3, 850000.00, 820000.00, 'PO011', 'New', 1, 1),         -- New
+(4, 970000.00, 930000.00, 'PO012', 'Cancel', 1, 1),      -- Cancel
+(1, 1400000.00, 1350000.00, 'PO013', 'Confirmed', 1, 1),  -- Confirmed
+(2, 1150000.00, 1120000.00, 'PO014', 'Confirmed', 1, 1),  -- Confirmed
+(3, 780000.00, 750000.00, 'PO015', 'New', 1, 1),         -- New
+(4, 920000.00, 890000.00, 'PO016', 'Cancel', 1, 1),      -- Cancel
+(1, 1350000.00, 1300000.00, 'PO017', 'Confirmed', 1, 1),  -- Confirmed
+(2, 1180000.00, 1150000.00, 'PO018', 'Confirmed', 1, 1),  -- Confirmed
+(3, 810000.00, 780000.00, 'PO019', 'New', 1, 1),         -- New
+(4, 940000.00, 910000.00, 'PO020', 'Cancel', 1, 1);      -- Cancel
 
 -- Thêm dữ liệu mẫu cho bảng Purchase_Order_Item
 INSERT INTO "Purchase_Order_Item" ("PO_ID", "Product_ID", "Quantity", "Unit_ID", "Price", "TaxRate", "ProcessingType_ID", "LossRate", "ProcessingFee", "Note", "ProfitMargin")

@@ -449,16 +449,15 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Allow deletion for New, Pending, and Confirmed statuses only
+                // Allow deletion for New and Confirmed statuses only
                 var allowedStatuses = new[] {
                     EPOStatus.New.ToString(),
-                    EPOStatus.Pending.ToString(),
                     EPOStatus.Confirmed.ToString()
                 };
 
                 if (!allowedStatuses.Contains(purchaseOrder.Status))
                 {
-                    ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng ở trạng thái: Mới, Đang chờ xác nhận, Đã xác nhận).");
+                    ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng ở trạng thái: Mới, Đã xác nhận).");
                     return ack;
                 }
 

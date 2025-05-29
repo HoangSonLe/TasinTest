@@ -124,7 +124,7 @@ namespace Tasin.Website.Common.AutoMapper
             if (string.IsNullOrEmpty(status))
                 return EPOStatus.New;
 
-            // Try to parse as enum name first (e.g., "New", "Pending", etc.)
+            // Try to parse as enum name first (e.g., "New", "Confirmed", etc.)
             if (Enum.TryParse<EPOStatus>(status, out var enumResult))
                 return enumResult;
 

@@ -278,26 +278,14 @@
     }
 
     function createPAGroupFromPO() {
-        $('#dialog').kendoConfirm({
-            title: "TẠO TỔNG HỢP ĐƠN",
-            content: "Bạn có chắc chắn muốn tạo tổng hợp đơn từ các PO đã xác nhận không?",
-            size: "medium",
-            messages: {
-                okText: "Đồng ý",
-                cancel: "Hủy"
-            },
-        }).data("kendoConfirm").open().result.done(function () {
-            ajax("POST", "/PurchaseAgreement/CreatePAGroup", {}, function (response) {
-                if (response.isSuccess) {
-                    showSuccessMessage("Tạo tổng hợp đơn thành công!");
-                    $(gridId).data("kendoGrid").dataSource.filter({});
-                } else {
-                    showErrorMessages(response.errorMessageList);
-                }
-            });
+        ajax("POST", "/PurchaseAgreement/CreatePAGroup", {}, function (response) {
+            if (response.isSuccess) {
+                showSuccessMessages(["Tạo tổng hợp đơn thành công!"]);
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            } else {
+                showErrorMessages(response.errorMessageList);
+            }
         });
-
-        $("#window").after("<div id='dialog'></div>");
     }
 
     async function ExportExcel() {
@@ -446,13 +434,6 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 100,
-                },
-                {
-                    field: "totalItemCount",
-                    title: "Số sản phẩm",
-                    headerAttributes: { style: "text-align: center; justify-content: center" },
-                    attributes: { style: "text-align:center;" },
-                    width: 120,
                 },
                 {
                     field: "totalPrice",
@@ -609,6 +590,15 @@
         $("#createPAGroupWithPreview").on('click', function () {
             showPAGroupPreview();
         });
+
+        // Set default date range to last 1 week
+        var today = new Date();
+        var oneWeekAgo = new Date();
+        oneWeekAgo.setDate(today.getDate() - 7);
+
+        // Set default values for date pickers
+        $("#dateFrom").data("kendoDatePicker").value(oneWeekAgo);
+        $("#dateTo").data("kendoDatePicker").value(today);
     };
 
 </script>

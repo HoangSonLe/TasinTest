@@ -241,19 +241,27 @@
     position: relative;
 }
 
-/* Prevent grid overflow from hiding dropdowns */
-.k-grid .k-grid-content {
-    overflow: visible !important;
-}
-
-.k-grid .k-grid-content table {
-    overflow: visible !important;
-}
-
 /* Ensure dropdown shows above all grid content */
 .k-grid .dropdown.show .dropdown-menu {
     z-index: 10001 !important;
     position: absolute !important;
+}
+
+/* Grid scrolling behavior - allow normal scrolling */
+.k-grid .k-grid-content {
+    overflow: auto !important;
+}
+
+/* Default grid height for better UX */
+.k-grid {
+    min-height: 400px;
+}
+
+/* Ensure grid content can scroll properly */
+.k-grid .k-grid-content {
+    max-height: 500px;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
 }
 
 /* Grid Performance Optimizations */

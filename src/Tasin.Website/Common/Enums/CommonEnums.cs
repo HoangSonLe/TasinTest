@@ -56,8 +56,6 @@ namespace Tasin.Website.Common.Enums
     {
         [Description("Mới")]
         New,
-        [Description("Đang chờ xác nhận")]
-        Pending,
         [Description("Đã xác nhận")]
         Confirmed,
         [Description("Đã tạo đơn tổng hợp")]

@@ -349,6 +349,41 @@
         $("#window").after("<div id='dialog'></div>");
     }
 
+    function confirmPurchaseOrder(id) {
+        $('#dialog').kendoConfirm({
+            title: "XÁC NHẬN ĐƠN HÀNG PO",
+            content: "Bạn có chắc chắn muốn xác nhận đơn hàng PO này không?",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            // Get current purchase order data first
+            ajax("GET", "/PurchaseOrder/GetPurchaseOrderById", { purchaseOrderId: id }, function (response) {
+                if (response.isSuccess && response.data) {
+                    var purchaseOrder = response.data;
+                    // Update status to Confirmed
+                    purchaseOrder.status = "Confirmed";
+
+                    // Call update API
+                    ajax("PUT", "/PurchaseOrder/UpdatePurchaseOrder", purchaseOrder, function (updateResponse) {
+                        if (updateResponse.isSuccess) {
+                            showSuccessMessages(["Xác nhận đơn hàng thành công!"]);
+                            $(gridId).data("kendoGrid").dataSource.filter({});
+                        } else {
+                            showErrorMessages(updateResponse.errorMessageList);
+                        }
+                    });
+                } else {
+                    showErrorMessages(response.errorMessageList || ["Không thể lấy thông tin đơn hàng"]);
+                }
+            }, null, false);
+        })
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
     function viewPurchaseOrderDetail(id) {
         var response = ajax("GET", "/PurchaseOrder/GetPurchaseOrderById", { purchaseOrderId: id }, (response) => {
             showPurchaseOrderDetail(response.data);
@@ -1093,17 +1128,14 @@
                             case "New":
                             case "0":
                                 statusClass = "badge-secondary"; break; // Mới
-                            case "Pending":
-                            case "1":
-                                statusClass = "badge-warning"; break;   // Đang chờ xác nhận
                             case "Confirmed":
-                            case "2":
+                            case "1":
                                 statusClass = "badge-success"; break;   // Đã xác nhận
                             case "Executed":
-                            case "3":
+                            case "2":
                                 statusClass = "badge-info"; break;      // Đã tạo đơn tổng hợp
                             case "Cancel":
-                            case "4":
+                            case "3":
                                 statusClass = "badge-danger"; break;    // Đã hủy
                             default: statusClass = "badge-secondary";
                         }
@@ -1140,22 +1172,31 @@
                     width: 200,
                     attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: `
-                        <div class="action-buttons">
-                            <button onclick='editPurchaseOrder(#=id#)' title='Chỉnh sửa' class='btn-action btn-edit _permission_' data-enum='33'>
-                                <i class='fas fa-edit'></i>
-                            </button>
-                            <button onclick='deletePurchaseOrder(#=id#)' title='Xoá' class='btn-action btn-delete _permission_' data-enum='34'>
-                                <i class='fas fa-trash'></i>
-                            </button>
-                            <button onclick='cancelPurchaseOrder(#=id#)' title='Hủy đơn hàng' class='btn-action btn-cancel _permission_' data-enum='33'>
-                                <i class='fas fa-ban'></i>
-                            </button>
-                            <button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, #=id#)" title="Xuất hóa đơn">
-                                <i class="fas fa-file-invoice"></i>
-                            </button>
-                        </div>
-                    `
+                    template: function (dataItem) {
+                        var confirmButton = '';
+                        // Show confirm button only for orders with status "New" (0)
+                        if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
+                            confirmButton = '<button onclick="confirmPurchaseOrder(' + dataItem.id + ')" title="Xác nhận đơn hàng" class="btn-action btn-confirm _permission_" data-enum="33">' +
+                                '<i class="fas fa-check"></i>' +
+                                '</button>';
+                        }
+
+                        return '<div class="action-buttons">' +
+                            '<button onclick="editPurchaseOrder(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="33">' +
+                            '<i class="fas fa-edit"></i>' +
+                            '</button>' +
+                            '<button onclick="deletePurchaseOrder(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="34">' +
+                            '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                            confirmButton +
+                            '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="33">' +
+                            '<i class="fas fa-ban"></i>' +
+                            '</button>' +
+                            '<button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, ' + dataItem.id + ')" title="Xuất hóa đơn">' +
+                            '<i class="fas fa-file-invoice"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
                 }
             ],
             dataBound: function (e) {
@@ -1566,5 +1607,17 @@
 
     .invoice-dropdown-overlay a:hover {
         background-color: #f8f9fa !important;
+    }
+
+    /* Confirm button styling */
+    .btn-action.btn-confirm {
+        background-color: #28a745;
+        color: white;
+        border: 1px solid #28a745;
+    }
+
+    .btn-action.btn-confirm:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
     }
 </style>
