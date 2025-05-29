@@ -126,6 +126,21 @@
         span#badge-sent:hover {
             color: white;
         }
+
+        /* Menu icon alignment */
+        .menu-icon {
+            display: inline-block;
+            width: 20px !important;
+            text-align: center !important;
+            margin-right: 8px !important;
+        }
+
+        .submenu-icon {
+            display: inline-block;
+            width: 16px !important;
+            text-align: center !important;
+            margin-right: 8px !important;
+        }
     </style>
 </head>
 
@@ -318,7 +333,7 @@
             let html = "";
             if (EnumRoleList.find(e => listDanhMuc.includes(e))) {
                 html += ` <a id="category_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-category" aria-expanded="false" aria-controls="menu-category">
-                                                <div class="nav-link-icon"><i class="fa-solid fa-bars-staggered fa-1_5x me-2"></i></div>
+                                                <div class="nav-link-icon"><i class="fa-solid fa-folder-open menu-icon"></i></div>
                                                 Danh mục
                                                 <div class="sidenav-collapse-arrow">
                                                     <i class="fas fa-angle-down"></i>
@@ -328,55 +343,49 @@
                             <div class="nav collapse" id="menu-category" data-bs-parent="#accordionSidenav">
                                  <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">`;
                 if (EnumRoleList.find(e => e == 1)) {
-                    html += `<a class="nav-link _permission_" data-enum="1" href="/User/Index">Người dùng</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="1" href="/User/Index"><i class="fa-solid fa-users submenu-icon"></i>Người dùng</a>`;
                 }
                 if (EnumRoleList.find(e => e == 5)) {
-                    html += `<a class="nav-link _permission_" data-enum="5" href="/Vendor/Index">Nhà cung cấp</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="5" href="/Vendor/Index"><i class="fa-solid fa-truck submenu-icon"></i>Nhà cung cấp</a>`;
                 }
                 if (EnumRoleList.find(e => e == 9)) {
-                    html += `<a class="nav-link _permission_" data-enum="9" href="/Customer/Index">Khách hàng</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="9" href="/Customer/Index"><i class="fa-solid fa-user-tie submenu-icon"></i>Khách hàng</a>`;
                 }
                 if (EnumRoleList.find(e => e == 13)) {
-                    html += `<a class="nav-link _permission_" data-enum="13" href="/Product/Index">Hàng hoá</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="13" href="/Product/Index"><i class="fa-solid fa-box submenu-icon"></i>Hàng hoá</a>`;
                 }
                 if (EnumRoleList.find(e => e == 17)) {
-                    html += `<a class="nav-link _permission_" data-enum="17" href="/Unit/Index">Đơn vị</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="17" href="/Unit/Index"><i class="fa-solid fa-ruler submenu-icon"></i>Đơn vị</a>`;
                 }
                 if (EnumRoleList.find(e => e == 21)) {
-                    html += `<a class="nav-link _permission_" data-enum="21" href="/Category/Index">Quy cách</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="21" href="/Category/Index"><i class="fa-solid fa-tags submenu-icon"></i>Quy cách</a>`;
                 }
                 //ko dùng nữa
                 // if (EnumRoleList.find(e => e == 25)){
                 //     html += `<a class="nav-link _permission_" data-enum="25" href="/">Cấu hình thuế</a>`;
                 // }
                 if (EnumRoleList.find(e => e == 29)) {
-                    html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate/Index">Loại mặt hàng</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="29" href="/SpecialProductTaxRate/Index"><i class="fa-solid fa-layer-group submenu-icon"></i>Loại mặt hàng</a>`;
                 }
                 if (EnumRoleList.find(e => e == 33)) {
-                    html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index">Nguyên liệu</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index"><i class="fa-solid fa-cubes submenu-icon"></i>Nguyên liệu</a>`;
                 }
                 if (EnumRoleList.find(e => e == 37)) {
-                    html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index">Phân loại hàng hoá</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index"><i class="fa-solid fa-sitemap submenu-icon"></i>Phân loại</a>`;
                 }
                 html += `</nav>
                                             </div>`;
             }
 
-            if (EnumRoleList.find(e => e == 40)) {
-                html += `<a class="nav-link my-1 _permission_" data-enum="40" href="/PurchaseOrder/Index">
-                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
-                                Tạo đơn hàng
-                            </a>`;
-            }
-            if (EnumRoleList.find(e => e == 41)) {
+            if (EnumRoleList.find(e => e == 40 || e == 41)) {
                 html += `<a class="nav-link my-1 _permission_" data-enum="41" href="/PurchaseOrder/Index">
-                                <i class="fa-solid fa-bars-progress fa-1_5x me-2"></i>
+                                <i class="fa-solid fa-clipboard-list menu-icon"></i>
                                 Đơn hàng
                             </a>`;
             }
             if (EnumRoleList.find(e => e == 44)) {
                 html += `<a class="nav-link  my-1 _permission_" data-enum="44" href="/PurchaseAgreement/PAGroupIndex">
-                                <i class="fa-solid fa-plus fa-1_5x me-2"></i>
+                                <i class="fa-solid fa-file-contract menu-icon"></i>
                                 Đơn tổng hợp
                             </a>`;
             }
@@ -384,7 +393,7 @@
             let listBaoCao = [41, 45]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
             if (EnumRoleList.find(e => listBaoCao.includes(e))) {
                 html += ` <a id="report_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-report" aria-expanded="false" aria-controls="menu-report">
-                                                <div class="nav-link-icon"><i class="fa-solid fa-chart-line fa-1_5x me-2"></i></div>
+                                                <div class="nav-link-icon"><i class="fa-solid fa-chart-line menu-icon"></i></div>
                                                 Báo cáo
                                                 <div class="sidenav-collapse-arrow">
                                                     <i class="fas fa-angle-down"></i>
@@ -395,10 +404,10 @@
                                  <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavReport">`;
 
                 if (EnumRoleList.find(e => e == 45)) { // READ_PURCHASE_AGREEMENT
-                    html += `<a class="nav-link _permission_" data-enum="45" href="/ProductOrderStatistics/Index">Thống kê sản phẩm đặt hàng</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="45" href="/ProductOrderStatistics/Index"><i class="fa-solid fa-chart-bar submenu-icon"></i>Thống kê sản phẩm đặt hàng</a>`;
                 }
                 if (EnumRoleList.find(e => e == 41)) { // READ_PURCHASE_ORDER
-                    html += `<a class="nav-link _permission_" data-enum="41" href="/ProductOrderStatistics/CustomerIndex">Thống kê khách hàng đặt hàng</a>`;
+                    html += `<a class="nav-link _permission_" data-enum="41" href="/ProductOrderStatistics/CustomerIndex"><i class="fa-solid fa-chart-pie submenu-icon"></i>Thống kê khách hàng đặt hàng</a>`;
                 }
 
                 html += `</nav>

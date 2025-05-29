@@ -25,20 +25,19 @@
         let searchString = $("#searchString").val();
         let customerId = $("#customerId").data("kendoDropDownList")?.value();
         let status = $("#status").data("kendoDropDownList")?.value();
-        let dateFromStr = $("#dateFrom").val();
-        let dateToStr = $("#dateTo").val();
+        let dateFromPicker = $("#dateFrom").data("kendoDatePicker");
+        let dateToPicker = $("#dateTo").data("kendoDatePicker");
 
-        // Convert date strings to ISO format if they exist
+        // Get date values from Kendo DatePickers
         let dateFrom = null;
         let dateTo = null;
 
-        if (dateFromStr) {
-            let dateFromObj = new Date(dateFromStr);
-            dateFrom = dateFromObj.toISOString();
+        if (dateFromPicker && dateFromPicker.value()) {
+            dateFrom = dateFromPicker.value().toISOString();
         }
 
-        if (dateToStr) {
-            let dateToObj = new Date(dateToStr);
+        if (dateToPicker && dateToPicker.value()) {
+            let dateToObj = dateToPicker.value();
             // Set to end of day
             dateToObj.setHours(23, 59, 59, 999);
             dateTo = dateToObj.toISOString();
@@ -409,95 +408,7 @@
         myWindow.data("kendoWindow").open();
     }
 
-    async function ExportExcel() {
-        let dataSheet1 = [
-            {
-                cells: [
-                    { value: "Mã đơn hàng", textAlign: "center", background: "#428dd8" },
-                    { value: "Khách hàng", textAlign: "center", background: "#428dd8" },
-                    { value: "Trạng thái", textAlign: "center", background: "#428dd8" },
-                    { value: "Tổng tiền chưa thuế", textAlign: "center", background: "#428dd8" },
-                    { value: "Tổng tiền", textAlign: "center", background: "#428dd8" },
-                    { value: "Ngày tạo", textAlign: "center", background: "#428dd8" },
-                    { value: "Người tạo", textAlign: "center", background: "#428dd8" }
-                ]
-            }];
 
-        var searchModel = getSearchModel();
-        let postData = {
-            ...searchModel,
-            pageSize: 999999999,
-            pageNumber: 1
-        }
-        let dataSourcePO = null;
-        var response = await ajax("GET", "/PurchaseOrder/GetPurchaseOrderList", postData, (poResponse) => {
-            dataSourcePO = poResponse.data.data;
-        }, null, false);
-        if (dataSourcePO == null) return;
-
-        for (let index = 0; index < dataSourcePO.length; index++) {
-            dataSheet1.push({
-                cells: [
-                    { value: dataSourcePO[index].code },
-                    { value: dataSourcePO[index].customerName },
-                    { value: dataSourcePO[index].statusName },
-                    { value: dataSourcePO[index].totalPriceNoTax },
-                    { value: dataSourcePO[index].totalPrice },
-                    { value: dataSourcePO[index].createdDate ? kendo.toString(kendo.parseDate(dataSourcePO[index].createdDate), "dd/MM/yyyy HH:mm") : '' },
-                    { value: dataSourcePO[index].createdByName }
-                ]
-            })
-        }
-
-        var workbook = new kendo.ooxml.Workbook({
-            sheets: [
-                {
-                    name: "Danh sách đơn hàng PO",
-                    columns: [
-                        { width: 150 }, { width: 200 }, { width: 150 },
-                        { width: 150 }, { width: 150 }, { width: 150 }, { width: 150 }
-                    ],
-                    rows: dataSheet1,
-                }
-            ]
-        });
-        kendo.saveAs({
-            dataURI: workbook.toDataURL(),
-            fileName: "Danh sách đơn hàng PO _ " + kendo.toString(new Date(), "dd_MM_yyyy__HH_mm_ss") + ".xlsx"
-        });
-    }
-
-    function getSearchModel() {
-        let searchString = $("#searchString").val();
-        let customerId = $("#customerId").data("kendoDropDownList")?.value();
-        let status = $("#status").data("kendoDropDownList")?.value();
-        let dateFromStr = $("#dateFrom").val();
-        let dateToStr = $("#dateTo").val();
-
-        // Convert date strings to ISO format if they exist
-        let dateFrom = null;
-        let dateTo = null;
-
-        if (dateFromStr) {
-            let dateFromObj = new Date(dateFromStr);
-            dateFrom = dateFromObj.toISOString();
-        }
-
-        if (dateToStr) {
-            let dateToObj = new Date(dateToStr);
-            // Set to end of day
-            dateToObj.setHours(23, 59, 59, 999);
-            dateTo = dateToObj.toISOString();
-        }
-
-        return {
-            searchString: searchString || null,
-            customer_ID: customerId && customerId !== "" ? parseInt(customerId) : null,
-            status: status || null,
-            dateFrom: dateFrom,
-            dateTo: dateTo
-        };
-    }
 
     function generateInvoice(id) {
         window.open(`/PurchaseOrder/PreviewInvoice?purchaseOrderId=${id}`, '_blank');
@@ -922,56 +833,48 @@
 
     function InitGrid() {
         let htmlToolbar = `
-            <div id='toolbar' class='purchase-order-toolbar'>
-                <div class="toolbar-filters">
-                    <div class="filter-group">
-                        <label class="filter-label">Tìm kiếm:</label>
-                        <div class="filter-input">
-                            <input type="text" id="searchString" placeholder="Nhập mã đơn hàng..."/>
+                <div id='toolbar' style=''  class='w-100 d-flex flex-column'>
+                       <div class="row gx-0 row-gap-2 w-100">
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="searchString">Tìm kiếm:</label>
+                                    <input type="text" class="w-100" id="searchString" placeholder="Nhập mã đơn hàng..."/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="customerId">Khách hàng:</label>
+                                    <select id="customerId" class="w-100"></select>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="status">Trạng thái:</label>
+                                    <select id="status" class="w-100"></select>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="dateFrom">Từ ngày:</label>
+                                    <input type="text" class="w-100" id="dateFrom"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                                <div class="pe-1">
+                                    <label for="dateTo">Đến ngày:</label>
+                                    <input type="text" class="w-100" id="dateTo"/>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
+                                <div class="pe-1 d-flex gap-2">
+                                    <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
+                                    <button id='create' title="Thêm đơn hàng mới" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='32'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm mới</span></button>
+                                    <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Khách hàng:</label>
-                        <div class="filter-input">
-                            <select id="customerId"></select>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Trạng thái:</label>
-                        <div class="filter-input">
-                            <select id="status"></select>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Từ ngày:</label>
-                        <div class="filter-input">
-                            <input type="date" id="dateFrom"/>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Đến ngày:</label>
-                        <div class="filter-input">
-                            <input type="date" id="dateTo"/>
-                        </div>
-                    </div>
-                    <div class="filter-group action-group">
-                        <button id="search" title="Tìm kiếm" class="btn-search">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
                 </div>
-                <div class="toolbar-actions">
-                    <button id='create' title="Thêm đơn hàng mới" class='btn-create _permission_' data-enum='32'>
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm mới</span>
-                    </button>
-                    <button id="exportExcel" class="btn-export">
-                        <i class="fas fa-file-excel"></i>
-                        <span>Export Excel</span>
-                    </button>
-                </div>
-            </div>
-        `;
+            `;
 
         $(gridId).kendoGrid({
             dataSource: {
@@ -1191,16 +1094,38 @@
     }
 
     function InitKendoToolBar() {
-        // Search button click handler
+        // Initialize Kendo components
+        $("#search").kendoButton({
+            icon: "search"
+        });
         $("#search").click(async function (e) {
             var grid = $(gridId).data("kendoGrid");
             grid.dataSource.filter({});
         });
 
-        // Export Excel button click handler
         $("#exportExcel").click(async function (e) {
             ExportExcel();
         });
+
+        $("#searchString").kendoTextBox({
+            icon: {
+                type: "search",
+                position: "end"
+            },
+            placeholder: "Nhập mã đơn hàng..."
+        });
+
+        // Initialize Date Pickers
+        $("#dateFrom").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            culture: "vi-VN"
+        });
+
+        $("#dateTo").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            culture: "vi-VN"
+        });
+
         // Initialize customer dropdown with Kendo DropDownList
         $("#customerId").kendoDropDownList({
             dataTextField: "text",
@@ -1285,17 +1210,9 @@
         var oneMonthAgo = new Date();
         oneMonthAgo.setMonth(today.getMonth() - 1);
 
-        // Format dates for input fields (YYYY-MM-DD)
-        var todayStr = today.getFullYear() + '-' +
-            String(today.getMonth() + 1).padStart(2, '0') + '-' +
-            String(today.getDate()).padStart(2, '0');
-        var oneMonthAgoStr = oneMonthAgo.getFullYear() + '-' +
-            String(oneMonthAgo.getMonth() + 1).padStart(2, '0') + '-' +
-            String(oneMonthAgo.getDate()).padStart(2, '0');
-
-        // Set default values for date inputs
-        $("#dateFrom").val(oneMonthAgoStr);
-        $("#dateTo").val(todayStr);
+        // Set default values for date pickers
+        $("#dateFrom").data("kendoDatePicker").value(oneMonthAgo);
+        $("#dateTo").data("kendoDatePicker").value(today);
     }
 
     // Helper Functions for Purchase Order Form
@@ -1506,10 +1423,8 @@
 
         // Auto load data with default filter (last 1 month)
         setTimeout(function () {
-            var grid = $(gridId).data("kendoGrid");
-            if (grid) {
-                grid.dataSource.read();
-            }
+
+            $(window).trigger("resize");
         }, 500);
     });
 </script>
