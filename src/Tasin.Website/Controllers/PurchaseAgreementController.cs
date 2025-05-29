@@ -146,6 +146,21 @@ namespace Tasin.Website.Controllers
         }
 
         /// <summary>
+        /// Get preview data for PA group that will be created from confirmed purchase orders
+        /// </summary>
+        /// <returns>Preview data of the PA group to be created</returns>
+        /// <response code="200">Returns the preview data</response>
+        [HttpGet]
+        [Route("PurchaseAgreement/GetPAGroupPreview")]
+        [ProducesResponseType(typeof(Acknowledgement<PAGroupViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
+        public async Task<IActionResult> GetPAGroupPreview()
+        {
+            var result = await _purchaseAgreementService.GetPAGroupPreview();
+            return Json(result);
+        }
+
+        /// <summary>
         /// Create PA group from confirmed purchase orders
         /// </summary>
         /// <returns>Result of the operation with created PA group</returns>

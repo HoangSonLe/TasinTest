@@ -14,6 +14,7 @@
         </div>
     </div>
     <div id="window"></div>
+    <div id="previewWindow"></div>
     <div id="dialog"></div>
 </div>
 
@@ -162,6 +163,120 @@
         });
     }
 
+    function showPAGroupPreview() {
+        ajax("GET", "/PurchaseAgreement/GetPAGroupPreview", {}, function(response) {
+            if (response.isSuccess && response.data) {
+                showPAGroupPreviewModal(response.data);
+            } else {
+                showErrorMessages(response.errorMessageList || ["Không thể lấy dữ liệu preview"]);
+            }
+        }, null, false);
+    }
+
+    function showPAGroupPreviewModal(data) {
+        let previewWindow = $("#previewWindow");
+        let previewHtml = '<div class="pa-group-preview">' +
+            '<div class="preview-header">' +
+                '<h5 style="color: #007bff; margin-bottom: 15px;">PREVIEW - TỔNG HỢP ĐƠN SẼ ĐƯỢC TẠO</h5>' +
+            '</div>' +
+            '<div class="pa-info-row">' +
+                '<div class="pa-info-col">' +
+                    '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
+                    '<p><strong>Số nhà cung cấp:</strong> ' + (data.vendorCount || 0) + '</p>' +
+                    '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
+                '</div>' +
+                '<div class="pa-info-col">' +
+                    '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
+                    '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
+                    '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
+                '</div>' +
+            '</div>' +
+            '<hr>' +
+            '<h5>Danh sách hợp đồng theo nhà cung cấp (Preview):</h5>' +
+            '<div id="previewChildPAsGrid"></div>' +
+            '<div class="preview-actions" style="margin-top: 20px; text-align: center;">' +
+                '<button id="confirmCreatePA" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success" style="margin-right: 10px;">' +
+                    '<span class="k-icon k-i-check k-button-icon"></span>' +
+                    '<span class="k-button-text">Xác nhận tạo</span>' +
+                '</button>' +
+                '<button id="cancelPreview" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base">' +
+                    '<span class="k-icon k-i-cancel k-button-icon"></span>' +
+                    '<span class="k-button-text">Hủy</span>' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+
+        previewWindow.html(previewHtml);
+
+        $("#previewChildPAsGrid").kendoGrid({
+            dataSource: {
+                data: data.childPAs || [],
+                schema: {
+                    model: {
+                        fields: {
+                            totalPrice: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "code", title: "Mã hợp đồng", width: "120px" },
+                { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
+                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
+                { field: "statusName", title: "Trạng thái", width: "120px" },
+                {
+                    title: "Số sản phẩm",
+                    width: "100px",
+                    template: "#= (purchaseAgreementItems && purchaseAgreementItems.length) || 0 #"
+                }
+            ],
+            detailTemplate: kendo.template($("#paDetailTemplate").html()),
+            detailInit: detailInit,
+            pageable: false,
+            scrollable: true,
+            height: 400
+        });
+
+        function removePreview() {
+            setTimeout(function() {
+                if ($(".k-window #previewWindow").length > 0) {
+                    $("#previewWindow").parent().remove();
+                    $(gridId).after("<div id='previewWindow'></div>");
+                }
+            }, 200);
+        }
+
+        previewWindow.kendoWindow({
+            width: "1400px",
+            height: "800px",
+            title: "PREVIEW - TỔNG HỢP ĐƠN",
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                removePreview();
+            },
+        }).data("kendoWindow").center();
+
+        // Bind button events
+        $("#confirmCreatePA").kendoButton({
+            icon: "check"
+        }).click(function() {
+            previewWindow.data("kendoWindow").close();
+            createPAGroupFromPO();
+        });
+
+        $("#cancelPreview").kendoButton({
+            icon: "cancel"
+        }).click(function() {
+            previewWindow.data("kendoWindow").close();
+        });
+
+        previewWindow.data("kendoWindow").open();
+    }
+
     function createPAGroupFromPO() {
         $('#dialog').kendoConfirm({
             title: "TẠO TỔNG HỢP ĐƠN",
@@ -212,7 +327,7 @@
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-sm-end ">
                                 <div class="pe-1">
                                     <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='createPAGroup' title="Tạo tổng hợp đơn"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
+                                    <button id='createPAGroupWithPreview' title="Tạo tổng hợp đơn"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
                                 </div>
                             </div>
                         </div>
@@ -372,12 +487,12 @@
             },
             placeholder: "Nhập mã nhóm tìm kiếm..."
         });
-        $("#createPAGroup").kendoButton({
+        $("#createPAGroupWithPreview").kendoButton({
             icon: "plus"
         });
 
-        $("#createPAGroup").on('click', function () {
-            createPAGroupFromPO();
+        $("#createPAGroupWithPreview").on('click', function () {
+            showPAGroupPreview();
         });
     };
 
@@ -434,10 +549,39 @@
         word-wrap: break-word;
     }
 
+    .pa-group-preview {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .preview-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .preview-actions {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .preview-actions .k-button {
+        min-width: 120px;
+    }
+
     @@media (max-width: 768px) {
         .pa-info-row {
             flex-direction: column;
             gap: 10px;
+        }
+
+        .preview-actions .k-button {
+            width: 100%;
+            margin-bottom: 10px;
         }
     }
 </style>

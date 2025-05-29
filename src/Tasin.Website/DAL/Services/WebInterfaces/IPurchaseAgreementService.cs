@@ -18,6 +18,7 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         // PA Group methods (Parent PAs)
         Task<Acknowledgement<JsonResultPaging<List<PAGroupViewModel>>>> GetPAGroupList(PAGroupSearchModel postData);
         Task<Acknowledgement<PAGroupViewModel>> GetPAByGroupCode(string groupCode);
+        Task<Acknowledgement<PAGroupViewModel>> GetPAGroupPreview();
         Task<Acknowledgement<PAGroupViewModel>> CreatePAGroup();
     }
 }

@@ -556,6 +556,131 @@ namespace Tasin.Website.DAL.Services.WebServices
             return ack;
         }
 
+        public async Task<Acknowledgement<PAGroupViewModel>> GetPAGroupPreview()
+        {
+            var ack = new Acknowledgement<PAGroupViewModel>();
+            try
+            {
+                // Get all confirmed purchase orders with items in one query
+                var confirmedOrders = await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                    filter: po => po.Status == EPOStatus.Confirmed.ToString() && po.IsActive,
+                    includeProperties: "PurchaseOrderItems"
+                );
+
+                if (!confirmedOrders.Any())
+                {
+                    ack.AddMessage("Không có đơn hàng nào ở trạng thái Đã xác nhận để tạo PA tổng hợp.");
+                    return ack;
+                }
+
+                // Use included items instead of separate query
+                var allOrderItems = confirmedOrders.SelectMany(po => po.PurchaseOrderItems).ToList();
+
+                if (!allOrderItems.Any())
+                {
+                    ack.AddMessage("Không có sản phẩm nào trong các đơn hàng đã xác nhận.");
+                    return ack;
+                }
+
+                // Get product-vendor relationships for all products
+                var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
+                var productVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
+
+                // Create lookup dictionary for better performance
+                var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+
+                // Group items by vendor using lookup
+                var vendorGroups = allOrderItems
+                    .Where(item => productVendorLookup.Contains(item.Product_ID))
+                    .GroupBy(item => productVendorLookup[item.Product_ID].First())
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                if (!vendorGroups.Any())
+                {
+                    ack.AddMessage("Không tìm thấy thông tin nhà cung cấp cho các sản phẩm trong đơn hàng.");
+                    return ack;
+                }
+
+                // Get all vendor information in one query
+                var vendorIds = vendorGroups.Keys.ToList();
+                var vendors = await _vendorRepository.ReadOnlyRespository.GetAsync(
+                    filter: v => vendorIds.Contains(v.ID)
+                );
+                var vendorLookup = vendors.ToDictionary(v => v.ID, v => v);
+
+                // Get all product and unit information for display
+                var unitIds = allOrderItems.Where(item => item.Unit_ID.HasValue).Select(item => item.Unit_ID.Value).Distinct().ToList();
+
+                var products = await _productRepository.ReadOnlyRespository.GetAsync(
+                    filter: p => productIds.Contains(p.ID)
+                );
+                var units = await _unitRepository.ReadOnlyRespository.GetAsync(
+                    filter: u => unitIds.Contains(u.ID)
+                );
+
+                var productLookup = products.ToDictionary(p => p.ID, p => p);
+                var unitLookup = units.ToDictionary(u => u.ID, u => u);
+
+                var previewChildPAs = new List<PurchaseAgreementViewModel>();
+
+                foreach (var vendorGroup in vendorGroups)
+                {
+                    var vendorId = vendorGroup.Key;
+                    var vendorItems = vendorGroup.Value;
+
+                    if (!vendorLookup.TryGetValue(vendorId, out var vendor))
+                        continue;
+
+                    // Calculate total price for this vendor
+                    var totalPrice = vendorItems.Sum(item => (item.Quantity * item.Price) +
+                        (item.Quantity * item.Price * (item.TaxRate ?? 0) / 100) +
+                        (item.ProcessingFee ?? 0));
+
+                    // Create preview PA items
+                    var paItems = vendorItems.Select(item => new PurchaseAgreementItemViewModel
+                    {
+                        Product_ID = item.Product_ID,
+                        ProductName = productLookup.TryGetValue(item.Product_ID, out var product) ? product.Name : "",
+                        Quantity = item.Quantity,
+                        Unit_ID = item.Unit_ID,
+                        UnitName = item.Unit_ID.HasValue && unitLookup.TryGetValue(item.Unit_ID.Value, out var unit) ? unit.Name : "",
+                        Price = item.Price ?? 0
+                    }).ToList();
+
+                    var previewPA = new PurchaseAgreementViewModel
+                    {
+                        Code = $"[Preview] PA-{vendor.Name}",
+                        Vendor_ID = vendorId,
+                        VendorName = vendor.Name,
+                        TotalPrice = totalPrice ?? 0,
+                        Status = EPAStatus.New,
+                        PurchaseAgreementItems = paItems
+                    };
+
+                    previewChildPAs.Add(previewPA);
+                }
+
+                // Create preview PA Group ViewModel
+                var previewPAGroup = new PAGroupViewModel
+                {
+                    GroupCode = "[Preview] Sẽ được tạo tự động",
+                    TotalPrice = previewChildPAs.Sum(pa => pa.TotalPrice),
+                    Status = EPAStatus.New,
+                    CreatedDate = DateTime.Now,
+                    ChildPAs = previewChildPAs
+                };
+
+                ack.Data = previewPAGroup;
+                ack.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                ack.AddMessage($"Lỗi khi lấy preview PA tổng hợp: {ex.Message}");
+                _logger.LogError(ex, "Error getting PA group preview");
+            }
+            return ack;
+        }
+
         public async Task<Acknowledgement<PAGroupViewModel>> CreatePAGroup()
         {
             var ack = new Acknowledgement<PAGroupViewModel>();
