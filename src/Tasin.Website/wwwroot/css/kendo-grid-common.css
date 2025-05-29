@@ -1,0 +1,326 @@
+/* Kendo Grid Common Styles - CustomerIndex Style */
+
+/* Main Grid Styling */
+.k-grid {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-top: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    table-layout: auto;
+}
+
+/* Ensure consistent table layout for both scrollable and non-scrollable */
+.k-grid .k-grid-content table,
+.k-grid .k-grid-header table {
+    width: 100%;
+    table-layout: auto;
+}
+
+/* Force full width for non-scrollable grids */
+.k-grid:not(.k-grid-scrollable) {
+    width: 100% !important;
+}
+
+.k-grid:not(.k-grid-scrollable) table {
+    width: 100% !important;
+    table-layout: auto;
+}
+
+.k-grid .k-grid-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+}
+
+.k-grid .k-grid-header .k-header {
+    background: transparent;
+    border-color: #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+/* Alternating row colors for both grid types */
+.k-grid .k-alt {
+    background-color: #f8f9fa !important;
+}
+
+.k-grid .k-alt td {
+    background-color: #f8f9fa !important;
+}
+
+.k-grid .k-grid-content .k-table tr.k-alt {
+    background-color: #f8f9fa !important;
+}
+
+.k-grid .k-grid-content .k-table tr.k-alt td {
+    background-color: #f8f9fa !important;
+}
+
+/* Specific for non-scrollable grids */
+.k-grid:not(.k-grid-scrollable) tbody tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+.k-grid:not(.k-grid-scrollable) tbody tr:nth-child(even) td {
+    background-color: #f8f9fa !important;
+}
+
+/* Hover effects for both scrollable and non-scrollable grids */
+.k-grid .k-grid-content tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid .k-grid-content tr:hover td {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid .k-grid-content .k-table tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid .k-grid-content .k-table tr:hover td {
+    background-color: #e3f2fd !important;
+}
+
+/* Specific for non-scrollable grids (CustomerIndex style) */
+.k-grid:not(.k-grid-scrollable) tbody tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid:not(.k-grid-scrollable) tbody tr:hover td {
+    background-color: #e3f2fd !important;
+}
+
+/* Specific for scrollable grids (PurchaseOrder style) */
+.k-grid.k-grid-scrollable .k-grid-content tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid.k-grid-scrollable .k-grid-content tr:hover td {
+    background-color: #e3f2fd !important;
+}
+
+.k-grid .k-grid-content td {
+    padding: 10px 8px;
+    border-color: #e9ecef;
+    vertical-align: middle;
+}
+
+/* Currency and Number Formatting */
+.currency {
+    font-weight: 600;
+    color: #198754 !important;
+}
+
+.number {
+    font-weight: 500;
+    color: #495057 !important;
+}
+
+/* Ensure currency and number styling works in grid cells */
+.k-grid .k-grid-content td .currency {
+    font-weight: 600;
+    color: #198754 !important;
+}
+
+.k-grid .k-grid-content td .number {
+    font-weight: 500;
+    color: #495057 !important;
+}
+
+/* Detail grid currency and number styling */
+.k-grid .k-detail-row .k-grid .k-grid-content td .currency {
+    font-weight: 600;
+    color: #198754 !important;
+}
+
+.k-grid .k-detail-row .k-grid .k-grid-content td .number {
+    font-weight: 500;
+    color: #495057 !important;
+}
+
+/* Detail Grid Styling */
+.k-grid .k-detail-row .k-grid {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.k-grid .k-detail-row .k-grid .k-grid-header {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-bottom: 1px solid #f1c40f;
+}
+
+.k-grid .k-detail-row .k-grid .k-grid-header .k-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: #856404;
+    padding: 8px 6px;
+}
+
+.k-grid .k-detail-row .k-grid .k-grid-content td {
+    padding: 8px 6px;
+    font-size: 13px;
+    border-color: #f8f9fa;
+}
+
+.k-grid .k-detail-row .k-grid .k-alt {
+    background-color: #fffbf0;
+}
+
+.k-grid .k-detail-row .k-grid .k-grid-content tr:hover {
+    background-color: #fff3cd !important;
+}
+
+/* Pagination Styling */
+.k-grid .k-pager-wrap {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 12px;
+}
+
+.k-grid .k-pager-wrap .k-pager-numbers .k-current-page {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Loading Overlay */
+.k-grid .k-loading-mask {
+    background: rgba(248, 249, 250, 0.9);
+}
+
+.k-grid .k-loading-text {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Status Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Action Buttons */
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    margin: 0 2px;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+    transform: scale(1.1);
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.btn-invoice {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-invoice:hover {
+    background: #545b62;
+    transform: scale(1.1);
+}
+
+.btn-view {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-view:hover {
+    background: #138496;
+    transform: scale(1.1);
+}
+
+/* Dropdown Menu Styling */
+.dropdown-menu {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 160px;
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive Design for Grid */
+@media (max-width: 768px) {
+    .k-grid .k-grid-header,
+    .k-grid .k-grid-content {
+        font-size: 12px;
+    }
+
+    .k-grid .k-grid-content td,
+    .k-grid .k-grid-header .k-header {
+        padding: 6px 4px;
+    }
+
+    .btn-action {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+}

@@ -65,15 +65,6 @@ namespace Tasin.Website.Common.AutoMapper
             CreateMap<ProductViewModel, Product>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
 
-            // Product_Vendor mapping
-            CreateMap<Product_Vendor, ProductVendorViewModel>()
-                .ForMember(dest => dest.VendorName, opts => opts.Ignore())
-                .ForMember(dest => dest.ProductName, opts => opts.Ignore())
-                .ForMember(dest => dest.ProductCode, opts => opts.Ignore());
-            CreateMap<ProductVendorViewModel, Product_Vendor>()
-                .ForMember(dest => dest.Vendor, opts => opts.Ignore())
-                .ForMember(dest => dest.Product, opts => opts.Ignore());
-
             // PurchaseOrder mapping
             CreateMap<Purchase_Order, PurchaseOrderViewModel>()
                 .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID))

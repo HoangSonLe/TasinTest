@@ -2,6 +2,12 @@
     ViewData["Title"] = "Danh sách đơn hàng PO";
 }
 
+@section Styles {
+    <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
+    <link href="~/css/toolbar-common.css" rel="stylesheet" />
+    <link href="~/css/form-common.css" rel="stylesheet" />
+}
+
 <div>
     <h4 class="demo-section wide title">@ViewData["Title"]</h4>
     <div id="divContent">
@@ -304,7 +310,7 @@
 
     async function editPurchaseOrder(id) {
         var response = ajax("GET", "/PurchaseOrder/GetPurchaseOrderById", { purchaseOrderId: id }, (response) => {
-            renderCreateOrEditForm(false, response.data);
+            renderPurchaseOrderForm(response.data);
         }, null, false);
     }
 
@@ -507,6 +513,411 @@
 
     function exportInvoiceWord(id) {
         window.open(`/PurchaseOrder/ExportInvoiceWord?purchaseOrderId=${id}`, '_blank');
+    }
+
+    function renderPurchaseOrderForm(data = null) {
+        var isEdit = data !== null && data !== undefined;
+        var windowTitle = isEdit ? "CHỈNH SỬA ĐƠN HÀNG PO" : "THÊM MỚI ĐƠN HÀNG PO";
+
+        let formHtml = `
+            <div class="purchase-order-form">
+                <!-- Header Info Section -->
+                <div class="po-header-section">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Khách hàng (*)</label>
+                                <select id="po-customerId" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <select id="po-status" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Mã đơn hàng</label>
+                                <input type="text" id="po-code" class="form-control" readonly placeholder="Tự động tạo"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tổng tiền chưa thuế</label>
+                                <input type="text" id="po-totalPriceNoTax" class="form-control" readonly/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tổng tiền</label>
+                                <input type="text" id="po-totalPrice" class="form-control" readonly/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Item Input Section -->
+                <div class="po-item-section">
+                    <h5>Thêm sản phẩm vào đơn hàng</h5>
+                    <div class="item-input-grid">
+                        <div class="grid-row">
+                            <div class="grid-col-3">
+                                <div class="form-group">
+                                    <label>Sản phẩm (*)</label>
+                                    <select id="item-productId" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Số lượng (*)</label>
+                                    <input type="number" id="item-quantity" class="form-control" step="0.01" min="0"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Đơn vị</label>
+                                    <input type="text" id="item-unitName" class="form-control" readonly/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Đơn giá</label>
+                                    <input type="number" id="item-price" class="form-control" step="0.01" min="0"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Hao hụt (%)</label>
+                                    <input type="number" id="item-lossRate" class="form-control" step="0.1" min="0" max="100"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Thuế (%)</label>
+                                    <input type="number" id="item-taxRate" class="form-control" step="0.1" min="0" max="100"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Phí gia công</label>
+                                    <input type="number" id="item-processingFee" class="form-control" step="0.01" min="0"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>Lợi nhuận (%)</label>
+                                    <input type="number" id="item-profitMargin" class="form-control" step="0.1" min="0"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-2">
+                                <div class="form-group">
+                                    <label>Loại gia công</label>
+                                    <select id="item-processingTypeId" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="grid-col-2">
+                                <div class="form-group">
+                                    <label>Ghi chú</label>
+                                    <input type="text" id="item-note" class="form-control"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-1">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" id="addItemBtn" class="btn btn-primary btn-block">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Items List Section -->
+                <div class="po-items-section">
+                    <h5>Danh sách sản phẩm</h5>
+                    <div id="itemsGrid"></div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" id="savePOBtn" class="btn btn-success">
+                        <i class="fas fa-save"></i> ${isEdit ? 'Cập nhật' : 'Lưu'}
+                    </button>
+                    <button type="button" id="cancelPOBtn" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
+                </div>
+            </div>
+        `;
+
+        let myWindow = $("#window");
+        myWindow.html(formHtml);
+
+        function remove() {
+            setTimeout(() => {
+                if ($(".k-window #window").length > 0) {
+                    $("#window").parent().remove();
+                    $(gridId).after("<div id='window'></div>");
+                }
+            }, 200)
+        }
+
+        myWindow.kendoWindow({
+            width: "1400px",
+            height: "800px",
+            title: windowTitle,
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                remove();
+            },
+        }).data("kendoWindow").center();
+        myWindow.data("kendoWindow").open();
+
+        // Initialize form after window opens
+        setTimeout(function () {
+            initializePurchaseOrderForm(data);
+        }, 100);
+    }
+
+    function initializePurchaseOrderForm(data) {
+        var isEdit = data !== null && data !== undefined;
+        var poItems = [];
+
+        // Initialize Customer Dropdown
+        $("#po-customerId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value",
+            optionLabel: "-- Chọn khách hàng --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn khách hàng --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Customer" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Status Dropdown
+        $("#po-status").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "data",
+            optionLabel: "-- Chọn trạng thái --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn trạng thái --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "POStatus" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.data !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Product Dropdown
+        $("#item-productId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value",
+            optionLabel: "-- Chọn sản phẩm --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn sản phẩm --";
+                }
+                return dataItem.text;
+            },
+            change: function (e) {
+                var selectedProduct = this.dataItem();
+                if (selectedProduct) {
+                    // Load product details
+                    loadProductDetails(selectedProduct.value);
+                }
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "Product" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Processing Type Dropdown
+        $("#item-processingTypeId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "value",
+            optionLabel: "-- Chọn loại gia công --",
+            template: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "N/A";
+                }
+                return dataItem.text;
+            },
+            valueTemplate: function (dataItem) {
+                if (!dataItem || !dataItem.text) {
+                    return "-- Chọn loại gia công --";
+                }
+                return dataItem.text;
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "ProcessingType" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.value !== undefined;
+                            });
+                        }
+                        return [];
+                    }
+                }
+            }
+        });
+
+        // Initialize Items Grid
+        $("#itemsGrid").kendoGrid({
+            dataSource: {
+                data: poItems,
+                schema: {
+                    model: {
+                        id: "tempId",
+                        fields: {
+                            tempId: { type: "string" },
+                            productId: { type: "number" },
+                            productName: { type: "string" },
+                            quantity: { type: "number" },
+                            unitName: { type: "string" },
+                            price: { type: "number" },
+                            lossRate: { type: "number" },
+                            taxRate: { type: "number" },
+                            processingFee: { type: "number" },
+                            profitMargin: { type: "number" },
+                            processingTypeId: { type: "number" },
+                            processingTypeName: { type: "string" },
+                            note: { type: "string" },
+                            totalAmount: { type: "number" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "productName", title: "Sản phẩm", width: "150px" },
+                { field: "quantity", title: "Số lượng", width: "80px", template: "#= kendo.toString(quantity, 'n2') #" },
+                { field: "unitName", title: "Đơn vị", width: "80px" },
+                { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
+                { field: "taxRate", title: "Thuế (%)", width: "80px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
+                { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
+                { field: "profitMargin", title: "Lợi nhuận (%)", width: "90px", template: "#= profitMargin ? kendo.toString(profitMargin, 'n1') + '%' : '' #" },
+                { field: "processingTypeName", title: "Loại gia công", width: "120px" },
+                { field: "note", title: "Ghi chú", width: "150px" },
+                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
+                {
+                    title: "Thao tác",
+                    width: "80px",
+                    template: '<button class="btn btn-sm btn-danger" onclick="removeItem(\'#= tempId #\')"><i class="fas fa-trash"></i></button>'
+                }
+            ],
+            pageable: false,
+            scrollable: true,
+            height: 300
+        });
+
+        // Event Handlers
+        $("#addItemBtn").click(function () {
+            addItemToGrid();
+        });
+
+        $("#savePOBtn").click(function () {
+            savePurchaseOrder();
+        });
+
+        $("#cancelPOBtn").click(function () {
+            $("#window").data("kendoWindow").close();
+        });
+
+        // Load data if editing
+        if (isEdit && data) {
+            loadPurchaseOrderData(data);
+        }
     }
 
     function InitGrid() {
@@ -866,7 +1277,7 @@
 
         // Create button click handler
         $("#create").on('click', function () {
-            renderCreateOrEditForm();
+            renderPurchaseOrderForm();
         });
 
         // Set default date range to last 1 month
@@ -885,6 +1296,205 @@
         // Set default values for date inputs
         $("#dateFrom").val(oneMonthAgoStr);
         $("#dateTo").val(todayStr);
+    }
+
+    // Helper Functions for Purchase Order Form
+    function loadProductDetails(productId) {
+        ajax("GET", "/Product/GetProductById", { productId: productId }, function (response) {
+            if (response.isSuccess && response.data) {
+                var product = response.data;
+                $("#item-unitName").val(product.unitName || '');
+                $("#item-price").val(product.price || 0);
+                $("#item-taxRate").val(product.taxRate || 0);
+            }
+        });
+    }
+
+    function addItemToGrid() {
+        var productDropdown = $("#item-productId").data("kendoDropDownList");
+        var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+
+        var productId = productDropdown.value();
+        var productName = productDropdown.text();
+        var quantity = parseFloat($("#item-quantity").val()) || 0;
+        var unitName = $("#item-unitName").val();
+        var price = parseFloat($("#item-price").val()) || 0;
+        var lossRate = parseFloat($("#item-lossRate").val()) || 0;
+        var taxRate = parseFloat($("#item-taxRate").val()) || 0;
+        var processingFee = parseFloat($("#item-processingFee").val()) || 0;
+        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0;
+        var processingTypeId = processingTypeDropdown.value();
+        var processingTypeName = processingTypeDropdown.text();
+        var note = $("#item-note").val();
+
+        // Validation
+        if (!productId || productId === "" || productName === "-- Chọn sản phẩm --") {
+            alert("Vui lòng chọn sản phẩm");
+            return;
+        }
+        if (quantity <= 0) {
+            alert("Vui lòng nhập số lượng hợp lệ");
+            return;
+        }
+
+        // Calculate total amount
+        var baseAmount = quantity * price;
+        var lossAmount = baseAmount * (lossRate / 100);
+        var totalBeforeTax = baseAmount + lossAmount + processingFee;
+        var profitAmount = totalBeforeTax * (profitMargin / 100);
+        var totalAfterProfit = totalBeforeTax + profitAmount;
+        var taxAmount = totalAfterProfit * (taxRate / 100);
+        var totalAmount = totalAfterProfit + taxAmount;
+
+        var newItem = {
+            tempId: generateTempId(),
+            productId: parseInt(productId),
+            productName: productName,
+            quantity: quantity,
+            unitName: unitName,
+            price: price,
+            lossRate: lossRate,
+            taxRate: taxRate,
+            processingFee: processingFee,
+            profitMargin: profitMargin,
+            processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
+            processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName,
+            note: note,
+            totalAmount: totalAmount
+        };
+
+        var grid = $("#itemsGrid").data("kendoGrid");
+        grid.dataSource.add(newItem);
+
+        // Clear form
+        clearItemForm();
+
+        // Update totals
+        updatePurchaseOrderTotals();
+    }
+
+    function removeItem(tempId) {
+        var grid = $("#itemsGrid").data("kendoGrid");
+        var dataItem = grid.dataSource.get(tempId);
+        if (dataItem) {
+            grid.dataSource.remove(dataItem);
+            updatePurchaseOrderTotals();
+        }
+    }
+
+    function clearItemForm() {
+        $("#item-productId").data("kendoDropDownList").value("");
+        $("#item-quantity").val("");
+        $("#item-unitName").val("");
+        $("#item-price").val("");
+        $("#item-lossRate").val("");
+        $("#item-taxRate").val("");
+        $("#item-processingFee").val("");
+        $("#item-profitMargin").val("");
+        $("#item-processingTypeId").data("kendoDropDownList").value("");
+        $("#item-note").val("");
+    }
+
+    function updatePurchaseOrderTotals() {
+        var grid = $("#itemsGrid").data("kendoGrid");
+        var items = grid.dataSource.data();
+
+        var totalPriceNoTax = 0;
+        var totalPrice = 0;
+
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var baseAmount = item.quantity * item.price;
+            var lossAmount = baseAmount * (item.lossRate / 100);
+            var totalBeforeTax = baseAmount + lossAmount + item.processingFee;
+            var profitAmount = totalBeforeTax * (item.profitMargin / 100);
+            var totalAfterProfit = totalBeforeTax + profitAmount;
+            var taxAmount = totalAfterProfit * (item.taxRate / 100);
+
+            totalPriceNoTax += totalAfterProfit;
+            totalPrice += totalAfterProfit + taxAmount;
+        }
+
+        $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n0") + " VNĐ");
+        $("#po-totalPrice").val(kendo.toString(totalPrice, "n0") + " VNĐ");
+    }
+
+    function generateTempId() {
+        return 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function loadPurchaseOrderData(data) {
+        // Load header data
+        if (data.customer_ID) {
+            $("#po-customerId").data("kendoDropDownList").value(data.customer_ID);
+        }
+        if (data.status !== undefined) {
+            $("#po-status").data("kendoDropDownList").value(data.status);
+        }
+        $("#po-code").val(data.code || '');
+
+        // Load items
+        if (data.purchaseOrderItems && data.purchaseOrderItems.length > 0) {
+            var grid = $("#itemsGrid").data("kendoGrid");
+            for (var i = 0; i < data.purchaseOrderItems.length; i++) {
+                var item = data.purchaseOrderItems[i];
+                item.tempId = generateTempId();
+                grid.dataSource.add(item);
+            }
+            updatePurchaseOrderTotals();
+        }
+    }
+
+    function savePurchaseOrder() {
+        var customerDropdown = $("#po-customerId").data("kendoDropDownList");
+        var statusDropdown = $("#po-status").data("kendoDropDownList");
+        var grid = $("#itemsGrid").data("kendoGrid");
+
+        var customerId = customerDropdown.value();
+        var status = statusDropdown.value();
+        var items = grid.dataSource.data();
+
+        // Validation
+        if (!customerId || customerId === "") {
+            alert("Vui lòng chọn khách hàng");
+            return;
+        }
+
+        if (items.length === 0) {
+            alert("Vui lòng thêm ít nhất một sản phẩm");
+            return;
+        }
+
+        // Prepare data
+        var purchaseOrderData = {
+            customer_ID: parseInt(customerId),
+            status: status || 0,
+            purchaseOrderItems: items.map(function (item) {
+                return {
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                    lossRate: item.lossRate,
+                    taxRate: item.taxRate,
+                    processingFee: item.processingFee,
+                    profitMargin: item.profitMargin,
+                    processingTypeId: item.processingTypeId,
+                    note: item.note
+                };
+            })
+        };
+
+        // Save
+        var url = "/PurchaseOrder/CreatePurchaseOrder";
+        var method = "POST";
+
+        ajax(method, url, purchaseOrderData, function (response) {
+            if (response.isSuccess) {
+                alert("Lưu đơn hàng thành công!");
+                $("#window").data("kendoWindow").close();
+                $(gridId).data("kendoGrid").dataSource.read();
+            }
+        });
     }
 </script>
 
@@ -909,7 +1519,7 @@
         justify-content: flex-end;
     }
 
-    /* Purchase Order Toolbar Styles */
+    /* Page specific overrides */
     .purchase-order-toolbar {
         background: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -917,328 +1527,5 @@
         padding: 20px;
         margin-bottom: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* Override any global label styles */
-    .purchase-order-toolbar label,
-    .purchase-order-toolbar .filter-label {
-        text-align: left !important;
-        justify-content: flex-start !important;
-        align-items: flex-start !important;
-    }
-
-    .toolbar-filters {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        align-items: flex-end;
-        margin-bottom: 16px;
-        width: 100%;
-    }
-
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        min-width: 200px;
-        flex: 1 1 200px;
-        max-width: 280px;
-        margin-right: 8px;
-        align-items: flex-start;
-    }
-
-    .filter-group:last-child {
-        margin-right: 0;
-    }
-
-    .filter-group.action-group {
-        min-width: 80px;
-        flex: 0 0 80px;
-        max-width: 80px;
-    }
-
-    .filter-label {
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 6px;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: left !important;
-        display: block;
-        width: 100%;
-    }
-
-    .filter-input {
-        position: relative;
-        width: 100%;
-    }
-
-    .filter-input input[type="text"],
-    .filter-input input[type="date"],
-    .filter-input select {
-        width: 100% !important;
-        height: 42px !important;
-        padding: 10px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: all 0.2s ease;
-        background: white;
-        box-sizing: border-box;
-        line-height: 1.4;
-    }
-
-    /* Force Kendo DropDownList to use full width and height */
-    .filter-input .k-dropdown,
-    .filter-input .k-dropdownlist {
-        width: 100% !important;
-        height: 42px !important;
-    }
-
-    .filter-input .k-dropdown .k-dropdown-wrap,
-    .filter-input .k-dropdownlist .k-dropdown-wrap {
-        width: 100% !important;
-        height: 42px !important;
-        box-sizing: border-box;
-    }
-
-    .filter-input .k-dropdown .k-input,
-    .filter-input .k-dropdownlist .k-input {
-        height: 40px !important;
-        line-height: 40px !important;
-        padding: 0 12px !important;
-    }
-
-    .filter-input input[type="text"]:focus,
-    .filter-input input[type="date"]:focus,
-    .filter-input select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        outline: none;
-    }
-
-    /* Toolbar Actions */
-    .toolbar-actions {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    /* Button Styles */
-    .btn-search,
-    .btn-create,
-    .btn-export {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-
-    .btn-search {
-        background: #007bff;
-        color: white;
-        padding: 10px 12px;
-        min-width: 44px;
-    }
-
-    .btn-search:hover {
-        background: #0056b3;
-        transform: translateY(-1px);
-    }
-
-    .btn-create {
-        background: #28a745;
-        color: white;
-    }
-
-    .btn-create:hover {
-        background: #1e7e34;
-        transform: translateY(-1px);
-    }
-
-    .btn-export {
-        background: #17a2b8;
-        color: white;
-    }
-
-    .btn-export:hover {
-        background: #117a8b;
-        transform: translateY(-1px);
-    }
-
-    /* Action Buttons in Grid */
-    .action-buttons {
-        display: flex;
-        gap: 4px;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-action {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 14px;
-    }
-
-    .btn-edit {
-        background: #ffc107;
-        color: #212529;
-    }
-
-    .btn-edit:hover {
-        background: #e0a800;
-        transform: scale(1.1);
-    }
-
-    .btn-delete {
-        background: #dc3545;
-        color: white;
-    }
-
-    .btn-delete:hover {
-        background: #c82333;
-        transform: scale(1.1);
-    }
-
-    .btn-invoice {
-        background: #6c757d;
-        color: white;
-    }
-
-    .btn-invoice:hover {
-        background: #545b62;
-        transform: scale(1.1);
-    }
-
-    /* Status Badges */
-    .badge {
-        display: inline-block;
-        padding: 4px 8px;
-        font-size: 12px;
-        font-weight: 500;
-        border-radius: 4px;
-        text-align: center;
-        white-space: nowrap;
-    }
-
-    .badge-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
-
-    .badge-warning {
-        background-color: #ffc107;
-        color: #212529;
-    }
-
-    .badge-success {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .badge-info {
-        background-color: #17a2b8;
-        color: white;
-    }
-
-    .badge-danger {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    /* Currency and Number Formatting */
-    .currency {
-        font-weight: 600;
-        color: #28a745;
-    }
-
-    .number {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    /* Dropdown Menu Styling */
-    .dropdown-menu {
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        min-width: 160px;
-    }
-
-    .dropdown-item {
-        padding: 8px 16px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-    }
-
-    .dropdown-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .toolbar-filters {
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .filter-group {
-            max-width: 100%;
-            margin-right: 0;
-        }
-
-        .toolbar-actions {
-            justify-content: center;
-            margin-top: 16px;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-            gap: 2px;
-        }
-    }
-
-    /* Detail Grid Styling */
-    .k-detail-cell .k-grid {
-        border: 1px solid #e9ecef;
-        border-radius: 4px;
-        margin: 10px;
-    }
-
-    .k-detail-cell .k-grid-header {
-        background: #f8f9fa;
-    }
-
-    /* Purchase Order Detail Modal */
-    .purchase-order-detail {
-        padding: 20px;
-    }
-
-    .purchase-order-detail p {
-        margin-bottom: 8px;
-    }
-
-    .purchase-order-detail hr {
-        margin: 20px 0;
-        border-color: #e9ecef;
     }
 </style>

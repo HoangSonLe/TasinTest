@@ -1,0 +1,357 @@
+/* Form Common Styles */
+
+/* Purchase Order Form Styles */
+.purchase-order-form {
+    padding: 20px;
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.po-header-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.po-item-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.po-items-section {
+    margin-bottom: 20px;
+}
+
+/* Grid Layout for Item Input */
+.item-input-grid {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.grid-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: end;
+}
+
+.grid-row:last-child {
+    margin-bottom: 0;
+}
+
+.grid-col-1 {
+    grid-column: span 1;
+}
+
+.grid-col-2 {
+    grid-column: span 2;
+}
+
+.grid-col-3 {
+    grid-column: span 3;
+}
+
+.grid-col-4 {
+    grid-column: span 4;
+}
+
+/* Form Group Styling */
+.purchase-order-form .form-group {
+    margin-bottom: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.purchase-order-form .form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+/* Form Control Styling */
+.purchase-order-form .form-control {
+    height: 40px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.purchase-order-form .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.purchase-order-form .form-control[readonly] {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+
+/* Kendo DropDownList in form */
+.purchase-order-form .k-dropdown,
+.purchase-order-form .k-dropdownlist {
+    width: 100% !important;
+    height: 40px !important;
+}
+
+.purchase-order-form .k-dropdown .k-dropdown-wrap,
+.purchase-order-form .k-dropdownlist .k-dropdown-wrap {
+    height: 40px !important;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+}
+
+.purchase-order-form .k-dropdown .k-input,
+.purchase-order-form .k-dropdownlist .k-input {
+    height: 38px !important;
+    line-height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 14px;
+}
+
+/* Button Styling */
+.purchase-order-form .btn {
+    height: 40px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.purchase-order-form .btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.purchase-order-form .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Form Actions */
+.form-actions {
+    text-align: right;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.form-actions .btn {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-actions .btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.form-actions .btn-success:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.form-actions .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.form-actions .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.form-actions .btn i {
+    margin-right: 5px;
+}
+
+/* Grid in form - CustomerIndex style */
+.purchase-order-form .k-grid {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-top: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.purchase-order-form .k-grid .k-grid-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+}
+
+.purchase-order-form .k-grid .k-grid-header .k-header {
+    background: transparent;
+    border-color: #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.purchase-order-form .k-grid .k-alt {
+    background-color: #f8f9fa;
+}
+
+.purchase-order-form .k-grid .k-grid-content tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.purchase-order-form .k-grid .k-grid-content td {
+    padding: 10px 8px;
+    border-color: #e9ecef;
+    vertical-align: middle;
+}
+
+/* Currency and number formatting in form grid */
+.purchase-order-form .currency {
+    font-weight: 600;
+    color: #198754;
+}
+
+.purchase-order-form .number {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Pagination styling in form */
+.purchase-order-form .k-grid .k-pager-wrap {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 12px;
+}
+
+.purchase-order-form .k-grid .k-pager-wrap .k-pager-numbers .k-current-page {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Loading Overlay in form */
+.purchase-order-form .k-grid .k-loading-mask {
+    background: rgba(248, 249, 250, 0.9);
+}
+
+.purchase-order-form .k-grid .k-loading-text {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Responsive Grid Layout */
+@media (max-width: 1200px) {
+    .grid-row {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .grid-col-3 {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 992px) {
+    .grid-row {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .grid-col-3 {
+        grid-column: span 2;
+    }
+
+    .grid-col-2 {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-col-1,
+    .grid-col-2,
+    .grid-col-3,
+    .grid-col-4 {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .grid-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .grid-col-1,
+    .grid-col-2,
+    .grid-col-3,
+    .grid-col-4 {
+        grid-column: span 1;
+    }
+
+    .item-input-grid {
+        padding: 15px;
+    }
+
+    .purchase-order-form {
+        padding: 15px;
+    }
+}

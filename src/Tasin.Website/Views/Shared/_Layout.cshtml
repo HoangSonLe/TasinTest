@@ -29,6 +29,8 @@
     <link href="~/lib/kendo/styles/kendo.bootstrap.min.css" rel="stylesheet" />
     <link href="~/lib/kendo/styles/kendo.bootstrap.mobile.min.css" rel="stylesheet" />
 
+    @await RenderSectionAsync("Styles", required: false)
+
     <script src="~/lib/kendo/js/messages/kendo.messages.vi-VN.min.js"></script>
     <script src="~/lib/kendo/js/cultures/kendo.culture.vi-VN.min.js"></script>
     <script src="~/js/login/changepassword.js" asp-append-version="true"></script>

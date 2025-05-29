@@ -1,0 +1,306 @@
+/* Toolbar Common Styles - CustomerIndex Style */
+
+/* Statistics Toolbar Styles */
+.statistics-toolbar,
+.purchase-order-toolbar {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Override any global label styles */
+.statistics-toolbar label,
+.statistics-toolbar .filter-label,
+.purchase-order-toolbar label,
+.purchase-order-toolbar .filter-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+}
+
+.toolbar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    flex: 1 1 200px;
+    max-width: 280px;
+    margin-right: 8px;
+    align-items: flex-start;
+}
+
+.filter-group:last-child {
+    margin-right: 0;
+}
+
+.filter-group.checkbox-group {
+    min-width: 140px;
+    flex: 0 0 140px;
+    max-width: 140px;
+}
+
+.filter-group.action-group {
+    min-width: 80px;
+    flex: 0 0 80px;
+    max-width: 80px;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left !important;
+    display: block;
+    width: 100%;
+}
+
+.filter-input {
+    position: relative;
+    width: 100%;
+}
+
+.filter-input input[type="text"],
+.filter-input input[type="date"],
+.filter-input select {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: white;
+    box-sizing: border-box;
+    line-height: 1.4;
+}
+
+/* Force Kendo DropDownList to use full width and height */
+.filter-input .k-dropdown,
+.filter-input .k-dropdownlist {
+    width: 100% !important;
+    height: 42px !important;
+}
+
+.filter-input .k-dropdown .k-dropdown-wrap,
+.filter-input .k-dropdownlist .k-dropdown-wrap {
+    width: 100% !important;
+    height: 42px !important;
+    box-sizing: border-box;
+}
+
+.filter-input .k-dropdown .k-input,
+.filter-input .k-dropdownlist .k-input {
+    height: 40px !important;
+    line-height: 40px !important;
+    padding: 0 12px !important;
+}
+
+.filter-input input[type="text"]:focus,
+.filter-input input[type="date"]:focus,
+.filter-input select:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.filter-input input[type="text"]::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Checkbox styling */
+.checkbox-group .filter-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-size: 14px;
+    color: #495057;
+    cursor: pointer;
+    margin: 0;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* Button styling */
+.btn-search {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    margin-top: 24px;
+    height: 42px;
+    width: 42px;
+    min-width: 42px;
+}
+
+.btn-search:hover {
+    background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-search i {
+    font-size: 16px;
+}
+
+.btn-export {
+    background: linear-gradient(135deg, #198754 0%, #157347 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(25, 135, 84, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    height: 42px;
+}
+
+.btn-export:hover {
+    background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+.btn-export i {
+    font-size: 16px;
+}
+
+.btn-create {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    height: 42px;
+}
+
+.btn-create:hover {
+    background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-create i {
+    font-size: 16px;
+}
+
+/* Toolbar actions styling */
+.toolbar-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .filter-group {
+        min-width: 180px;
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 992px) {
+    .toolbar-filters {
+        gap: 12px;
+    }
+
+    .filter-group {
+        min-width: 160px;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .toolbar-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        min-width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+
+    .filter-group.action-group {
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .btn-search,
+    .btn-export,
+    .btn-create {
+        margin-top: 0;
+        flex: 1;
+    }
+
+    .toolbar-actions {
+        justify-content: stretch;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .toolbar-actions .btn-export,
+    .toolbar-actions .btn-create {
+        flex: 1;
+        margin-top: 12px;
+    }
+}
