@@ -1,7 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Người dùng";
 }
-@using Newtonsoft.Json
 
 @section Styles {
     <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
@@ -528,20 +527,6 @@
 
     }
     function InitKendoToolBar() {
-        // $("#toolbar").kendoToolBar({
-        //     items: [
-        //         { template: "<label for='searchLabel'>Tìm kiếm:</label>" },
-        //         { template: '<input id="searchString" style="width:100%" />' },
-        //         { template: "<label for='roleLabel'>Vai trò:</label>" },
-        //         { template: '<input id="roleDropdownList" style="width:100%" />' },
-        //         { template: '<button id="search" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary me-2 k-button-solid-base k-icon-button"></button>' },
-        //         {
-        //             template: '<div class="buttonContainer">\
-        //                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-ext">Export Excel</span></button>\
-        //                         <button id="create" style="margin-left:5px;" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success me-2 _permission_" data-enum="6"><span class="k-icon k-i-plus k-button-icon" > </span><span class="k-button-text">Thêm</span ></button></div>' },
-
-        //     ]
-        // });
 
         $("#search").kendoButton({
             icon: "search"
@@ -565,7 +550,7 @@
             dataValueField: "value",
             optionLabel: 'Lọc vai trò...',
             filter: filterCustom,
-            dataSource: roleDatasource
+            dataSource: roleDatasource,
         });
         $("#create").kendoButton({
             icon: "plus"

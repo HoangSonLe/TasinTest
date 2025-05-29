@@ -1423,10 +1423,8 @@
 
         // Auto load data with default filter (last 1 month)
         setTimeout(function () {
-            var grid = $(gridId).data("kendoGrid");
-            if (grid) {
-                grid.dataSource.read();
-            }
+
+            $(window).trigger("resize");
         }, 500);
     });
 </script>
