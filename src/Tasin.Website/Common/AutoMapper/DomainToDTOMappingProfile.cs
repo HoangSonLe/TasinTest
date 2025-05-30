@@ -72,7 +72,7 @@ namespace Tasin.Website.Common.AutoMapper
                 .ForMember(dest => dest.CustomerName, opts => opts.Ignore());
             CreateMap<PurchaseOrderViewModel, Purchase_Order>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Status, opts => opts.MapFrom(src => ((int)src.Status).ToString()))
+                .ForMember(dest => dest.Status, opts => opts.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.Customer, opts => opts.Ignore())
                 .ForMember(dest => dest.PurchaseOrderItems, opts => opts.Ignore());
 

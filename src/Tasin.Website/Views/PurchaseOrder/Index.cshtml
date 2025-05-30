@@ -839,43 +839,90 @@
                         return [];
                     }
                 }
+            },
+            dataBound: function () {
+                // Always disable status dropdown - status can only be changed via action buttons
+                this.enable(false);
+
+                // Set default status to "New" for new orders
+                if (!isEdit) {
+                    // Find the item with "New" status (by enum value)
+                    var dataSource = this.dataSource;
+                    var newStatusItem = null;
+                    for (var i = 0; i < dataSource.data().length; i++) {
+                        var item = dataSource.data()[i];
+                        // Compare by enum value - look for "New"
+                        if (item.dataRaw === "New") {
+                            newStatusItem = item;
+                            break;
+                        }
+                    }
+
+                    if (newStatusItem) {
+                        this.value(newStatusItem.dataRaw);
+                    }
+                }
             }
         });
 
-        // Initialize Product Dropdown
-        $("#item-productId").kendoDropDownList({
+        // Initialize Product Dropdown with Dynamic Search
+        $("#item-productId").kendoComboBox({
             dataTextField: "text",
             dataValueField: "value",
-            optionLabel: "-- Chọn sản phẩm --",
+            placeholder: "Tìm kiếm sản phẩm...",
+            clearButton: false,
+            suggest: true,
+            filter: "contains", // Enable filtering to trigger server-side search
+            minLength: 1,
+            highlightFirst: true,
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
                     return "N/A";
                 }
                 return dataItem.text;
             },
-            valueTemplate: function (dataItem) {
-                if (!dataItem || !dataItem.text) {
-                    return "-- Chọn sản phẩm --";
-                }
-                return dataItem.text;
-            },
             change: function (e) {
                 var selectedProduct = this.dataItem();
-                console.log("Product dropdown changed:", selectedProduct);
                 if (selectedProduct && selectedProduct.value) {
                     // Load product details
                     loadProductDetails(selectedProduct.value);
                 } else {
-                    console.log("No valid product selected");
+                    // Clear product details if no valid selection
+                    $("#item-unitName").val('');
+                    $("#item-price").val('');
+                    $("#item-taxRate").val('');
                 }
             },
+            select: function (e) {
+                var selectedProduct = this.dataItem(e.item.index());
+                if (selectedProduct && selectedProduct.value) {
+                    // Load product details
+                    loadProductDetails(selectedProduct.value);
+                }
+            },
+
             dataSource: {
                 transport: {
                     read: {
                         url: "/Common/GetDataOptionsDropdown",
-                        data: { type: "Product" }
+                        data: {
+                            type: "Product",
+                            searchString: "" // Default empty search - loads first products
+                        }
+                    },
+                    parameterMap: function (data, type) {
+                        if (type === "read") {
+                            return {
+                                type: "Product",
+                                searchString: data.filter && data.filter.filters && data.filter.filters.length > 0
+                                    ? data.filter.filters[0].value
+                                    : ""
+                            };
+                        }
+                        return data;
                     }
                 },
+                serverFiltering: true,
                 schema: {
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
@@ -885,6 +932,13 @@
                         }
                         return [];
                     }
+                }
+            },
+            height: 300,
+            animation: {
+                open: {
+                    effects: "fadeIn",
+                    duration: 200
                 }
             }
         });
@@ -1406,32 +1460,28 @@
 
     // Helper Functions for Purchase Order Form
     function loadProductDetails(productId) {
-        console.log("Loading product details for ID:", productId);
         ajax("GET", "/Product/GetProductById/" + productId, {}, function (response) {
-            console.log("Product API response:", response);
             if (response.isSuccess && response.data) {
                 var product = response.data;
                 $("#item-unitName").val(product.unitName || '');
                 $("#item-price").val(product.price || 0);
                 $("#item-taxRate").val(product.taxRate || 0);
             } else {
-                console.log("Product API failed:", response);
                 // Show error notification
                 showErrorMessages(response.errorMessageList || ["Không thể tải thông tin sản phẩm"]);
             }
         }, function (error) {
-            console.log("Product API error:", error);
             // Handle AJAX error
             showErrorMessages(["Lỗi khi tải thông tin sản phẩm"]);
         }, false);
     }
 
     function addItemToGrid() {
-        var productDropdown = $("#item-productId").data("kendoDropDownList");
+        var productDropdown = $("#item-productId").data("kendoComboBox");
         var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
 
-        var productId = productDropdown.value();
-        var productName = productDropdown.text();
+        var productId = productDropdown ? productDropdown.value() : "";
+        var productName = productDropdown ? productDropdown.text() : "";
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var unitName = $("#item-unitName").val();
         var price = parseFloat($("#item-price").val()) || 0;
@@ -1445,11 +1495,11 @@
 
         // Validation
         if (!productId || productId === "" || productName === "-- Chọn sản phẩm --") {
-            alert("Vui lòng chọn sản phẩm");
+            showErrorMessages(["Vui lòng chọn sản phẩm"]);
             return;
         }
         if (quantity <= 0) {
-            alert("Vui lòng nhập số lượng hợp lệ");
+            showErrorMessages(["Vui lòng nhập số lượng hợp lệ"]);
             return;
         }
 
@@ -1499,7 +1549,10 @@
     }
 
     function clearItemForm() {
-        $("#item-productId").data("kendoDropDownList").value("");
+        var productComboBox = $("#item-productId").data("kendoComboBox");
+        if (productComboBox) {
+            productComboBox.value("");
+        }
         $("#item-quantity").val("");
         $("#item-unitName").val("");
         $("#item-price").val("");
@@ -1507,7 +1560,10 @@
         $("#item-taxRate").val("");
         $("#item-processingFee").val("");
         $("#item-profitMargin").val("");
-        $("#item-processingTypeId").data("kendoDropDownList").value("");
+        var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+        if (processingTypeDropdown) {
+            processingTypeDropdown.value("");
+        }
         $("#item-note").val("");
     }
 
@@ -1540,15 +1596,12 @@
     }
 
     function loadPurchaseOrderData(data) {
-        console.log("Loading PO data:", data);
-
         // Load header data
         try {
             if (data.customer_ID) {
                 var customerDropdown = $("#po-customerId").data("kendoDropDownList");
                 if (customerDropdown) {
                     customerDropdown.value(data.customer_ID);
-                    console.log("Set customer:", data.customer_ID);
                 }
             }
 
@@ -1556,12 +1609,10 @@
                 var statusDropdown = $("#po-status").data("kendoDropDownList");
                 if (statusDropdown) {
                     statusDropdown.value(data.status);
-                    console.log("Set status:", data.status);
                 }
             }
 
             $("#po-code").val(data.code || '');
-            console.log("Set code:", data.code);
 
             // Load items
             if (data.purchaseOrderItems && data.purchaseOrderItems.length > 0) {
@@ -1590,7 +1641,6 @@
                             totalAmount: (item.quantity || 0) * (item.price || 0)
                         };
                         grid.dataSource.add(gridItem);
-                        console.log("Added item:", gridItem);
                     }
                     updatePurchaseOrderTotals();
                 }
@@ -1605,7 +1655,7 @@
             }
 
         } catch (error) {
-            console.error("Error loading PO data:", error);
+            // Error loading PO data
         }
     }
 
@@ -1620,12 +1670,12 @@
 
         // Validation
         if (!customerId || customerId === "") {
-            alert("Vui lòng chọn khách hàng");
+            showErrorMessages(["Vui lòng chọn khách hàng"]);
             return;
         }
 
         if (items.length === 0) {
-            alert("Vui lòng thêm ít nhất một sản phẩm");
+            showErrorMessages(["Vui lòng thêm ít nhất một sản phẩm"]);
             return;
         }
 
@@ -1654,11 +1704,11 @@
 
         ajax(method, url, purchaseOrderData, function (response) {
             if (response.isSuccess) {
-                alert("Lưu đơn hàng thành công!");
+                showSuccessMessages(["Lưu đơn hàng thành công!"]);
                 $("#window").data("kendoWindow").close();
                 $(gridId).data("kendoGrid").dataSource.read();
             }
-        });
+        }, null, false);
     }
 </script>
 
@@ -1793,5 +1843,37 @@
             grid-template-columns: 1fr !important;
             gap: 15px !important;
         }
+    }
+
+    /* Disabled status dropdown styling */
+    .k-dropdown.k-disabled {
+        background-color: #f8f9fa !important;
+        border-color: #e9ecef !important;
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+
+    .k-dropdown.k-disabled .k-dropdown-wrap {
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+        cursor: not-allowed;
+    }
+
+    .k-dropdown.k-disabled .k-select {
+        background-color: #f8f9fa !important;
+        border-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+
+    /* Add a subtle indicator that status is read-only */
+    .k-dropdown.k-disabled::after {
+        content: "🔒";
+        position: absolute;
+        right: 25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        opacity: 0.6;
+        pointer-events: none;
     }
 </style>
