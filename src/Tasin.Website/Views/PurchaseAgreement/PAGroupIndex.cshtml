@@ -16,6 +16,7 @@
     <div id="window"></div>
     <div id="previewWindow"></div>
     <div id="dialog"></div>
+    <div id="notification"></div>
 </div>
 
 <script type="text/x-kendo-template" id="paDetailTemplate">
@@ -214,7 +215,96 @@
             if (response.isSuccess && response.data) {
                 showPAGroupPreviewModal(response.data);
             } else {
-                showErrorMessages(response.errorMessageList || ["Không thể lấy dữ liệu preview"]);
+                // Check if the error is about no confirmed purchase orders
+                const errorMessages = response.errorMessageList || ["Không thể lấy dữ liệu preview"];
+                const hasNoConfirmedOrdersError = errorMessages.some(msg =>
+                    msg.includes("Không có đơn hàng nào ở trạng thái Đã xác nhận"));
+
+                if (hasNoConfirmedOrdersError) {
+                    // Show a more helpful error message with guidance and a link
+                    const errorHtml = `
+                        <div>
+                            <p><strong>Không có đơn hàng nào ở trạng thái 'Đã xác nhận' để tạo PA tổng hợp.</strong></p>
+                            <p>Vui lòng:</p>
+                            <ol>
+                                <li><a href="/PurchaseOrder/Index" target="_blank" style="color: #007bff; text-decoration: underline;">Vào trang Đơn hàng (Purchase Order)</a></li>
+                                <li>Xác nhận các đơn hàng cần thiết</li>
+                                <li>Quay lại đây để tạo PA tổng hợp</li>
+                            </ol>
+                        </div>
+                    `;
+
+                    // Use kendo notification to show HTML content
+                    var notification = $("#notification").kendoNotification({
+                        position: {
+                            pinned: true,
+                            top: 30,
+                            right: 30
+                        },
+                        autoHideAfter: 10000,
+                        stacking: "down",
+                        templates: [{
+                            type: "error",
+                            template: "<div class='error-notification'>#= message #</div>"
+                        }]
+                    }).data("kendoNotification");
+
+                    notification.show({
+                        message: errorHtml
+                    }, "error");
+                } else {
+                    showErrorMessages(errorMessages);
+                }
+            }
+        }, null, false);
+    }
+
+    function showEditablePAGroupPreview() {
+        ajax("GET", "/PurchaseAgreement/GetEditablePAGroupPreview", {}, function (response) {
+            if (response.isSuccess && response.data) {
+                showEditablePAGroupPreviewModal(response.data);
+            } else {
+
+                // Check if the error is about no confirmed purchase orders
+                const errorMessages = response.errorMessageList || ["Không thể lấy dữ liệu preview có thể chỉnh sửa"];
+                const hasNoConfirmedOrdersError = errorMessages.some(msg =>
+                    msg.includes("Không có đơn hàng nào ở trạng thái Đã xác nhận"));
+
+                if (hasNoConfirmedOrdersError) {
+                    // Show a more helpful error message with guidance and a link
+                    const errorHtml = `
+                        <div>
+                            <p><strong>Không có đơn hàng nào ở trạng thái 'Đã xác nhận' để tạo PA tổng hợp.</strong></p>
+                            <p>Vui lòng:</p>
+                            <ol>
+                                <li><a href="/PurchaseOrder/Index" target="_blank" style="color: #007bff; text-decoration: underline;">Vào trang Đơn hàng (Purchase Order)</a></li>
+                                <li>Xác nhận các đơn hàng cần thiết</li>
+                                <li>Quay lại đây để tạo PA tổng hợp</li>
+                            </ol>
+                        </div>
+                    `;
+
+                    // Use kendo notification to show HTML content
+                    var notification = $("#notification").kendoNotification({
+                        position: {
+                            pinned: true,
+                            top: 30,
+                            right: 30
+                        },
+                        autoHideAfter: 10000,
+                        stacking: "down",
+                        templates: [{
+                            type: "error",
+                            template: "<div class='error-notification'>#= message #</div>"
+                        }]
+                    }).data("kendoNotification");
+
+                    notification.show({
+                        message: errorHtml
+                    }, "error");
+                } else {
+                    showErrorMessages(errorMessages);
+                }
             }
         }, null, false);
     }
@@ -334,6 +424,209 @@
         }, null, false);
     }
 
+    function showEditablePAGroupPreviewModal(data) {
+        let previewWindow = $("#previewWindow");
+        let previewHtml = '<div class="editable-pa-group-preview">' +
+            '<div class="preview-header">' +
+            '<h5 style="color: #007bff; margin-bottom: 15px;">PREVIEW - TỔNG HỢP ĐƠN CÓ THỂ CHỈNH SỬA</h5>' +
+            '</div>' +
+            '<div class="pa-info-row">' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Mã nhóm:</strong> ' + (data.groupCode || '') + '</p>' +
+            '<p><strong>Số sản phẩm:</strong> ' + (data.productVendorMappings ? data.productVendorMappings.length : 0) + '</p>' +
+            '</div>' +
+            '<div class="pa-info-col">' +
+            '<p><strong>Tổng tiền:</strong> <span id="totalPriceDisplay">' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</span></p>' +
+            '<p><strong>Trạng thái:</strong> ' + (data.statusName || 'Mới') + '</p>' +
+            '</div>' +
+            '</div>' +
+            '<hr>' +
+            '<h5>Danh sách sản phẩm và nhà cung cấp:</h5>' +
+            '<div id="editableProductVendorGrid"></div>' +
+            '<div class="preview-actions" style="margin-top: 20px; text-align: center;">' +
+            '<button id="confirmCreateEditablePA" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-success" style="margin-right: 10px;">' +
+            '<span class="k-icon k-i-check k-button-icon"></span>' +
+            '<span class="k-button-text">Xác nhận tạo</span>' +
+            '</button>' +
+            '<button id="cancelEditablePreview" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base">' +
+            '<span class="k-icon k-i-cancel k-button-icon"></span>' +
+            '<span class="k-button-text">Hủy</span>' +
+            '</button>' +
+            '</div>' +
+            '</div>';
+
+        previewWindow.html(previewHtml);
+
+        // Initialize the editable grid
+        var gridData = data.productVendorMappings || [];
+
+        $("#editableProductVendorGrid").kendoGrid({
+            dataSource: {
+                data: gridData,
+                schema: {
+                    model: {
+                        fields: {
+                            product_ID: { type: "number" },
+                            productCode: { type: "string" },
+                            productName: { type: "string" },
+                            totalQuantity: { type: "number" },
+                            unitName: { type: "string" },
+                            price: { type: "number" },
+                            totalAmount: { type: "number" },
+                            vendor_ID: { type: "number" },
+                            vendorName: { type: "string" }
+                        }
+                    }
+                }
+            },
+            columns: [
+                { field: "productCode", title: "Mã SP", width: "100px", template: "#= productCode || 'N/A' #" },
+                { field: "productName", title: "Tên sản phẩm", width: "200px", template: "#= productName || 'N/A' #" },
+                { field: "totalQuantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(totalQuantity || 0, 'n0') #", attributes: { style: "text-align: center;" } },
+                { field: "unitName", title: "Đơn vị", width: "80px", template: "#= unitName || 'N/A' #", attributes: { style: "text-align: center;" } },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price || 0, 'n0') # VNĐ", attributes: { style: "text-align: right;" } },
+                {
+                    title: "Thành tiền",
+                    width: "120px",
+                    template: "#= kendo.toString((totalQuantity || 0) * (price || 0), 'n0') # VNĐ",
+                    attributes: { style: "text-align: right;" }
+                },
+                {
+                    field: "vendor_ID",
+                    title: "Nhà cung cấp",
+                    width: "200px",
+                    template: function (dataItem) {
+                        if (!dataItem || typeof dataItem.product_ID === 'undefined' || dataItem.product_ID === null) {
+                            return '<span style="color: red;">Lỗi: Không có product_ID</span>';
+                        }
+
+                        var dropdownId = "vendorDropdown_" + dataItem.product_ID;
+                        var options = '';
+
+                        if (dataItem.availableVendors && Array.isArray(dataItem.availableVendors) && dataItem.availableVendors.length > 0) {
+                            dataItem.availableVendors.forEach(function (vendor) {
+                                if (vendor && vendor.id) {
+                                    var selected = vendor.id === dataItem.vendor_ID ? 'selected' : '';
+                                    var displayText = vendor.text || vendor.name || 'Vendor ' + vendor.id;
+                                    options += '<option value="' + vendor.id + '" ' + selected + '>' + displayText + '</option>';
+                                }
+                            });
+                        }
+
+                        if (options === '') {
+                            options = '<option value="">Không có nhà cung cấp</option>';
+                        }
+
+                        return '<select id="' + dropdownId + '" class="vendor-dropdown" data-product-id="' + dataItem.product_ID + '">' + options + '</select>';
+                    }
+                }
+            ],
+            pageable: false,
+            scrollable: true,
+            height: 400,
+            dataBound: function () {
+                // Initialize vendor dropdowns after grid is bound
+                $(".vendor-dropdown").each(function () {
+                    var $dropdown = $(this);
+                    var productId = $dropdown.data("product-id");
+
+                    // Find the current data from the original data source
+                    var currentData = null;
+                    if (data && data.productVendorMappings) {
+                        currentData = data.productVendorMappings.find(m => m.product_ID === productId);
+                    }
+
+                    if (currentData && currentData.availableVendors && currentData.availableVendors.length > 0) {
+                        $dropdown.kendoDropDownList({
+                            dataTextField: "text",
+                            dataValueField: "id",
+                            dataSource: currentData.availableVendors,
+                            value: currentData.vendor_ID,
+                            change: function (e) {
+                                updateVendorMapping(productId, e.sender.value());
+                            }
+                        });
+                    } else {
+                        // Show a simple text instead of dropdown if no vendors
+                        $dropdown.replaceWith('<span>Không có nhà cung cấp</span>');
+                    }
+                });
+            }
+        });
+
+
+
+        function updateVendorMapping(productId, newVendorId) {
+            // Find and update the mapping
+            var mapping = data.productVendorMappings.find(m => m.product_ID === productId);
+            if (mapping) {
+                mapping.vendor_ID = newVendorId;
+                var newVendor = mapping.availableVendors.find(v => v.id === newVendorId);
+                if (newVendor) {
+                    mapping.vendorName = newVendor.name;
+                }
+
+                // Update total price display
+                var newTotalPrice = data.productVendorMappings.reduce((sum, m) => sum + (m.totalQuantity * m.price), 0);
+                $("#totalPriceDisplay").text(kendo.toString(newTotalPrice, "n0") + " VNĐ");
+            }
+        }
+
+        function removeEditablePreview() {
+            setTimeout(function () {
+                if ($(".k-window #previewWindow").length > 0) {
+                    $("#previewWindow").parent().remove();
+                    $(gridId).after("<div id='previewWindow'></div>");
+                }
+            }, 200);
+        }
+
+        previewWindow.kendoWindow({
+            width: "1400px",
+            height: "800px",
+            title: "PREVIEW - TỔNG HỢP ĐƠN CÓ THỂ CHỈNH SỬA",
+            visible: false,
+            actions: ["Close"],
+            resizable: true,
+            draggable: true,
+            modal: true,
+            close: function (e) {
+                removeEditablePreview();
+            },
+        }).data("kendoWindow").center();
+
+        // Bind button events
+        $("#confirmCreateEditablePA").kendoButton({
+            icon: "check"
+        }).click(function () {
+            previewWindow.data("kendoWindow").close();
+            createPAGroupWithCustomMapping(data.productVendorMappings);
+        });
+
+        $("#cancelEditablePreview").kendoButton({
+            icon: "cancel"
+        }).click(function () {
+            previewWindow.data("kendoWindow").close();
+        });
+
+        previewWindow.data("kendoWindow").open();
+    }
+
+    function createPAGroupWithCustomMapping(productVendorMappings) {
+        var request = {
+            productVendorMappings: productVendorMappings
+        };
+
+        ajax("POST", "/PurchaseAgreement/CreatePAGroupWithCustomMapping", request, function (response) {
+            if (response.isSuccess) {
+                showSuccessMessages(["Tạo tổng hợp đơn với mapping tùy chỉnh thành công!"]);
+                $(gridId).data("kendoGrid").dataSource.filter({});
+            } else {
+                showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi tạo tổng hợp đơn"]);
+            }
+        }, null, false);
+    }
+
     async function ExportExcel() {
         var searchModel = getSearchModel();
         var params = new URLSearchParams(searchModel).toString();
@@ -393,7 +686,8 @@
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
                                 <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='createPAGroupWithPreview' title="Tạo tổng hợp đơn"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
+                                    <button id='createPAGroupWithEditablePreview' title="Tạo tổng hợp đơn (có thể chỉnh sửa)"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tổng hợp đơn</span></button>
+                                    <button id='createPAGroupWithPreview' title="Tạo tổng hợp đơn (tự động)"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-info _permission_' data-enum='44' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Tạo tự động</span></button>
                                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
@@ -518,6 +812,14 @@
                     template: function (dataItem) {
                         var completeButton = '';
                         var cancelButton = '';
+                        var sendButton = '';
+
+                        // Show send button only for orders with status "New" (0)
+                        if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
+                            sendButton = '<button onclick="sendToVendors(\'' + dataItem.groupCode + '\')" title="Gửi NCC" class="btn-action btn-send _permission_" data-enum="44">' +
+                                '<i class="fas fa-paper-plane"></i>' +
+                                '</button>';
+                        }
 
                         // Show complete button only for orders with status "SendVendor" (1)
                         if (dataItem.status === "SendVendor" || dataItem.status === "1" || dataItem.status === 1) {
@@ -539,9 +841,7 @@
                             '<button onclick="viewPAGroupDetail(\'' + dataItem.groupCode + '\')" title="Xem chi tiết" class="btn-action btn-view _permission_" data-enum="45">' +
                             '<i class="fas fa-eye"></i>' +
                             '</button>' +
-                            '<button onclick="sendToVendors(\'' + dataItem.groupCode + '\')" title="Gửi NCC" class="btn-action btn-send _permission_" data-enum="44">' +
-                            '<i class="fas fa-paper-plane"></i>' +
-                            '</button>' +
+                            sendButton +
                             completeButton +
                             cancelButton +
                             '</div>';
@@ -656,6 +956,14 @@
         $("#dateTo").kendoDatePicker({
             format: "dd/MM/yyyy",
             culture: "vi-VN"
+        });
+
+        $("#createPAGroupWithEditablePreview").kendoButton({
+            icon: "plus"
+        });
+
+        $("#createPAGroupWithEditablePreview").on('click', function () {
+            showEditablePAGroupPreview();
         });
 
         $("#createPAGroupWithPreview").kendoButton({
@@ -845,5 +1153,37 @@
     .btn-action.btn-cancel:hover {
         background-color: #c82333;
         border-color: #bd2130;
+    }
+
+    /* Editable preview specific styling */
+    .editable-pa-group-preview {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .editable-pa-group-preview .preview-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .vendor-dropdown {
+        width: 100%;
+        min-width: 150px;
+    }
+
+    #editableProductVendorGrid .k-grid-content {
+        overflow-x: auto;
+    }
+
+    #editableProductVendorGrid .k-grid-header th {
+        white-space: nowrap;
+    }
+
+    #totalPriceDisplay {
+        font-weight: bold;
+        color: #28a745;
     }
 </style>

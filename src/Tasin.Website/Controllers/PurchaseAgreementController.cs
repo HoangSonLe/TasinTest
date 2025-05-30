@@ -161,6 +161,21 @@ namespace Tasin.Website.Controllers
         }
 
         /// <summary>
+        /// Get editable preview data for PA group that allows vendor assignment changes
+        /// </summary>
+        /// <returns>Editable preview data of the PA group to be created</returns>
+        /// <response code="200">Returns the editable preview data</response>
+        [HttpGet]
+        [Route("PurchaseAgreement/GetEditablePAGroupPreview")]
+        [ProducesResponseType(typeof(Acknowledgement<EditablePAGroupPreviewViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_AGREEMENT])]
+        public async Task<IActionResult> GetEditablePAGroupPreview()
+        {
+            var result = await _purchaseAgreementService.GetEditablePAGroupPreview();
+            return Json(result);
+        }
+
+        /// <summary>
         /// Create PA group from confirmed purchase orders
         /// </summary>
         /// <returns>Result of the operation with created PA group</returns>
@@ -172,6 +187,22 @@ namespace Tasin.Website.Controllers
         public async Task<IActionResult> CreatePAGroup()
         {
             var result = await _purchaseAgreementService.CreatePAGroup();
+            return Json(result);
+        }
+
+        /// <summary>
+        /// Create PA group with custom vendor mappings
+        /// </summary>
+        /// <param name="request">Request containing product-vendor mappings</param>
+        /// <returns>Result of the operation with created PA group</returns>
+        /// <response code="200">Returns the result of the operation</response>
+        [HttpPost]
+        [Route("PurchaseAgreement/CreatePAGroupWithCustomMapping")]
+        [ProducesResponseType(typeof(Acknowledgement<PAGroupViewModel>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_PURCHASE_AGREEMENT])]
+        public async Task<IActionResult> CreatePAGroupWithCustomMapping([FromBody] CreatePAGroupWithMappingRequest request)
+        {
+            var result = await _purchaseAgreementService.CreatePAGroupWithCustomMapping(request);
             return Json(result);
         }
 

@@ -63,6 +63,62 @@
     grid-column: span 4;
 }
 
+/* 4-Column Grid Layout for Item Input */
+.item-input-grid .grid-row-4col {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: end;
+}
+
+.grid-row-4col {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: end;
+}
+
+.grid-row-4col:last-child {
+    margin-bottom: 0;
+}
+
+.grid-col-4-1 {
+    grid-column: span 1;
+}
+
+.grid-col-4-2 {
+    grid-column: span 2;
+}
+
+.grid-col-4-3 {
+    grid-column: span 3;
+}
+
+.grid-col-4-4 {
+    grid-column: span 4;
+}
+
+/* Button Row */
+.grid-row-button {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.grid-row-button .form-group {
+    margin-bottom: 0;
+}
+
+.grid-row-button .btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
 /* Form Group Styling */
 .purchase-order-form .form-group {
     margin-bottom: 0;
@@ -127,12 +183,14 @@
 
 /* Button Styling */
 .purchase-order-form .btn {
-    height: 40px;
+    height: 36px;
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.2s ease;
     border: none;
     cursor: pointer;
+    padding: 8px 16px;
+    font-size: 13px;
 }
 
 .purchase-order-form .btn-primary {
@@ -192,12 +250,14 @@
 
 .form-actions .btn {
     margin-left: 10px;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 4px;
     font-weight: 500;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 13px;
+    height: 36px;
 }
 
 .form-actions .btn-success {
@@ -305,6 +365,11 @@
     .grid-col-3 {
         grid-column: span 2;
     }
+
+    /* Keep 4-column layout on large screens */
+    .grid-row-4col {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
 }
 
 @media (max-width: 992px) {
@@ -319,6 +384,19 @@
     .grid-col-2 {
         grid-column: span 2;
     }
+
+    /* Keep 4-column layout on medium screens */
+    .grid-row-4col {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    .grid-col-4-1 {
+        grid-column: span 1;
+    }
+
+    .grid-col-4-2 {
+        grid-column: span 2;
+    }
 }
 
 @media (max-width: 768px) {
@@ -330,6 +408,24 @@
     .grid-col-2,
     .grid-col-3,
     .grid-col-4 {
+        grid-column: span 1;
+    }
+
+    /* 4-column responsive - keep 2 columns on tablet */
+    .grid-row-4col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-col-4-1 {
+        grid-column: span 1;
+    }
+
+    .grid-col-4-2 {
+        grid-column: span 2;
+    }
+
+    .grid-col-4-3,
+    .grid-col-4-4 {
         grid-column: span 1;
     }
 }
@@ -347,11 +443,34 @@
         grid-column: span 1;
     }
 
+    /* 4-column responsive */
+    .grid-row-4col {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .grid-col-4-1,
+    .grid-col-4-2,
+    .grid-col-4-3,
+    .grid-col-4-4 {
+        grid-column: span 1;
+    }
+
     .item-input-grid {
         padding: 15px;
     }
 
     .purchase-order-form {
         padding: 15px;
+    }
+
+    .grid-row-button {
+        margin-top: 15px;
+        padding-top: 10px;
+    }
+
+    .grid-row-button .btn {
+        padding: 8px 20px;
+        font-size: 13px;
     }
 }

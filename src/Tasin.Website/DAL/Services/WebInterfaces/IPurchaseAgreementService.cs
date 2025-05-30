@@ -19,7 +19,9 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement<JsonResultPaging<List<PAGroupViewModel>>>> GetPAGroupList(PAGroupSearchModel postData);
         Task<Acknowledgement<PAGroupViewModel>> GetPAByGroupCode(string groupCode);
         Task<Acknowledgement<PAGroupViewModel>> GetPAGroupPreview();
+        Task<Acknowledgement<EditablePAGroupPreviewViewModel>> GetEditablePAGroupPreview();
         Task<Acknowledgement<PAGroupViewModel>> CreatePAGroup();
+        Task<Acknowledgement<PAGroupViewModel>> CreatePAGroupWithCustomMapping(CreatePAGroupWithMappingRequest request);
         Task<Acknowledgement> CompletePAGroup(string groupCode);
         Task<Acknowledgement> CancelPAGroup(string groupCode);
     }

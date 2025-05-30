@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test EditablePAGroupPreview API</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            button {
+                padding: 10px 20px;
+                margin: 10px;
+                background: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            button:hover {
+                background: #0056b3;
+            }
+            .result {
+                margin-top: 20px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: #f8f9fa;
+            }
+            .error {
+                color: red;
+            }
+            .success {
+                color: green;
+            }
+            pre {
+                background: #f4f4f4;
+                padding: 10px;
+                border-radius: 4px;
+                overflow-x: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Test EditablePAGroupPreview API</h1>
+
+        <div>
+            <button id="testEditableBtn">Test Editable PA Group Preview</button>
+            <button id="testRegularBtn">Test Regular PA Group Preview</button>
+            <button id="testPOListBtn">Test Purchase Order List</button>
+        </div>
+
+        <div id="result" class="result"></div>
+
+        <script>
+            $("#testEditableBtn").click(function () {
+                $("#result").html("<p>Loading...</p>");
+                $.ajax({
+                    url: "/PurchaseAgreement/GetEditablePAGroupPreview",
+                    type: "GET",
+                    success: function (response) {
+                        console.log("Editable API Response:", response);
+                        var html =
+                            "<h3 class='success'>Editable PA Group Preview API Response:</h3>";
+                        html += "<pre>" + JSON.stringify(response, null, 2) + "</pre>";
+
+                        if (
+                            response.isSuccess &&
+                            response.data &&
+                            response.data.productVendorMappings
+                        ) {
+                            html +=
+                                "<h4>Product Vendor Mappings (" +
+                                response.data.productVendorMappings.length +
+                                " items):</h4>";
+                            response.data.productVendorMappings.forEach((item, index) => {
+                                html +=
+                                    "<div style='border: 1px solid #ccc; margin: 5px; padding: 10px;'>";
+                                html += "<strong>Product " + (index + 1) + ":</strong><br>";
+                                html += "Product_ID: " + item.Product_ID + "<br>";
+                                html += "ProductCode: " + (item.ProductCode || "N/A") + "<br>";
+                                html += "ProductName: " + (item.ProductName || "N/A") + "<br>";
+                                html += "UnitName: " + (item.UnitName || "N/A") + "<br>";
+                                html += "TotalQuantity: " + (item.TotalQuantity || 0) + "<br>";
+                                html += "Price: " + (item.Price || 0) + "<br>";
+                                html += "Vendor_ID: " + (item.Vendor_ID || "N/A") + "<br>";
+                                html += "VendorName: " + (item.VendorName || "N/A") + "<br>";
+                                html +=
+                                    "Available Vendors: " +
+                                    (item.AvailableVendors ? item.AvailableVendors.length : 0) +
+                                    "<br>";
+                                html += "</div>";
+                            });
+                        }
+
+                        $("#result").html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("API Error:", error);
+                        $("#result").html("<p class='error'>Error: " + error + "</p>");
+                    },
+                });
+            });
+
+            $("#testRegularBtn").click(function () {
+                $("#result").html("<p>Loading...</p>");
+                $.ajax({
+                    url: "/PurchaseAgreement/GetPAGroupPreview",
+                    type: "GET",
+                    success: function (response) {
+                        console.log("Regular API Response:", response);
+                        var html =
+                            "<h3 class='success'>Regular PA Group Preview API Response:</h3>";
+                        html += "<pre>" + JSON.stringify(response, null, 2) + "</pre>";
+                        $("#result").html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("API Error:", error);
+                        $("#result").html("<p class='error'>Error: " + error + "</p>");
+                    },
+                });
+            });
+
+            $("#testPOListBtn").click(function () {
+                $("#result").html("<p>Loading...</p>");
+                $.ajax({
+                    url: "/PurchaseOrder/GetPurchaseOrderList",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        pageSize: 10,
+                        pageNumber: 1,
+                    }),
+                    success: function (response) {
+                        console.log("PO List API Response:", response);
+                        var html = "<h3 class='success'>Purchase Order List API Response:</h3>";
+                        html += "<pre>" + JSON.stringify(response, null, 2) + "</pre>";
+
+                        if (response.isSuccess && response.data && response.data.data) {
+                            html +=
+                                "<h4>Purchase Orders (" +
+                                response.data.data.length +
+                                " items):</h4>";
+                            response.data.data.forEach((item, index) => {
+                                html +=
+                                    "<div style='border: 1px solid #ccc; margin: 5px; padding: 10px;'>";
+                                html += "<strong>PO " + (index + 1) + ":</strong><br>";
+                                html += "ID: " + item.id + "<br>";
+                                html += "Code: " + (item.code || "N/A") + "<br>";
+                                html +=
+                                    "Status: " +
+                                    (item.status || "N/A") +
+                                    " (" +
+                                    (item.statusName || "N/A") +
+                                    ")<br>";
+                                html += "Customer: " + (item.customerName || "N/A") + "<br>";
+                                html += "Total Price: " + (item.totalPrice || 0) + "<br>";
+                                html += "Created Date: " + (item.createdDate || "N/A") + "<br>";
+                                html += "</div>";
+                            });
+                        }
+
+                        $("#result").html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("API Error:", error);
+                        $("#result").html("<p class='error'>Error: " + error + "</p>");
+                    },
+                });
+            });
+        </script>
+    </body>
+</html>

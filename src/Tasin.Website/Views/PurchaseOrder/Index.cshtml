@@ -588,38 +588,39 @@
             <div class="purchase-order-form">
                 <!-- Header Info Section -->
                 <div class="po-header-section">
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="header-grid-3col">
+                        <div class="header-col-3-1">
                             <div class="form-group">
                                 <label>Khách hàng (*)</label>
                                 <select id="po-customerId" class="form-control"></select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="header-col-3-1">
                             <div class="form-group">
                                 <label>Trạng thái</label>
                                 <select id="po-status" class="form-control"></select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="header-col-3-1">
                             <div class="form-group">
                                 <label>Mã đơn hàng</label>
                                 <input type="text" id="po-code" class="form-control" readonly placeholder="Tự động tạo"/>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
+                        <div class="header-col-3-1">
                             <div class="form-group">
                                 <label>Tổng tiền chưa thuế</label>
                                 <input type="text" id="po-totalPriceNoTax" class="form-control" readonly/>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="header-col-3-1">
                             <div class="form-group">
                                 <label>Tổng tiền</label>
                                 <input type="text" id="po-totalPrice" class="form-control" readonly/>
                             </div>
+                        </div>
+                        <div class="header-col-3-1">
+                            <!-- Empty column for spacing -->
                         </div>
                     </div>
                 </div>
@@ -630,76 +631,81 @@
                 <div class="po-item-section">
                     <h5>Thêm sản phẩm vào đơn hàng</h5>
                     <div class="item-input-grid">
-                        <div class="grid-row">
-                            <div class="grid-col-3">
+                        <!-- Row 1: 4 columns -->
+                        <div class="grid-row-4col">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Sản phẩm (*)</label>
                                     <select id="item-productId" class="form-control"></select>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Số lượng (*)</label>
                                     <input type="number" id="item-quantity" class="form-control" step="0.01" min="0"/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Đơn vị</label>
                                     <input type="text" id="item-unitName" class="form-control" readonly/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Đơn giá</label>
                                     <input type="number" id="item-price" class="form-control" step="0.01" min="0"/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                        </div>
+                        <!-- Row 2: 4 columns -->
+                        <div class="grid-row-4col">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Hao hụt (%)</label>
                                     <input type="number" id="item-lossRate" class="form-control" step="0.1" min="0" max="100"/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Thuế (%)</label>
                                     <input type="number" id="item-taxRate" class="form-control" step="0.1" min="0" max="100"/>
                                 </div>
                             </div>
-                        </div>
-                        <div class="grid-row">
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Phí gia công</label>
                                     <input type="number" id="item-processingFee" class="form-control" step="0.01" min="0"/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Lợi nhuận (%)</label>
                                     <input type="number" id="item-profitMargin" class="form-control" step="0.1" min="0"/>
                                 </div>
                             </div>
-                            <div class="grid-col-2">
+                        </div>
+                        <!-- Row 3: 4 columns -->
+                        <div class="grid-row-4col">
+                            <div class="grid-col-4-2">
                                 <div class="form-group">
                                     <label>Loại gia công</label>
                                     <select id="item-processingTypeId" class="form-control"></select>
                                 </div>
                             </div>
-                            <div class="grid-col-2">
+                            <div class="grid-col-4-2">
                                 <div class="form-group">
                                     <label>Ghi chú</label>
                                     <input type="text" id="item-note" class="form-control"/>
                                 </div>
                             </div>
-                            <div class="grid-col-1">
-                                <div class="form-group">
-                                    <label>&nbsp;</label>
-                                    <button type="button" id="addItemBtn" class="btn btn-primary btn-block">
-                                        <i class="fas fa-plus"></i> Thêm
-                                    </button>
-                                </div>
+                        </div>
+                        <!-- Row 4: Button row -->
+                        <div class="grid-row-button">
+                            <div class="form-group">
+                                <button type="button" id="addItemBtn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Thêm sản phẩm
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -981,7 +987,10 @@
 
         // Load data if editing
         if (isEdit && data) {
-            loadPurchaseOrderData(data);
+            // Delay to ensure dropdowns are initialized
+            setTimeout(function () {
+                loadPurchaseOrderData(data);
+            }, 200);
         }
     }
 
@@ -1174,10 +1183,19 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         var confirmButton = '';
+                        var cancelButton = '';
+
                         // Show confirm button only for orders with status "New" (0)
                         if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
                             confirmButton = '<button onclick="confirmPurchaseOrder(' + dataItem.id + ')" title="Xác nhận đơn hàng" class="btn-action btn-confirm _permission_" data-enum="33">' +
                                 '<i class="fas fa-check"></i>' +
+                                '</button>';
+                        }
+
+                        // Show cancel button only for orders that are not already cancelled
+                        if (dataItem.status !== "Cancel" && dataItem.status !== "3" && dataItem.status !== 3) {
+                            cancelButton = '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="33">' +
+                                '<i class="fas fa-ban"></i>' +
                                 '</button>';
                         }
 
@@ -1189,9 +1207,7 @@
                             '<i class="fas fa-trash"></i>' +
                             '</button>' +
                             confirmButton +
-                            '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="33">' +
-                            '<i class="fas fa-ban"></i>' +
-                            '</button>' +
+                            cancelButton +
                             '<button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, ' + dataItem.id + ')" title="Xuất hóa đơn">' +
                             '<i class="fas fa-file-invoice"></i>' +
                             '</button>' +
@@ -1492,24 +1508,72 @@
     }
 
     function loadPurchaseOrderData(data) {
-        // Load header data
-        if (data.customer_ID) {
-            $("#po-customerId").data("kendoDropDownList").value(data.customer_ID);
-        }
-        if (data.status !== undefined) {
-            $("#po-status").data("kendoDropDownList").value(data.status);
-        }
-        $("#po-code").val(data.code || '');
+        console.log("Loading PO data:", data);
 
-        // Load items
-        if (data.purchaseOrderItems && data.purchaseOrderItems.length > 0) {
-            var grid = $("#itemsGrid").data("kendoGrid");
-            for (var i = 0; i < data.purchaseOrderItems.length; i++) {
-                var item = data.purchaseOrderItems[i];
-                item.tempId = generateTempId();
-                grid.dataSource.add(item);
+        // Load header data
+        try {
+            if (data.customer_ID) {
+                var customerDropdown = $("#po-customerId").data("kendoDropDownList");
+                if (customerDropdown) {
+                    customerDropdown.value(data.customer_ID);
+                    console.log("Set customer:", data.customer_ID);
+                }
             }
-            updatePurchaseOrderTotals();
+
+            if (data.status !== undefined) {
+                var statusDropdown = $("#po-status").data("kendoDropDownList");
+                if (statusDropdown) {
+                    statusDropdown.value(data.status);
+                    console.log("Set status:", data.status);
+                }
+            }
+
+            $("#po-code").val(data.code || '');
+            console.log("Set code:", data.code);
+
+            // Load items
+            if (data.purchaseOrderItems && data.purchaseOrderItems.length > 0) {
+                var grid = $("#itemsGrid").data("kendoGrid");
+                if (grid) {
+                    // Clear existing data first
+                    grid.dataSource.data([]);
+
+                    for (var i = 0; i < data.purchaseOrderItems.length; i++) {
+                        var item = data.purchaseOrderItems[i];
+                        // Map server field names to client field names
+                        var gridItem = {
+                            tempId: generateTempId(),
+                            productId: item.product_ID || item.productId,
+                            productName: item.productName,
+                            quantity: item.quantity,
+                            unitName: item.unitName,
+                            price: item.price,
+                            lossRate: item.lossRate,
+                            taxRate: item.taxRate,
+                            processingFee: item.processingFee,
+                            profitMargin: item.profitMargin,
+                            processingTypeId: item.processingType_ID || item.processingTypeId,
+                            processingTypeName: item.processingTypeName,
+                            note: item.note,
+                            totalAmount: (item.quantity || 0) * (item.price || 0)
+                        };
+                        grid.dataSource.add(gridItem);
+                        console.log("Added item:", gridItem);
+                    }
+                    updatePurchaseOrderTotals();
+                }
+            }
+
+            // Load totals
+            if (data.totalPriceNoTax !== undefined) {
+                $("#po-totalPriceNoTax").val(kendo.toString(data.totalPriceNoTax, "n0") + " VNĐ");
+            }
+            if (data.totalPrice !== undefined) {
+                $("#po-totalPrice").val(kendo.toString(data.totalPrice, "n0") + " VNĐ");
+            }
+
+        } catch (error) {
+            console.error("Error loading PO data:", error);
         }
     }
 
@@ -1619,5 +1683,97 @@
     .btn-action.btn-confirm:hover {
         background-color: #218838;
         border-color: #1e7e34;
+    }
+
+    /* Force 4-column layout for item input */
+    .item-input-grid .grid-row-4col {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 15px !important;
+        margin-bottom: 15px;
+        align-items: end;
+    }
+
+    .grid-row-4col {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 15px !important;
+        margin-bottom: 15px;
+        align-items: end;
+    }
+
+    .grid-col-4-1 {
+        grid-column: span 1 !important;
+    }
+
+    .grid-col-4-2 {
+        grid-column: span 2 !important;
+    }
+
+    .grid-row-button {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .grid-row-button .form-group {
+        margin-bottom: 0;
+    }
+
+    .grid-row-button .btn {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    /* Make all form buttons smaller */
+    .purchase-order-form .btn {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        height: 36px !important;
+    }
+
+    .form-actions .btn {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+    }
+
+    /* 3-Column Grid Layout for Header */
+    .header-grid-3col {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 20px !important;
+        margin-bottom: 0;
+        align-items: end;
+    }
+
+    .header-col-3-1 {
+        grid-column: span 1 !important;
+    }
+
+    .header-col-3-2 {
+        grid-column: span 2 !important;
+    }
+
+    .header-col-3-3 {
+        grid-column: span 3 !important;
+    }
+
+    /* Responsive for header grid */
+    @@media (max-width: 992px) {
+        .header-grid-3col {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .header-grid-3col {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+        }
     }
 </style>

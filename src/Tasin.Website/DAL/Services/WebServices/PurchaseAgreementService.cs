@@ -21,6 +21,7 @@ namespace Tasin.Website.DAL.Services.WebServices
     public class PurchaseAgreementService : BaseService<PurchaseAgreementService>, IPurchaseAgreementService
     {
         private readonly IMapper _mapper;
+        private readonly ICommonService _commonService;
         private IPurchaseAgreementRepository _purchaseAgreementRepository;
         private IPurchaseAgreementItemRepository _purchaseAgreementItemRepository;
         private IPurchaseOrderRepository _purchaseOrderRepository;
@@ -39,6 +40,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             IRoleRepository roleRepository,
             SampleDBContext dbContext,
             IMapper mapper,
+            ICommonService commonService,
             IPurchaseAgreementRepository purchaseAgreementRepository,
             IPurchaseAgreementItemRepository purchaseAgreementItemRepository,
             IPurchaseOrderRepository purchaseOrderRepository,
@@ -49,6 +51,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             IProduct_VendorRepository productVendorRepository) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
             _mapper = mapper;
+            _commonService = commonService;
             _purchaseAgreementRepository = purchaseAgreementRepository;
             _purchaseAgreementItemRepository = purchaseAgreementItemRepository;
             _purchaseOrderRepository = purchaseOrderRepository;
@@ -1077,6 +1080,333 @@ namespace Tasin.Website.DAL.Services.WebServices
                 _logger.LogError(ex, "Error creating PA from confirmed orders with UoW - Transaction rolled back");
             }
 
+            return ack;
+        }
+
+        public async Task<Acknowledgement<EditablePAGroupPreviewViewModel>> GetEditablePAGroupPreview()
+        {
+            var ack = new Acknowledgement<EditablePAGroupPreviewViewModel>();
+            try
+            {
+                // Get all confirmed purchase orders with items in one query
+                var confirmedOrders = await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                    filter: po => po.Status == EPOStatus.Confirmed.ToString() && po.IsActive,
+                    includeProperties: "PurchaseOrderItems"
+                );
+
+                if (!confirmedOrders.Any())
+                {
+                    ack.AddMessage("Không có đơn hàng nào ở trạng thái Đã xác nhận để tạo PA tổng hợp.");
+                    return ack;
+                }
+
+                // Use included items instead of separate query
+                var allOrderItems = confirmedOrders.SelectMany(po => po.PurchaseOrderItems).ToList();
+
+                if (!allOrderItems.Any())
+                {
+                    ack.AddMessage("Không có sản phẩm nào trong các đơn hàng đã xác nhận.");
+                    return ack;
+                }
+
+                // Get product information for all products
+                var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
+                var products = await _productRepository.ReadOnlyRespository.GetAsync(
+                    filter: p => productIds.Contains(p.ID)
+                );
+                var productLookup = products.ToDictionary(p => p.ID, p => p);
+
+                // Get unit information for all units
+                var unitIds = allOrderItems.Where(poi => poi.Unit_ID.HasValue).Select(poi => poi.Unit_ID.Value).Distinct().ToList();
+                var units = await _unitRepository.ReadOnlyRespository.GetAsync(
+                    filter: u => unitIds.Contains(u.ID)
+                );
+                var unitLookup = units.ToDictionary(u => u.ID, u => u);
+
+                // Get product-vendor relationships for all products
+                var productVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
+                var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+
+                // Get all available vendors using common service
+                var allVendorsResponse = await _commonService.GetDataOptionsDropdown("", ECategoryType.Vendor);
+                var allVendors = allVendorsResponse.IsSuccess ? allVendorsResponse.Data : new List<KendoDropdownListModel<string>>();
+
+                // Group items by product and create mappings
+                var productGroups = allOrderItems.GroupBy(i => i.Product_ID)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        TotalQuantity = (int)g.Sum(i => i.Quantity),
+                        Price = g.First().Price,
+                        UnitId = g.First().Unit_ID,
+                        POItemIds = string.Join(",", g.Select(i => i.ID))
+                    }).ToList();
+
+                var productVendorMappings = new List<ProductVendorMappingViewModel>();
+
+                foreach (var productGroup in productGroups)
+                {
+                    var product = productLookup.TryGetValue(productGroup.ProductId, out var prod) ? prod : null;
+                    var unit = productGroup.UnitId.HasValue && unitLookup.TryGetValue(productGroup.UnitId.Value, out var u) ? u : null;
+
+                    // Get available vendors for this product from product-vendor relationships
+                    var availableVendorIds = productVendorLookup[productGroup.ProductId].ToList();
+
+                    // Filter all vendors to only those available for this product
+                    var availableVendors = new List<VendorOptionViewModel>();
+                    if (allVendors != null && allVendors.Count > 0)
+                    {
+                        availableVendors = allVendors
+                            .Where(vendor => vendor != null && !string.IsNullOrEmpty(vendor.Value) &&
+                                           int.TryParse(vendor.Value, out var vendorId) &&
+                                           availableVendorIds.Contains(vendorId))
+                            .Select(vendor => new VendorOptionViewModel
+                            {
+                                ID = int.Parse(vendor.Value),
+                                Name = vendor.Text?.Split('(')[0].Trim() ?? "", // Extract name before parentheses
+                                Code = vendor.Text?.Contains('(') == true ? vendor.Text.Split('(')[1].Replace(")", "").Trim() : ""
+                            }).ToList();
+                    }
+
+                    // Use first available vendor as default
+                    var defaultVendorId = availableVendorIds.FirstOrDefault();
+                    var defaultVendor = availableVendors.FirstOrDefault(v => v.ID == defaultVendorId);
+
+                    var mapping = new ProductVendorMappingViewModel
+                    {
+                        Product_ID = productGroup.ProductId,
+                        ProductName = product?.Name,
+                        ProductCode = product?.Code,
+                        TotalQuantity = productGroup.TotalQuantity,
+                        Unit_ID = productGroup.UnitId,
+                        UnitName = unit?.Name,
+                        Price = productGroup.Price ?? 0,
+                        Vendor_ID = defaultVendor?.ID ?? 0,
+                        VendorName = defaultVendor?.Name,
+                        AvailableVendors = availableVendors,
+                        PO_Item_ID_List = productGroup.POItemIds
+                    };
+
+                    productVendorMappings.Add(mapping);
+                }
+
+                // Create editable preview
+                var editablePreview = new EditablePAGroupPreviewViewModel
+                {
+                    GroupCode = "[Preview] Sẽ được tạo tự động",
+                    TotalPrice = productVendorMappings.Sum(m => m.TotalAmount),
+                    Status = EPAStatus.New,
+                    ProductVendorMappings = productVendorMappings
+                };
+
+                ack.Data = editablePreview;
+                ack.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                ack.AddMessage($"Lỗi khi lấy preview PA tổng hợp có thể chỉnh sửa: {ex.Message}");
+                _logger.LogError(ex, "Error getting editable PA group preview");
+            }
+            return ack;
+        }
+
+        public async Task<Acknowledgement<PAGroupViewModel>> CreatePAGroupWithCustomMapping(CreatePAGroupWithMappingRequest request)
+        {
+            var ack = new Acknowledgement<PAGroupViewModel>();
+
+            if (request?.ProductVendorMappings == null || !request.ProductVendorMappings.Any())
+            {
+                ack.AddMessage("Dữ liệu mapping sản phẩm-nhà cung cấp không hợp lệ.");
+                return ack;
+            }
+
+            // Use database transaction to ensure data consistency
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                // Validate that all products have valid vendor assignments
+                var invalidMappings = request.ProductVendorMappings.Where(m => m.Vendor_ID <= 0).ToList();
+                if (invalidMappings.Any())
+                {
+                    ack.AddMessage($"Có {invalidMappings.Count} sản phẩm chưa được gán nhà cung cấp hợp lệ.");
+                    return ack;
+                }
+
+                // Get all PO Item IDs from mappings
+                var allPOItemIds = new List<int>();
+                foreach (var mapping in request.ProductVendorMappings)
+                {
+                    if (!string.IsNullOrEmpty(mapping.PO_Item_ID_List))
+                    {
+                        var poItemIds = mapping.PO_Item_ID_List.Split(',')
+                            .Where(id => int.TryParse(id.Trim(), out _))
+                            .Select(id => int.Parse(id.Trim()))
+                            .ToList();
+                        allPOItemIds.AddRange(poItemIds);
+                    }
+                }
+
+                // Get related Purchase Orders and update their status to Executed
+                var relatedPOIds = new List<int>();
+                if (allPOItemIds.Any())
+                {
+                    var poItems = await _purchaseOrderItemRepository.ReadOnlyRespository.GetAsync(
+                        filter: poi => allPOItemIds.Contains(poi.ID)
+                    );
+                    relatedPOIds = poItems.Select(poi => poi.PO_ID).Distinct().ToList();
+                }
+
+                var relatedPOs = new List<Purchase_Order>();
+                if (relatedPOIds.Any())
+                {
+                    relatedPOs = (await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                        filter: po => relatedPOIds.Contains(po.ID) && po.Status == EPOStatus.Confirmed.ToString() && po.IsActive
+                    )).ToList();
+
+                    // Update PO status to Executed
+                    foreach (var po in relatedPOs)
+                    {
+                        po.Status = EPOStatus.Executed.ToString();
+                        po.UpdatedDate = DateTime.Now;
+                        po.UpdatedBy = CurrentUserId;
+                    }
+
+                    await _purchaseOrderRepository.Repository.UpdateRangeAsync(relatedPOs);
+                    await _purchaseOrderRepository.Repository.SaveChangesAsync();
+                }
+
+                // Generate unique GroupCode
+                var groupCode = await Generator.GenerateEntityCodeAsync(EntityPrefix.PAGroupCode, DbContext);
+
+                // Group mappings by vendor
+                var vendorGroups = request.ProductVendorMappings.GroupBy(m => m.Vendor_ID).ToList();
+
+                // Get vendor information
+                var vendorIds = vendorGroups.Select(g => g.Key).ToList();
+                var vendors = await _vendorRepository.ReadOnlyRespository.GetAsync(
+                    filter: v => vendorIds.Contains(v.ID)
+                );
+                var vendorLookup = vendors.ToDictionary(v => v.ID, v => v);
+
+                var createdChildPAs = new List<PurchaseAgreementViewModel>();
+                var purchaseAgreements = new List<Purchase_Agreement>();
+                var allAgreementItems = new List<Purchase_Agreement_Item>();
+                var currentDateTime = DateTime.Now;
+
+                // Create purchase agreement for each vendor
+                foreach (var vendorGroup in vendorGroups)
+                {
+                    var vendorId = vendorGroup.Key;
+                    var mappings = vendorGroup.ToList();
+
+                    // Create purchase agreement
+                    var purchaseAgreement = new Purchase_Agreement
+                    {
+                        Vendor_ID = vendorId,
+                        Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.PurchaseAgreement, DbContext),
+                        GroupCode = groupCode,
+                        TotalPrice = mappings.Sum(m => m.TotalAmount),
+                        Status = EPAStatus.New.ToString(),
+                        CreatedDate = currentDateTime,
+                        CreatedBy = CurrentUserId,
+                        UpdatedDate = currentDateTime,
+                        UpdatedBy = CurrentUserId,
+                        IsActive = true
+                    };
+
+                    purchaseAgreements.Add(purchaseAgreement);
+
+                    // Prepare agreement items
+                    var agreementItems = mappings.Select(mapping => new Purchase_Agreement_Item
+                    {
+                        Product_ID = mapping.Product_ID,
+                        Quantity = mapping.TotalQuantity,
+                        Unit_ID = mapping.Unit_ID,
+                        Price = mapping.Price,
+                        PO_Item_ID_List = mapping.PO_Item_ID_List
+                    }).ToList();
+
+                    allAgreementItems.AddRange(agreementItems);
+                }
+
+                // Save purchase agreements
+                await _purchaseAgreementRepository.Repository.AddRangeAsync(purchaseAgreements);
+                await _purchaseAgreementRepository.Repository.SaveChangesAsync();
+
+                // Set PA_ID for agreement items and save them
+                var itemIndex = 0;
+                foreach (var pa in purchaseAgreements)
+                {
+                    var vendorMappings = request.ProductVendorMappings.Where(m => m.Vendor_ID == pa.Vendor_ID).ToList();
+                    for (int i = 0; i < vendorMappings.Count; i++)
+                    {
+                        allAgreementItems[itemIndex].PA_ID = pa.ID;
+                        itemIndex++;
+                    }
+                }
+
+                await _purchaseAgreementItemRepository.Repository.AddRangeAsync(allAgreementItems);
+                await _purchaseAgreementItemRepository.Repository.SaveChangesAsync();
+
+                // Create response ViewModels
+                foreach (var pa in purchaseAgreements)
+                {
+                    var vendor = vendorLookup.TryGetValue(pa.Vendor_ID, out var v) ? v : null;
+                    var vendorMappings = request.ProductVendorMappings.Where(m => m.Vendor_ID == pa.Vendor_ID).ToList();
+
+                    var paItems = vendorMappings.Select(mapping => new PurchaseAgreementItemViewModel
+                    {
+                        Product_ID = mapping.Product_ID,
+                        ProductName = mapping.ProductName,
+                        Quantity = mapping.TotalQuantity,
+                        Unit_ID = mapping.Unit_ID,
+                        UnitName = mapping.UnitName,
+                        Price = mapping.Price
+                    }).ToList();
+
+                    var paViewModel = new PurchaseAgreementViewModel
+                    {
+                        Id = pa.ID,
+                        Code = pa.Code,
+                        Vendor_ID = pa.Vendor_ID,
+                        VendorName = vendor?.Name,
+                        GroupCode = pa.GroupCode,
+                        TotalPrice = pa.TotalPrice,
+                        Status = EPAStatus.New,
+                        PurchaseAgreementItems = paItems
+                    };
+
+                    createdChildPAs.Add(paViewModel);
+                }
+
+                // Create Parent PA ViewModel
+                var paGroupViewModel = new PAGroupViewModel
+                {
+                    GroupCode = groupCode,
+                    TotalPrice = createdChildPAs.Sum(pa => pa.TotalPrice),
+                    Status = EPAStatus.New,
+                    CreatedDate = DateTime.Now,
+                    CreatedBy = CurrentUserId,
+                    UpdatedDate = DateTime.Now,
+                    UpdatedBy = CurrentUserId,
+                    ChildPAs = createdChildPAs
+                };
+
+                ack.Data = paGroupViewModel;
+                ack.IsSuccess = true;
+                ack.AddMessage($"Đã tạo thành công PA tổng hợp với {createdChildPAs.Count} PA con từ {relatedPOs.Count} đơn hàng.");
+
+                // Commit transaction if everything succeeded
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                // Rollback transaction on any error
+                await transaction.RollbackAsync();
+
+                ack.AddMessage($"Lỗi khi tạo PA tổng hợp với mapping tùy chỉnh: {ex.Message}");
+                _logger.LogError(ex, "Error creating PA group with custom mapping - Transaction rolled back");
+            }
             return ack;
         }
 
