@@ -391,7 +391,7 @@
     }
 
     async function editProduct(id) {
-        var response = ajax("GET", "/Product/GetProductById/" + id, { productId: id }, (response) => {
+        var response = ajax("GET", "/Product/GetProductById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -406,9 +406,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/Product/DeleteProductById/" + id, {
-                productId: id
-            }, () => {
+            var response = ajax("DELETE", "/Product/DeleteProductById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })

@@ -313,7 +313,7 @@
             $(gridId).data("kendoGrid").dataSource.filter({});
             $("#window").data("kendoWindow").close();
             showSuccessMessages(["Thêm sản phẩm thành công!"]);
-        });
+        }, null, false);
     }
 
     function renderCreateOrEditForm(isCreate = true, dataVendor = {}) {
@@ -426,7 +426,7 @@
     }
 
     async function editVendor(id) {
-        var response = ajax("GET", "/Vendor/GetVendorById/" + id, { vendorId: id }, (response) => {
+        var response = ajax("GET", "/Vendor/GetVendorById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }

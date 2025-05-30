@@ -861,9 +861,12 @@
             },
             change: function (e) {
                 var selectedProduct = this.dataItem();
-                if (selectedProduct) {
+                console.log("Product dropdown changed:", selectedProduct);
+                if (selectedProduct && selectedProduct.value) {
                     // Load product details
                     loadProductDetails(selectedProduct.value);
+                } else {
+                    console.log("No valid product selected");
                 }
             },
             dataSource: {
@@ -1403,14 +1406,24 @@
 
     // Helper Functions for Purchase Order Form
     function loadProductDetails(productId) {
-        ajax("GET", "/Product/GetProductById", { productId: productId }, function (response) {
+        console.log("Loading product details for ID:", productId);
+        ajax("GET", "/Product/GetProductById/" + productId, {}, function (response) {
+            console.log("Product API response:", response);
             if (response.isSuccess && response.data) {
                 var product = response.data;
                 $("#item-unitName").val(product.unitName || '');
                 $("#item-price").val(product.price || 0);
                 $("#item-taxRate").val(product.taxRate || 0);
+            } else {
+                console.log("Product API failed:", response);
+                // Show error notification
+                showErrorMessages(response.errorMessageList || ["Không thể tải thông tin sản phẩm"]);
             }
-        });
+        }, function (error) {
+            console.log("Product API error:", error);
+            // Handle AJAX error
+            showErrorMessages(["Lỗi khi tải thông tin sản phẩm"]);
+        }, false);
     }
 
     function addItemToGrid() {

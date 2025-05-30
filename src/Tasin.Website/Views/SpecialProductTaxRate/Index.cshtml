@@ -145,7 +145,7 @@
     }
 
     async function editSpecialProductTaxRate(id) {
-        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById/" + id, { specialProductTaxRateId: id }, (response) => {
+        var response = ajax("GET", "/SpecialProductTaxRate/GetSpecialProductTaxRateById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -160,9 +160,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/" + id, {
-                specialProductTaxRateId: id
-            }, () => {
+            var response = ajax("DELETE", "/SpecialProductTaxRate/DeleteSpecialProductTaxRateById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })

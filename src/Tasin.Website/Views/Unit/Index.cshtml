@@ -140,7 +140,7 @@
     }
 
     async function editUnit(id) {
-        var response = ajax("GET", "/Unit/GetUnitById/" + id, { unitId: id }, (response) => {
+        var response = ajax("GET", "/Unit/GetUnitById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }

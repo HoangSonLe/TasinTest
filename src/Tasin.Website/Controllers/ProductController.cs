@@ -74,7 +74,7 @@ namespace Tasin.Website.Controllers
         [Route("Product/GetProductById/{productId}")]
         [ProducesResponseType(typeof(Acknowledgement<ProductViewModel>), 200)]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
-        public async Task<IActionResult> GetProductById(int productId)
+        public async Task<IActionResult> GetProductById([FromRoute] int productId)
         {
             try
             {

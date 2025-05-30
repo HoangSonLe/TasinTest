@@ -189,7 +189,7 @@
     }
 
     async function editMaterial(id) {
-        var response = ajax("GET", "/Material/GetMaterialById/" + id, { materialId: id }, (response) => {
+        var response = ajax("GET", "/Material/GetMaterialById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -204,9 +204,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/Material/DeleteMaterialById/" + id, {
-                materialId: id
-            }, () => {
+            var response = ajax("DELETE", "/Material/DeleteMaterialById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })

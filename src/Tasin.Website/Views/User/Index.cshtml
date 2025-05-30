@@ -216,7 +216,7 @@
     }
 
     async function editUser(id) {
-        var response = ajax("GET", "/User/GetUserById/" + id, { userId: id }, (response) => {
+        var response = ajax("GET", "/User/GetUserById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -231,9 +231,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/User/DeleteUserById/" + id, {
-                userId: id
-            }, () => {
+            var response = ajax("DELETE", "/User/DeleteUserById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })

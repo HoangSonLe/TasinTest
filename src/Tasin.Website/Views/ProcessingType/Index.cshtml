@@ -146,7 +146,7 @@
     }
 
     async function editProcessingType(id) {
-        var response = ajax("GET", "/ProcessingType/GetProcessingTypeById/" + id, { processingTypeId: id }, (response) => {
+        var response = ajax("GET", "/ProcessingType/GetProcessingTypeById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -161,9 +161,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/ProcessingType/DeleteProcessingTypeById/" + id, {
-                processingTypeId: id
-            }, () => {
+            var response = ajax("DELETE", "/ProcessingType/DeleteProcessingTypeById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })

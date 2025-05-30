@@ -182,7 +182,7 @@
     }
 
     async function editCustomer(id) {
-        var response = ajax("GET", "/Customer/GetCustomerById/" + id, { customerId: id }, (response) => {
+        var response = ajax("GET", "/Customer/GetCustomerById/" + id, {}, (response) => {
             renderCreateOrEditForm(false, response.data);
         }, null, false);
     }
@@ -197,9 +197,7 @@
 
             },
         }).data("kendoConfirm").open().result.done(function () {
-            var response = ajax("DELETE", "/Customer/DeleteCustomerById/" + id, {
-                customerId: id
-            }, () => {
+            var response = ajax("DELETE", "/Customer/DeleteCustomerById/" + id, {}, () => {
                 $(gridId).data("kendoGrid").dataSource.filter({});
             });
         })
