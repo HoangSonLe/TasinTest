@@ -5,6 +5,7 @@
 @section Styles {
     <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
     <link href="~/css/toolbar-common.css" rel="stylesheet" />
+    <link href="~/css/vendor-form.css" rel="stylesheet" />
 }
 
 <div>
@@ -29,7 +30,7 @@
 
     function addVendorProduct(vendorId) {
         let myWindow = $("#window");
-        $("#window").html("<div id='productVendorGrid'></div>");
+        $("#window").html("<div class='vendor-product-container'><div id='productVendorGrid'></div></div>");
 
         let title = "THÊM NHIỀU HÀNG HOÁ CHO NHÀ CUNG CẤP";
 
@@ -57,24 +58,27 @@
                         },
                     }
                 },
-                height: 400,
+                height: "100%",
                 scrollable: true,
                 sortable: true,
                 filterable: false,
+                resizable: true,
                 editable: {
                     mode: "incell",
                     createAt: "bottom"
                 },
                 toolbar: [
-                    { name: "create", text: "Thêm sản phẩm" },
-                    { name: "save", text: "Lưu tất cả" },
-                    { name: "cancel", text: "Hủy" }
+                    { name: "create", text: "Thêm sản phẩm", iconClass: "k-icon k-i-plus" },
+                    { name: "save", text: "Lưu tất cả", iconClass: "k-icon k-i-save" },
+                    { name: "cancel", text: "Hủy", iconClass: "k-icon k-i-cancel" }
                 ],
                 columns: [
                     {
                         field: "Product_ID",
                         title: "Sản phẩm (*)",
-                        width: 200,
+                        width: 250,
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: left;" },
                         editor: function (container, options) {
                             $('<input required data-bind="value:' + options.field + '"/>')
                                 .appendTo(container)
@@ -141,8 +145,10 @@
                     {
                         field: "Price",
                         title: "Giá bán",
-                        width: 120,
+                        width: 130,
                         format: "{0:n0}",
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: right;" },
                         editor: function (container, options) {
                             $('<input data-bind="value:' + options.field + '"/>')
                                 .appendTo(container)
@@ -155,8 +161,10 @@
                     {
                         field: "UnitPrice",
                         title: "Đơn giá",
-                        width: 120,
+                        width: 130,
                         format: "{0:n0}",
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: right;" },
                         editor: function (container, options) {
                             $('<input data-bind="value:' + options.field + '"/>')
                                 .appendTo(container)
@@ -169,7 +177,9 @@
                     {
                         field: "Priority",
                         title: "Ưu tiên",
-                        width: 100,
+                        width: 110,
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: center;" },
                         editor: function (container, options) {
                             $('<input data-bind="value:' + options.field + '"/>')
                                 .appendTo(container)
@@ -183,12 +193,16 @@
                     {
                         field: "Description",
                         title: "Mô tả",
-                        width: 200
+                        width: 200,
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: left;" }
                     },
                     {
                         command: ["destroy"],
                         title: "Thao tác",
-                        width: 100
+                        width: 120,
+                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
+                        attributes: { style: "text-align: center;" }
                     }
                 ],
                 save: function (e) {
@@ -208,13 +222,13 @@
                         $("#window").parent().remove();
                         $(gridId).after("<div id='window'></div>");
                     }
-                }, 200)
+                }, 200);
             }
 
             myWindow.kendoWindow({
                 width: "900px",
                 height: "600px",
-                title: "",
+                title: title,
                 visible: false,
                 actions: ["Close"],
                 resizable: true,
@@ -223,31 +237,7 @@
                 close: function (e) {
                     remove();
                 },
-            });
-
-
-            function remove() {
-                setTimeout(() => {
-                    if ($(".k-window #window").length > 0) {
-                        $("#window").parent().remove();
-                        $(gridId).after("<div id='window'></div>");
-                    }
-                }, 200)
-            }
-
-            myWindow.kendoWindow({
-                width: "900px",
-                height: "600px",
-                title: "",
-                visible: false,
-                actions: ["Close"],
-                resizable: true,
-                draggable: true,
-                modal: true,
-                close: function (e) {
-                    remove();
-                },
-            }).data("kendoWindow").title(title).center();
+            }).data("kendoWindow").center();
             myWindow.data("kendoWindow").open();
         }
 

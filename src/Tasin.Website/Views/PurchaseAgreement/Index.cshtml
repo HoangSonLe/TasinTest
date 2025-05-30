@@ -667,6 +667,15 @@
                 } else {
                     $("#itemUnitName").val("");
                     $("#itemPrice").val("");
+                    $("#itemLossRate").val("");
+                    $("#itemProcessingFee").val("");
+                    $("#itemProfitMargin").val("");
+
+                    // Clear processing type dropdown if it exists
+                    var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
+                    if (processingTypeDropdown) {
+                        processingTypeDropdown.value('');
+                    }
                 }
             }
         });
@@ -793,10 +802,24 @@
         };
 
         function loadProductInfo(productId) {
-            ajax("GET", "/Common/GetProductInfo", { productId: productId }, function (response) {
+            ajax("GET", "/Product/GetProductById/" + productId, {}, function (response) {
                 if (response.isSuccess && response.data) {
-                    $("#itemUnitName").val(response.data.unitName || "");
-                    $("#itemPrice").val(response.data.defaultPrice || "");
+                    var product = response.data;
+                    $("#itemUnitName").val(product.unitName || "");
+                    $("#itemPrice").val(product.profitMargin || 0); // Đơn giá = profitMargin
+
+                    // Auto-fill the requested fields
+                    $("#itemLossRate").val(product.lossRate || 0);
+                    $("#itemProcessingFee").val(product.processingFee || 0);
+                    $("#itemProfitMargin").val(product.profitMargin || 0);
+
+                    // Auto-fill processing type dropdown if it exists
+                    if (product.processingType_ID) {
+                        var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
+                        if (processingTypeDropdown) {
+                            processingTypeDropdown.value(product.processingType_ID);
+                        }
+                    }
                 }
             });
         }

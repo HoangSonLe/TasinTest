@@ -1,0 +1,280 @@
+/* ===== VENDOR FORM STYLES ===== */
+/* Specialized styling for vendor product management forms */
+
+/* Vendor Product Window Styling */
+.k-window[style*="width: 900px"] .vendor-product-container {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Enhanced Grid Container for Product Vendor */
+#productVendorGrid {
+    height: 100%;
+    border: none;
+    border-radius: 0 !important;
+    box-shadow: none;
+    background: #ffffff;
+}
+
+/* Product Vendor Grid Header Styling */
+#productVendorGrid .k-grid-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border-bottom: 2px solid #096b73 !important;
+    padding: 0 !important;
+}
+
+#productVendorGrid .k-grid-header th {
+    background: transparent !important;
+    border-right: 1px solid #dee2e6 !important;
+    border-bottom: none !important;
+    padding: 16px 12px !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    text-align: center !important;
+    font-size: 14px !important;
+}
+
+#productVendorGrid .k-grid-header th:last-child {
+    border-right: none !important;
+}
+
+/* Product Vendor Grid Content Styling */
+#productVendorGrid .k-grid-content {
+    background: #ffffff !important;
+    border: none !important;
+}
+
+#productVendorGrid .k-grid-content td {
+    padding: 12px !important;
+    border-right: 1px solid #e9ecef !important;
+    border-bottom: 1px solid #e9ecef !important;
+    vertical-align: middle !important;
+    font-size: 14px !important;
+}
+
+#productVendorGrid .k-grid-content td:last-child {
+    border-right: none !important;
+}
+
+/* Alternating row colors for better readability */
+#productVendorGrid .k-grid-content tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+#productVendorGrid .k-grid-content tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+/* Selected row styling */
+#productVendorGrid .k-grid-content tr.k-selected {
+    background-color: rgba(9, 107, 115, 0.1) !important;
+    border-left: 3px solid #096b73 !important;
+}
+
+/* Enhanced Toolbar Styling for Product Vendor Grid */
+#productVendorGrid .k-grid-toolbar {
+    background: linear-gradient(135deg, #096b73 0%, #075a61 100%) !important;
+    border: none !important;
+    padding: 16px 20px !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+/* Toolbar Buttons Styling */
+#productVendorGrid .k-grid-toolbar .k-button {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #096b73 !important;
+    font-weight: 600 !important;
+    padding: 10px 16px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+#productVendorGrid .k-grid-toolbar .k-button:hover {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #064a50 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+#productVendorGrid .k-grid-toolbar .k-button:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Special styling for save button */
+#productVendorGrid .k-grid-toolbar .k-grid-save-changes {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+#productVendorGrid .k-grid-toolbar .k-grid-save-changes:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Special styling for cancel button */
+#productVendorGrid .k-grid-toolbar .k-grid-cancel-changes {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+#productVendorGrid .k-grid-toolbar .k-grid-cancel-changes:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Enhanced Input Styling within Grid */
+#productVendorGrid .k-dropdown,
+#productVendorGrid .k-dropdownlist {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+    height: 36px !important;
+    font-size: 14px !important;
+}
+
+#productVendorGrid .k-dropdown:focus,
+#productVendorGrid .k-dropdownlist:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 0.2rem rgba(9, 107, 115, 0.25) !important;
+}
+
+#productVendorGrid .k-numerictextbox {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+    height: 36px !important;
+}
+
+#productVendorGrid .k-numerictextbox:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 0.2rem rgba(9, 107, 115, 0.25) !important;
+}
+
+#productVendorGrid .k-textbox {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+    height: 36px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+}
+
+#productVendorGrid .k-textbox:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 0.2rem rgba(9, 107, 115, 0.25) !important;
+    outline: none !important;
+}
+
+/* Command Button Styling (Delete) */
+#productVendorGrid .k-grid-content .k-button {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+#productVendorGrid .k-grid-content .k-button:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Loading and Empty State Styling */
+#productVendorGrid .k-loading-mask {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+#productVendorGrid .k-loading-image {
+    background-color: #096b73 !important;
+}
+
+/* Validation Error Styling */
+#productVendorGrid .k-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Responsive Design for Product Vendor Grid */
+@media (max-width: 768px) {
+    .k-window[style*="width: 900px"] {
+        width: 95% !important;
+        max-width: 95% !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
+    }
+
+    #productVendorGrid .k-grid-toolbar {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 12px 16px !important;
+    }
+
+    #productVendorGrid .k-grid-toolbar .k-button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    #productVendorGrid .k-grid-header th {
+        padding: 12px 8px !important;
+        font-size: 12px !important;
+    }
+
+    #productVendorGrid .k-grid-content td {
+        padding: 8px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* Enhanced Window Content for Better Spacing */
+.k-window-content:has(#productVendorGrid) {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Ensure proper window cleanup */
+#window {
+    position: relative;
+}
+
+#window.k-window {
+    position: fixed !important;
+}
+
+/* Grid Scrollbar Styling */
+#productVendorGrid .k-grid-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#productVendorGrid .k-grid-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#productVendorGrid .k-grid-content::-webkit-scrollbar-thumb {
+    background: #096b73;
+    border-radius: 4px;
+}
+
+#productVendorGrid .k-grid-content::-webkit-scrollbar-thumb:hover {
+    background: #075a61;
+}
