@@ -352,7 +352,7 @@
                     width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    template: '#: kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm:ss")#',
+                    template: '#: kendo.toString(kendo.parseDate(updatedDate || createdDate), "dd/MM/yyyy HH:mm:ss")#',
                 },
                 {
                     field: "updatedByName",
