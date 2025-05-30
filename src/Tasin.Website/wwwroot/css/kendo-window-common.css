@@ -1,0 +1,283 @@
+/* ===== KENDO WINDOW COMMON STYLES ===== */
+/* Shared styling for all Kendo UI windows across the application */
+
+/* Main window container */
+.k-window {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e0e0e0 !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(10px);
+    animation: windowFadeIn 0.3s ease-out;
+}
+
+/* Window fade-in animation */
+@keyframes windowFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Window header/titlebar */
+.k-window-titlebar {
+    background: linear-gradient(135deg, #096b73 0%, #075a61 100%) !important;
+    border-bottom: none !important;
+    padding: 16px 20px !important;
+    border-radius: 12px 12px 0 0 !important;
+    position: relative;
+}
+
+.k-window-titlebar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+}
+
+/* Window title */
+.k-window-title {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 0 !important;
+    line-height: 1.4;
+}
+
+/* Window action buttons (close, maximize, etc.) */
+.k-window-actions {
+    gap: 8px !important;
+}
+
+.k-window-action {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 6px !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.k-window-action:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(255, 255, 255, 1) !important;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+.k-window-action:hover .k-icon {
+    color: #333 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    transform: scale(1.1);
+}
+
+.k-window-action .k-icon {
+    color: #333 !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    transition: all 0.2s ease !important;
+}
+
+/* Window content area */
+.k-window-content {
+    padding: 24px !important;
+    background: #ffffff !important;
+    border-radius: 0 0 12px 12px !important;
+    max-height: calc(90vh - 80px) !important;
+    overflow-y: auto !important;
+}
+
+/* Custom scrollbar for window content */
+.k-window-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.k-window-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.k-window-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.k-window-content::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Modal overlay */
+.k-overlay {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .k-window {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 10px !important;
+        border-radius: 8px !important;
+    }
+
+    .k-window-titlebar {
+        padding: 12px 16px !important;
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    .k-window-title {
+        font-size: 14px !important;
+    }
+
+    .k-window-content {
+        padding: 16px !important;
+        max-height: calc(90vh - 60px) !important;
+        border-radius: 0 0 8px 8px !important;
+    }
+
+    .k-window-action {
+        width: 36px !important;
+        height: 36px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 2px solid rgba(255, 255, 255, 1) !important;
+    }
+
+    .k-window-action .k-icon {
+        font-size: 20px !important;
+        font-weight: 900 !important;
+        color: #333 !important;
+    }
+}
+
+/* Special styling for large windows (detail forms) */
+.k-window[style*="width: 900px"],
+.k-window[style*="width: 1400px"] {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Large windows use same primary color with slightly darker gradient */
+.k-window[style*="width: 900px"] .k-window-titlebar,
+.k-window[style*="width: 1400px"] .k-window-titlebar {
+    background: linear-gradient(135deg, #096b73 0%, #075a61 100%) !important;
+}
+
+/* Small windows use primary color with lighter variant */
+.k-window[style*="width: 500px"] .k-window-titlebar {
+    background: linear-gradient(135deg, #096b73 0%, #0a7d85 100%) !important;
+    color: #ffffff !important;
+}
+
+.k-window[style*="width: 500px"] .k-window-title {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Small windows use same action button styling as other windows */
+
+/* Image popup windows use darker variant of primary color */
+.k-window[style*="width: 80%"] .k-window-titlebar {
+    background: linear-gradient(135deg, #096b73 0%, #064a50 100%) !important;
+}
+
+/* Form elements inside windows */
+.k-window-content .k-form {
+    margin: 0 !important;
+}
+
+.k-window-content .k-form-fieldset {
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    background: #f8f9fa !important;
+}
+
+.k-window-content .k-form-legend {
+    background: #ffffff !important;
+    padding: 8px 16px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Button styling inside windows */
+.k-window-content .k-button {
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    padding: 8px 18px !important;
+    transition: all 0.2s ease !important;
+}
+
+.k-window-content .k-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.k-window-content .k-button.k-primary {
+    background: linear-gradient(135deg, #096b73 0%, #075a61 100%) !important;
+    border: none !important;
+}
+
+.k-window-content .k-button.k-primary:hover {
+    background: linear-gradient(135deg, #085e66 0%, #064a50 100%) !important;
+}
+
+/* Grid styling inside windows */
+.k-window-content .k-grid {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.k-window-content .k-grid-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+/* Input styling inside windows */
+.k-window-content .k-textbox,
+.k-window-content .k-dropdown,
+.k-window-content .k-datepicker {
+    border-radius: 6px !important;
+    border: 1px solid #ced4da !important;
+    transition: all 0.2s ease !important;
+}
+
+.k-window-content .k-textbox:focus,
+.k-window-content .k-dropdown:focus,
+.k-window-content .k-datepicker:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 3px rgba(9, 107, 115, 0.1) !important;
+}
+
+/* Loading indicator inside windows */
+.k-window-content .k-loading-mask {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+/* Window resize handles */
+.k-resize-handle {
+    background: transparent !important;
+}
+
+.k-resize-handle:hover {
+    background: rgba(9, 107, 115, 0.2) !important;
+}

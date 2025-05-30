@@ -2330,15 +2330,12 @@ div.gm-style div img[alt="Google"] {
     }
 }
 
-.k-window-title {
-    font-weight: bold;
+/* K-Window styling moved to kendo-window-common.css for better organization */
+
+.k-text-success,
+.k-color-success {
+    color: green !important;
 }
-
-    .k-text-success,
-    .k-color-success {
-        color: green !important;
-    }
-
 
 .checkBoxFilter {
     height: 34px;

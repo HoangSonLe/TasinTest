@@ -49,18 +49,22 @@
 
 .grid-col-1 {
     grid-column: span 1;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-2 {
     grid-column: span 2;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-3 {
     grid-column: span 3;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-4 {
     grid-column: span 4;
+    min-width: 0; /* Allow content to shrink */
 }
 
 /* 4-Column Grid Layout for Item Input */
@@ -86,18 +90,81 @@
 
 .grid-col-4-1 {
     grid-column: span 1;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-4-2 {
     grid-column: span 2;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-4-3 {
     grid-column: span 3;
+    min-width: 0; /* Allow content to shrink */
 }
 
 .grid-col-4-4 {
     grid-column: span 4;
+    min-width: 0; /* Allow content to shrink */
+}
+
+/* Fix form controls overflow in grid */
+.grid-col-1 .form-control,
+.grid-col-1 .k-dropdown,
+.grid-col-1 .k-textbox,
+.grid-col-2 .form-control,
+.grid-col-2 .k-dropdown,
+.grid-col-2 .k-textbox,
+.grid-col-3 .form-control,
+.grid-col-3 .k-dropdown,
+.grid-col-3 .k-textbox,
+.grid-col-4 .form-control,
+.grid-col-4 .k-dropdown,
+.grid-col-4 .k-textbox,
+.grid-col-4-1 .form-control,
+.grid-col-4-1 .k-dropdown,
+.grid-col-4-1 .k-textbox,
+.grid-col-4-2 .form-control,
+.grid-col-4-2 .k-dropdown,
+.grid-col-4-2 .k-textbox,
+.grid-col-4-3 .form-control,
+.grid-col-4-3 .k-dropdown,
+.grid-col-4-3 .k-textbox,
+.grid-col-4-4 .form-control,
+.grid-col-4-4 .k-dropdown,
+.grid-col-4-4 .k-textbox {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Fix Kendo DropDownList overflow */
+.grid-col-1 .k-dropdown-wrap,
+.grid-col-2 .k-dropdown-wrap,
+.grid-col-3 .k-dropdown-wrap,
+.grid-col-4 .k-dropdown-wrap,
+.grid-col-4-1 .k-dropdown-wrap,
+.grid-col-4-2 .k-dropdown-wrap,
+.grid-col-4-3 .k-dropdown-wrap,
+.grid-col-4-4 .k-dropdown-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.grid-col-1 .k-input,
+.grid-col-2 .k-input,
+.grid-col-3 .k-input,
+.grid-col-4 .k-input,
+.grid-col-4-1 .k-input,
+.grid-col-4-2 .k-input,
+.grid-col-4-3 .k-input,
+.grid-col-4-4 .k-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
 }
 
 /* Button Row */
@@ -181,29 +248,6 @@
     font-size: 14px;
 }
 
-/* Button Styling */
-.purchase-order-form .btn {
-    height: 36px;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border: none;
-    cursor: pointer;
-    padding: 8px 16px;
-    font-size: 13px;
-}
-
-.purchase-order-form .btn-primary {
-    background: #007bff;
-    color: white;
-}
-
-.purchase-order-form .btn-primary:hover {
-    background: #0056b3;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
-}
-
 .btn-block {
     width: 100%;
 }
@@ -250,7 +294,7 @@
 
 .form-actions .btn {
     margin-left: 10px;
-    padding: 8px 16px;
+    padding: 0px 16px;
     border-radius: 4px;
     font-weight: 500;
     border: none;
@@ -356,6 +400,49 @@
     font-weight: 500;
 }
 
+/* Header Grid Layout - 3 columns */
+.header-grid-3col {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 15px !important;
+    margin-bottom: 20px;
+    align-items: end;
+}
+
+.header-col-3-1 {
+    grid-column: span 1 !important;
+    min-width: 0; /* Allow content to shrink */
+}
+
+.header-col-3-2 {
+    grid-column: span 2 !important;
+    min-width: 0; /* Allow content to shrink */
+}
+
+/* Ensure form controls fit within their containers */
+.header-col-3-1 .form-control,
+.header-col-3-1 .k-dropdown,
+.header-col-3-1 .k-textbox {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Fix for Kendo DropDownList overflow */
+.header-col-3-1 .k-dropdown-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.header-col-3-1 .k-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
 /* Responsive Grid Layout */
 @media (max-width: 1200px) {
     .grid-row {
@@ -369,6 +456,17 @@
     /* Keep 4-column layout on large screens */
     .grid-row-4col {
         grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    /* Header grid responsive */
+    .header-grid-3col {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-grid-3col {
+        grid-template-columns: 1fr !important;
     }
 }
 

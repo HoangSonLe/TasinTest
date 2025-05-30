@@ -126,7 +126,26 @@
     }
 
     function sendToVendors(groupCode) {
-        showInfoMessage("Chức năng gửi cho nhà cung cấp đang được phát triển.");
+        $('#dialog').kendoConfirm({
+            title: "XÁC NHẬN GỬI PA TỔNG HỢP CHO NHÀ CUNG CẤP",
+            content: "Bạn có chắc chắn muốn gửi PA tổng hợp '" + groupCode + "' cho nhà cung cấp không?<br/><br/>Sau khi gửi, trạng thái sẽ được chuyển thành 'Đã gửi NCC'.",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            ajax("PUT", "/PurchaseAgreement/SendToVendor?groupCode=" + encodeURIComponent(groupCode), {}, function (response) {
+                if (response.isSuccess) {
+                    showSuccessMessages(response.successMessageList || ["Gửi PA tổng hợp cho nhà cung cấp thành công!"]);
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                } else {
+                    showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi gửi PA tổng hợp cho nhà cung cấp"]);
+                }
+            }, null, false);
+        });
+
+        $("#window").after("<div id='dialog'></div>");
     }
 
     function completePAGroup(groupCode) {

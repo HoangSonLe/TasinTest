@@ -585,7 +585,7 @@
         var windowTitle = isEdit ? "CHỈNH SỬA ĐƠN HÀNG PO" : "THÊM MỚI ĐƠN HÀNG PO";
 
         let formHtml = `
-            <div class="purchase-order-form">
+            <div class="">
                 <!-- Header Info Section -->
                 <div class="po-header-section">
                     <div class="header-grid-3col">
@@ -1192,25 +1192,44 @@
                                 '</button>';
                         }
 
-                        // Show cancel button only for orders that are not already cancelled
-                        if (dataItem.status !== "Cancel" && dataItem.status !== "3" && dataItem.status !== 3) {
+                        // Show cancel button only for orders with New (0) and Confirmed (1) statuses
+                        if ((dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) ||
+                            (dataItem.status === "Confirmed" || dataItem.status === "1" || dataItem.status === 1)) {
                             cancelButton = '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="33">' +
                                 '<i class="fas fa-ban"></i>' +
                                 '</button>';
                         }
 
+                        // Show delete button only for orders with New (0) status
+                        var deleteButton = '';
+                        if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
+                            deleteButton = '<button onclick="deletePurchaseOrder(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="34">' +
+                                '<i class="fas fa-trash"></i>' +
+                                '</button>';
+                        }
+
+                        // Show edit button only for orders with New (0) status
+                        var editButton = '';
+                        if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
+                            editButton = '<button onclick="editPurchaseOrder(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="33">' +
+                                '<i class="fas fa-edit"></i>' +
+                                '</button>';
+                        }
+
+                        // Show invoice button only for orders that are not cancelled
+                        var invoiceButton = '';
+                        if (dataItem.status !== "Cancel" && dataItem.status !== "3" && dataItem.status !== 3) {
+                            invoiceButton = '<button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, ' + dataItem.id + ')" title="Xuất hóa đơn">' +
+                                '<i class="fas fa-file-invoice"></i>' +
+                                '</button>';
+                        }
+
                         return '<div class="action-buttons">' +
-                            '<button onclick="editPurchaseOrder(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="33">' +
-                            '<i class="fas fa-edit"></i>' +
-                            '</button>' +
-                            '<button onclick="deletePurchaseOrder(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="34">' +
-                            '<i class="fas fa-trash"></i>' +
-                            '</button>' +
+                            editButton +
+                            deleteButton +
                             confirmButton +
                             cancelButton +
-                            '<button class="btn-action btn-invoice" type="button" onclick="toggleInvoiceDropdown(this, ' + dataItem.id + ')" title="Xuất hóa đơn">' +
-                            '<i class="fas fa-file-invoice"></i>' +
-                            '</button>' +
+                            invoiceButton +
                             '</div>';
                     }
                 }
@@ -1726,20 +1745,6 @@
         padding: 8px 16px;
         font-size: 13px;
         font-weight: 500;
-    }
-
-    /* Make all form buttons smaller */
-    .purchase-order-form .btn {
-        padding: 8px 16px !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        height: 36px !important;
-    }
-
-    .form-actions .btn {
-        padding: 8px 16px !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
     }
 
     /* 3-Column Grid Layout for Header */

@@ -352,6 +352,24 @@ namespace Tasin.Website.DAL.Services.WebServices
                         return ack;
                     }
 
+                    // Allow editing for New status only
+                    if (existingPurchaseOrder.Status != EPOStatus.New.ToString())
+                    {
+                        if (existingPurchaseOrder.Status == EPOStatus.Executed.ToString())
+                        {
+                            ack.AddMessage("Không thể chỉnh sửa đơn hàng đã được tạo đơn tổng hợp.");
+                        }
+                        else if (existingPurchaseOrder.Status == EPOStatus.Cancel.ToString())
+                        {
+                            ack.AddMessage("Không thể chỉnh sửa đơn hàng đã bị hủy.");
+                        }
+                        else
+                        {
+                            ack.AddMessage("Đơn hàng không thể chỉnh sửa (Chỉ có thể chỉnh sửa đơn hàng ở trạng thái: Mới).");
+                        }
+                        return ack;
+                    }
+
                     existingPurchaseOrder.Customer_ID = postData.Customer_ID;
                     existingPurchaseOrder.Status = postData.Status.ToString();
                     existingPurchaseOrder.UpdatedDate = DateTime.Now;
@@ -449,15 +467,21 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Allow deletion for New and Confirmed statuses only
-                var allowedStatuses = new[] {
-                    EPOStatus.New.ToString(),
-                    EPOStatus.Confirmed.ToString()
-                };
-
-                if (!allowedStatuses.Contains(purchaseOrder.Status))
+                // Allow deletion for New status only
+                if (purchaseOrder.Status != EPOStatus.New.ToString())
                 {
-                    ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng ở trạng thái: Mới, Đã xác nhận).");
+                    if (purchaseOrder.Status == EPOStatus.Executed.ToString())
+                    {
+                        ack.AddMessage("Không thể xóa đơn hàng đã được tạo đơn tổng hợp.");
+                    }
+                    else if (purchaseOrder.Status == EPOStatus.Cancel.ToString())
+                    {
+                        ack.AddMessage("Không thể xóa đơn hàng đã bị hủy.");
+                    }
+                    else
+                    {
+                        ack.AddMessage("Đơn hàng không thể xóa (Chỉ có thể xóa đơn hàng ở trạng thái: Mới).");
+                    }
                     return ack;
                 }
 
@@ -504,16 +528,26 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Check if order can be cancelled
-                if (purchaseOrder.Status == EPOStatus.Cancel.ToString())
-                {
-                    ack.AddMessage("Đơn hàng đã được hủy trước đó.");
-                    return ack;
-                }
+                // Check if order can be cancelled - only allow cancellation for New and Confirmed statuses
+                var allowedCancelStatuses = new[] {
+                    EPOStatus.New.ToString(),
+                    EPOStatus.Confirmed.ToString()
+                };
 
-                if (purchaseOrder.Status == EPOStatus.Executed.ToString())
+                if (!allowedCancelStatuses.Contains(purchaseOrder.Status))
                 {
-                    ack.AddMessage("Không thể hủy đơn hàng đã được tạo đơn tổng hợp.");
+                    if (purchaseOrder.Status == EPOStatus.Cancel.ToString())
+                    {
+                        ack.AddMessage("Đơn hàng đã được hủy trước đó.");
+                    }
+                    else if (purchaseOrder.Status == EPOStatus.Executed.ToString())
+                    {
+                        ack.AddMessage("Không thể hủy đơn hàng đã được tạo đơn tổng hợp.");
+                    }
+                    else
+                    {
+                        ack.AddMessage("Đơn hàng không thể hủy (Chỉ có thể hủy đơn hàng ở trạng thái: Mới, Đã xác nhận).");
+                    }
                     return ack;
                 }
 
