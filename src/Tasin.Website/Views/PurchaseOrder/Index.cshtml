@@ -891,6 +891,15 @@
                     $("#item-unitName").val('');
                     $("#item-price").val('');
                     $("#item-taxRate").val('');
+                    $("#item-lossRate").val('');
+                    $("#item-processingFee").val('');
+                    $("#item-profitMargin").val('');
+
+                    // Clear processing type dropdown
+                    var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+                    if (processingTypeDropdown) {
+                        processingTypeDropdown.value('');
+                    }
                 }
             },
             select: function (e) {
@@ -1464,8 +1473,21 @@
             if (response.isSuccess && response.data) {
                 var product = response.data;
                 $("#item-unitName").val(product.unitName || '');
-                $("#item-price").val(product.price || 0);
+                $("#item-price").val(product.profitMargin || 0); // Đơn giá = profitMargin
                 $("#item-taxRate").val(product.taxRate || 0);
+
+                // Auto-fill the requested fields
+                $("#item-lossRate").val(product.lossRate || 0);
+                $("#item-processingFee").val(product.processingFee || 0);
+                $("#item-profitMargin").val(product.profitMargin || 0);
+
+                // Auto-fill processing type dropdown
+                if (product.processingType_ID) {
+                    var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+                    if (processingTypeDropdown) {
+                        processingTypeDropdown.value(product.processingType_ID);
+                    }
+                }
             } else {
                 // Show error notification
                 showErrorMessages(response.errorMessageList || ["Không thể tải thông tin sản phẩm"]);
