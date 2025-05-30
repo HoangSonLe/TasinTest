@@ -41,7 +41,7 @@
             consumerTaxRate: null,
             specialProductTaxRate_ID: null,
             lossRate: null,
-            material_ID: null,
+            isMaterial: false,
             profitMargin: null,
             note: null,
             isDiscontinued: null,
@@ -200,18 +200,33 @@
                     title: "Mức thuế",
                     label: "Mức thuế:",
                     colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
                 },
                 {
                     field: "companyTaxRate",
                     title: "Mức thuế doanh nghiệp",
                     label: "Mức thuế doanh nghiệp:",
                     colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
                 },
                 {
                     field: "consumerTaxRate",
                     title: "Mức thuế người tiêu dùng",
                     label: "Mức thuế người tiêu dùng:",
                     colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
                 },
                 {
                     field: "specialProductTaxRate_ID",
@@ -256,56 +271,29 @@
                     title: "Hao hụt",
                     label: "Hao hụt:",
                     colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
                 },
                 {
-                    field: "material_ID",
-                    title: "Nguyên liệu",
-                    label: "Nguyên liệu:",
+                    field: "isMaterial",
+                    title: "Là nguyên liệu",
+                    label: "Là nguyên liệu:",
                     colSpan: 1,
-                    editor: "DropDownList",
-                    editorOptions: {
-                        optionLabel: "Chọn nguyên liệu",
-                        dataTextField: "name",
-                        dataValueField: "id",
-                        filter: filterCustom,
-                        dataSource: {
-                            transport: {
-                                read: {
-                                    url: "/Material/GetMaterialList",
-                                    dataType: "json",
-                                },
-                                parameterMap: function (data, type) {
-                                    if (type == "read") {
-
-                                        return {
-                                            pageSize: data.pageSize,
-                                            pageNumber: data.page,
-                                        }
-                                    }
-                                },
-                            },
-                            serverPaging: true,
-                            serverFiltering: true,
-                            page: 1,
-                            pageSize: 9999,
-                            schema: {
-                                data: "data.data",
-                                total: "data.total"
-                            },
-                        },
-                    },
+                    editor: "CheckBox",
                 },
                 {
                     field: "profitMargin",
                     title: "Lợi nhuận",
                     label: "Lợi nhuận:",
                     colSpan: 1,
-                },
-                {
-                    field: "note",
-                    title: "Ghi chú",
-                    label: "Ghi chú:",
-                    colSpan: 2,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
                 },
                 {
                     field: "isDiscontinued",
@@ -318,6 +306,22 @@
                     title: "Mức phí",
                     label: "Mức phí:",
                     colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+                {
+                    field: "note",
+                    title: "Ghi chú",
+                    label: "Ghi chú:",
+                    colSpan: 2,
+                    editor: "TextArea",
+                    editorOptions: {
+                        rows: 3,
+                        placeholder: "Nhập ghi chú..."
+                    }
                 },
             ],
             messages: {

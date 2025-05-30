@@ -27,12 +27,6 @@ namespace Tasin.Website.Models.SearchModels
         [Display(Name = "ProcessingType_ID")]
         public int? ProcessingType_ID { get; set; }
 
-        /// <summary>
-        /// Material ID to filter by
-        /// </summary>
-        [Display(Name = "Material_ID")]
-        public int? Material_ID { get; set; }
-
 
         /// <summary>
         /// Include discontinued products

@@ -23,7 +23,6 @@ namespace Tasin.Website.Domains.Entitites
         [NotMapped]
         public virtual ICollection<Material>? Children { get; set; }
 
-        [NotMapped]
-        public virtual ICollection<Product>? Products { get; set; }
+
     }
 }

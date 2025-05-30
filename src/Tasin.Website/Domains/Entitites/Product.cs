@@ -17,7 +17,7 @@ namespace Tasin.Website.Domains.Entitites
         public int? ProcessingType_ID { get; set; }
         public decimal? TaxRate { get; set; }
         public decimal? LossRate { get; set; }
-        public int? Material_ID { get; set; }
+        public bool IsMaterial { get; set; } = false;
         public decimal? ProfitMargin { get; set; }
         public string? Note { get; set; }
         public bool IsDiscontinued { get; set; } = false;
@@ -38,10 +38,6 @@ namespace Tasin.Website.Domains.Entitites
         [ForeignKey("ProcessingType_ID")]
         [NotMapped]
         public virtual ProcessingType? ProcessingType { get; set; }
-
-        [ForeignKey("Material_ID")]
-        [NotMapped]
-        public virtual Material? Material { get; set; }
 
         [ForeignKey("SpecialProductTaxRate_ID")]
         [NotMapped]

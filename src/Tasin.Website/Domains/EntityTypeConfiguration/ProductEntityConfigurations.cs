@@ -21,7 +21,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.ProcessingType_ID).HasColumnName("ProcessingType_ID");
             builder.Property(p => p.TaxRate).HasColumnName("TaxRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
-            builder.Property(p => p.Material_ID).HasColumnName("Material_ID");
+            builder.Property(p => p.IsMaterial).HasColumnName("IsMaterial").HasDefaultValue(false);
             builder.Property(p => p.ProfitMargin).HasColumnName("ProfitMargin").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.Note).HasColumnName("Note").HasColumnType("TEXT");
             builder.Property(p => p.IsDiscontinued).HasColumnName("IsDiscontinued").HasDefaultValue(false);
@@ -50,10 +50,6 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.HasOne(p => p.ProcessingType)
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.ProcessingType_ID);
-
-            builder.HasOne(p => p.Material)
-                .WithMany(p => p.Products)
-                .HasForeignKey(p => p.Material_ID);
 
             builder.HasOne(p => p.SpecialProductTaxRate)
                 .WithMany(p => p.Products)

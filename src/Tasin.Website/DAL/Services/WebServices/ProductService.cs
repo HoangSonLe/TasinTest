@@ -25,7 +25,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         private readonly IUnitRepository _unitRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IProcessingTypeRepository _processingTypeRepository;
-        private readonly IMaterialRepository _materialRepository;
         private readonly ISpecialProductTaxRateRepository _specialProductTaxRateRepository;
 
         public ProductService(
@@ -35,7 +34,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             IUnitRepository unitRepository,
             ICategoryRepository categoryRepository,
             IProcessingTypeRepository processingTypeRepository,
-            IMaterialRepository materialRepository,
             ISpecialProductTaxRateRepository specialProductTaxRateRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
@@ -50,7 +48,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             _unitRepository = unitRepository;
             _categoryRepository = categoryRepository;
             _processingTypeRepository = processingTypeRepository;
-            _materialRepository = materialRepository;
             _specialProductTaxRateRepository = specialProductTaxRateRepository;
         }
 
@@ -67,7 +64,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             var unitIds = products.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
             var categoryIds = products.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
             var processingTypeIds = products.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
-            var materialIds = products.Where(p => p.Material_ID.HasValue).Select(p => p.Material_ID.Value).Distinct().ToList();
             var specialProductTaxRateIds = products.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
 
             // Load related entities sequentially to avoid DbContext threading issues
@@ -89,12 +85,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(i => processingTypeIds.Contains(i.ID));
             }
 
-            IEnumerable<Material> materials = new List<Material>();
-            if (materialIds.Count > 0)
-            {
-                materials = await _materialRepository.ReadOnlyRespository.GetAsync(i => materialIds.Contains(i.ID));
-            }
-
             IEnumerable<SpecialProductTaxRate> specialProductTaxRates = new List<SpecialProductTaxRate>();
             if (specialProductTaxRateIds.Count > 0)
             {
@@ -105,7 +95,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             var unitLookup = units.ToDictionary(u => u.ID, u => u.Name);
             var categoryLookup = categories.ToDictionary(c => c.ID, c => c.Name);
             var processingTypeLookup = processingTypes.ToDictionary(p => p.ID, p => p.Name);
-            var materialLookup = materials.ToDictionary(m => m.ID, m => m.Name);
             var specialProductTaxRateLookup = specialProductTaxRates.ToDictionary(s => s.ID, s => s.Name);
 
             // Assign names using lookups
@@ -119,9 +108,6 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 if (product.ProcessingType_ID.HasValue && processingTypeLookup.TryGetValue(product.ProcessingType_ID.Value, out var processingTypeName))
                     product.ProcessingTypeName = processingTypeName;
-
-                if (product.Material_ID.HasValue && materialLookup.TryGetValue(product.Material_ID.Value, out var materialName))
-                    product.MaterialName = materialName;
 
                 if (product.SpecialProductTaxRate_ID.HasValue && specialProductTaxRateLookup.TryGetValue(product.SpecialProductTaxRate_ID.Value, out var specialProductTaxRateName))
                     product.SpecialProductTaxRateName = specialProductTaxRateName;
@@ -200,7 +186,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             existingProduct.ProcessingType_ID = productData.ProcessingType_ID;
             existingProduct.TaxRate = productData.TaxRate;
             existingProduct.LossRate = productData.LossRate;
-            existingProduct.Material_ID = productData.Material_ID;
+            existingProduct.IsMaterial = productData.IsMaterial;
             existingProduct.ProfitMargin = productData.ProfitMargin;
             existingProduct.Note = productData.Note;
             existingProduct.IsDiscontinued = productData.IsDiscontinued;
@@ -255,11 +241,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (searchModel.ProcessingType_ID.HasValue)
                 {
                     predicate = predicate.And(i => i.ProcessingType_ID == searchModel.ProcessingType_ID);
-                }
-
-                if (searchModel.Material_ID.HasValue)
-                {
-                    predicate = predicate.And(i => i.Material_ID == searchModel.Material_ID);
                 }
 
                 // Add author predicate if needed
@@ -447,7 +428,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 UnitCode = ExcelHelper.GetCellStringValue(row.Cell(3)),
                                 CategoryCode = ExcelHelper.GetCellStringValue(row.Cell(4)),
                                 ProcessingTypeCode = ExcelHelper.GetCellStringValue(row.Cell(5)),
-                                MaterialCode = ExcelHelper.GetCellStringValue(row.Cell(6)),
+                                IsMaterialText = ExcelHelper.GetCellStringValue(row.Cell(6)),
                                 SpecialProductTaxRateCode = ExcelHelper.GetCellStringValue(row.Cell(7)),
                                 TaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(8))),
                                 LossRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(9))),
@@ -477,7 +458,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 var units = await _unitRepository.ReadOnlyRespository.GetAsync(u => u.IsActive);
                 var categories = await _categoryRepository.ReadOnlyRespository.GetAsync(c => c.IsActive);
                 var processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(p => p.IsActive);
-                var materials = await _materialRepository.ReadOnlyRespository.GetAsync(m => m.IsActive);
                 var specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(s => s.IsActive);
 
                 // Process each row
@@ -528,20 +508,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                             }
                         }
 
-                        int? materialId = null;
-                        if (!string.IsNullOrEmpty(importModel.MaterialCode))
-                        {
-                            var material = materials.FirstOrDefault(m => m.Code.Equals(importModel.MaterialCode, StringComparison.OrdinalIgnoreCase));
-                            if (material == null)
-                            {
-                                importModel.ValidationErrors.Add($"Không tìm thấy nguyên liệu với mã: {importModel.MaterialCode}");
-                            }
-                            else
-                            {
-                                materialId = material.ID;
-                            }
-                        }
-
                         int? specialProductTaxRateId = null;
                         if (!string.IsNullOrEmpty(importModel.SpecialProductTaxRateCode))
                         {
@@ -579,7 +545,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             Unit_ID = unitId,
                             Category_ID = categoryId,
                             ProcessingType_ID = processingTypeId,
-                            Material_ID = materialId,
+                            IsMaterial = importModel.IsMaterial,
                             SpecialProductTaxRate_ID = specialProductTaxRateId,
                             TaxRate = importModel.TaxRate,
                             LossRate = importModel.LossRate,
@@ -647,7 +613,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "Mã đơn vị",
                         "Mã danh mục",
                         "Mã loại chế biến",
-                        "Mã nguyên liệu",
+                        "Là nguyên liệu (Y/N)",
                         "Mã thuế suất đặc biệt",
                         "Thuế suất (%)",
                         "Tỷ lệ hao hụt (%)",
@@ -674,7 +640,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     worksheet.Cell(2, 3).Value = "KG";
                     worksheet.Cell(2, 4).Value = "CAT001";
                     worksheet.Cell(2, 5).Value = "PT001";
-                    worksheet.Cell(2, 6).Value = "MAT001";
+                    worksheet.Cell(2, 6).Value = "Y";
                     worksheet.Cell(2, 7).Value = "SPTR001";
                     worksheet.Cell(2, 8).Value = 10;
                     worksheet.Cell(2, 9).Value = 5;
@@ -707,7 +673,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "   - Mã đơn vị: Phải tồn tại trong hệ thống",
                         "   - Mã danh mục: Phải tồn tại trong hệ thống",
                         "   - Mã loại chế biến: Phải tồn tại trong hệ thống",
-                        "   - Mã nguyên liệu: Phải tồn tại trong hệ thống",
+                        "   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0",
                         "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
                         "   - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)",
                         "   - Phí chế biến: Nhập số",

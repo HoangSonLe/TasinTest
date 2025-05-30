@@ -39,9 +39,9 @@ namespace Tasin.Website.Models.ViewModels
         public string? ProcessingTypeCode { get; set; }
 
         /// <summary>
-        /// Material code (will be mapped to Material_ID)
+        /// Is Material text (Y/N, Yes/No, True/False, 1/0)
         /// </summary>
-        public string? MaterialCode { get; set; }
+        public string? IsMaterialText { get; set; }
 
         /// <summary>
         /// Special product tax rate code (will be mapped to SpecialProductTaxRate_ID)
@@ -91,12 +91,22 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Parsed IsDiscontinued value
         /// </summary>
-        public bool IsDiscontinued => 
-            !string.IsNullOrEmpty(IsDiscontinuedText) && 
-            (IsDiscontinuedText.Trim().ToUpper() == "Y" || 
-             IsDiscontinuedText.Trim().ToUpper() == "YES" || 
+        public bool IsDiscontinued =>
+            !string.IsNullOrEmpty(IsDiscontinuedText) &&
+            (IsDiscontinuedText.Trim().ToUpper() == "Y" ||
+             IsDiscontinuedText.Trim().ToUpper() == "YES" ||
              IsDiscontinuedText.Trim().ToUpper() == "TRUE" ||
              IsDiscontinuedText.Trim() == "1");
+
+        /// <summary>
+        /// Parsed IsMaterial value
+        /// </summary>
+        public bool IsMaterial =>
+            !string.IsNullOrEmpty(IsMaterialText) &&
+            (IsMaterialText.Trim().ToUpper() == "Y" ||
+             IsMaterialText.Trim().ToUpper() == "YES" ||
+             IsMaterialText.Trim().ToUpper() == "TRUE" ||
+             IsMaterialText.Trim() == "1");
 
         /// <summary>
         /// Validation errors for this row
