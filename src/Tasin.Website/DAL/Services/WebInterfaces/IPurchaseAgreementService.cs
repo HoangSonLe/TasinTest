@@ -21,5 +21,6 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement<PAGroupViewModel>> GetPAGroupPreview();
         Task<Acknowledgement<PAGroupViewModel>> CreatePAGroup();
         Task<Acknowledgement> CompletePAGroup(string groupCode);
+        Task<Acknowledgement> CancelPAGroup(string groupCode);
     }
 }

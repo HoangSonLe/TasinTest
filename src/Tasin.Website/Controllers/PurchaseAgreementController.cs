@@ -190,5 +190,21 @@ namespace Tasin.Website.Controllers
             var result = await _purchaseAgreementService.CompletePAGroup(groupCode);
             return Json(result);
         }
+
+        /// <summary>
+        /// Update PA group status to Cancel
+        /// </summary>
+        /// <param name="groupCode">Group code of the PA group to cancel</param>
+        /// <returns>Result of the operation</returns>
+        /// <response code="200">Returns the result of the operation</response>
+        [HttpPut]
+        [Route("PurchaseAgreement/CancelPAGroup")]
+        [ProducesResponseType(typeof(Acknowledgement), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.UPDATE_PURCHASE_AGREEMENT])]
+        public async Task<IActionResult> CancelPAGroup([FromQuery] string groupCode)
+        {
+            var result = await _purchaseAgreementService.CancelPAGroup(groupCode);
+            return Json(result);
+        }
     }
 }

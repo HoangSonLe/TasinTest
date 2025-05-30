@@ -374,7 +374,7 @@
                         } else {
                             showErrorMessages(updateResponse.errorMessageList);
                         }
-                    });
+                    }, null, false);
                 } else {
                     showErrorMessages(response.errorMessageList || ["Không thể lấy thông tin đơn hàng"]);
                 }

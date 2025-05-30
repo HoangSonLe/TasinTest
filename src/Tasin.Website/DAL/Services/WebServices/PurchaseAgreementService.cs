@@ -1146,6 +1146,140 @@ namespace Tasin.Website.DAL.Services.WebServices
             return ack;
         }
 
+        public async Task<Acknowledgement> CancelPAGroup(string groupCode)
+        {
+            var ack = new Acknowledgement();
+
+            // Use database transaction to ensure data consistency
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                if (string.IsNullOrEmpty(groupCode))
+                {
+                    ack.AddMessage("Mã nhóm không được để trống.");
+                    return ack;
+                }
+
+                // Get all PAs in the group with their items
+                var purchaseAgreements = await _purchaseAgreementRepository.ReadOnlyRespository.GetAsync(
+                    filter: pa => pa.GroupCode == groupCode && pa.IsActive,
+                    includeProperties: "PurchaseAgreementItems"
+                );
+
+                if (!purchaseAgreements.Any())
+                {
+                    ack.AddMessage("Không tìm thấy PA tổng hợp với mã nhóm này.");
+                    return ack;
+                }
+
+                // Check if any PA is already cancelled
+                var alreadyCancelledPAs = purchaseAgreements.Where(pa => pa.Status == EPAStatus.Cancel.ToString()).ToList();
+                if (alreadyCancelledPAs.Any())
+                {
+                    ack.AddMessage("PA tổng hợp đã được hủy trước đó.");
+                    return ack;
+                }
+
+                // Check if any PA is completed (cannot cancel completed PAs)
+                var completedPAs = purchaseAgreements.Where(pa => pa.Status == EPAStatus.Completed.ToString()).ToList();
+                if (completedPAs.Any())
+                {
+                    ack.AddMessage("Không thể hủy PA tổng hợp đã hoàn thành.");
+                    return ack;
+                }
+
+                // Get all PO Item IDs from PA Items to find related POs
+                var allPOItemIds = new List<int>();
+                foreach (var pa in purchaseAgreements)
+                {
+                    if (pa.PurchaseAgreementItems != null)
+                    {
+                        foreach (var paItem in pa.PurchaseAgreementItems)
+                        {
+                            if (!string.IsNullOrEmpty(paItem.PO_Item_ID_List))
+                            {
+                                // Parse comma-separated PO Item IDs
+                                var poItemIds = paItem.PO_Item_ID_List.Split(',')
+                                    .Where(id => int.TryParse(id.Trim(), out _))
+                                    .Select(id => int.Parse(id.Trim()))
+                                    .ToList();
+                                allPOItemIds.AddRange(poItemIds);
+                            }
+                        }
+                    }
+                }
+
+                // Get unique PO IDs from PO Items
+                var relatedPOIds = new List<int>();
+                if (allPOItemIds.Any())
+                {
+                    var poItems = await _purchaseOrderItemRepository.ReadOnlyRespository.GetAsync(
+                        filter: poi => allPOItemIds.Contains(poi.ID)
+                    );
+                    relatedPOIds = poItems.Select(poi => poi.PO_ID).Distinct().ToList();
+                }
+
+                // Get related Purchase Orders that are currently in Executed status
+                var relatedPOs = new List<Purchase_Order>();
+                if (relatedPOIds.Any())
+                {
+                    relatedPOs = (await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                        filter: po => relatedPOIds.Contains(po.ID) && po.Status == EPOStatus.Executed.ToString() && po.IsActive
+                    )).ToList();
+                }
+
+                // Update all PAs in the group to Cancel status
+                foreach (var pa in purchaseAgreements)
+                {
+                    pa.Status = EPAStatus.Cancel.ToString();
+                    pa.UpdatedDate = DateTime.Now;
+                    pa.UpdatedBy = CurrentUserId;
+                }
+
+                // Revert related POs back to Confirmed status
+                foreach (var po in relatedPOs)
+                {
+                    po.Status = EPOStatus.Confirmed.ToString();
+                    po.UpdatedDate = DateTime.Now;
+                    po.UpdatedBy = CurrentUserId;
+                }
+
+                // Save PA changes
+                await ack.TrySaveChangesAsync(res => res.UpdateRangeAsync(purchaseAgreements), _purchaseAgreementRepository.Repository);
+
+                if (!ack.IsSuccess)
+                {
+                    await transaction.RollbackAsync();
+                    return ack;
+                }
+
+                // Save PO changes
+                if (relatedPOs.Any())
+                {
+                    await _purchaseOrderRepository.Repository.UpdateRangeAsync(relatedPOs);
+                    await _purchaseOrderRepository.Repository.SaveChangesAsync();
+                }
+
+                // Commit transaction if everything succeeded
+                await transaction.CommitAsync();
+
+                if (ack.IsSuccess)
+                {
+                    var poCount = relatedPOs.Count;
+                    ack.AddSuccessMessages($"Đã hủy PA tổng hợp '{groupCode}' thành công. {poCount} đơn hàng PO đã được chuyển về trạng thái 'Đã xác nhận'.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Rollback transaction on any error
+                await transaction.RollbackAsync();
+
+                ack.AddMessage($"Lỗi khi hủy PA tổng hợp: {ex.Message}");
+                _logger.LogError(ex, "Error cancelling PA group - Transaction rolled back");
+            }
+            return ack;
+        }
+
         private async Task SavePurchaseAgreementItems(int purchaseAgreementId, List<PurchaseAgreementItemViewModel>? items)
         {
             if (items != null)

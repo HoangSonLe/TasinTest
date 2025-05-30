@@ -145,7 +145,30 @@
                 } else {
                     showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi hoàn thành PA tổng hợp"]);
                 }
-            });
+            }, null, false);
+        });
+
+        $("#window").after("<div id='dialog'></div>");
+    }
+
+    function cancelPAGroup(groupCode) {
+        $('#dialog').kendoConfirm({
+            title: "XÁC NHẬN HỦY PA TỔNG HỢP",
+            content: "Bạn có chắc chắn muốn hủy PA tổng hợp '" + groupCode + "' không?<br/><br/>Sau khi hủy, trạng thái sẽ được chuyển thành 'Hủy' và không thể thay đổi.",
+            size: "medium",
+            messages: {
+                okText: "Đồng ý",
+                cancel: "Hủy"
+            },
+        }).data("kendoConfirm").open().result.done(function () {
+            ajax("PUT", "/PurchaseAgreement/CancelPAGroup?groupCode=" + encodeURIComponent(groupCode), {}, function (response) {
+                if (response.isSuccess) {
+                    showSuccessMessages(response.successMessageList || ["Hủy PA tổng hợp thành công!"]);
+                    $(gridId).data("kendoGrid").dataSource.filter({});
+                } else {
+                    showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi hủy PA tổng hợp"]);
+                }
+            }, null, false);
         });
 
         $("#window").after("<div id='dialog'></div>");
@@ -308,7 +331,7 @@
             } else {
                 showErrorMessages(response.errorMessageList);
             }
-        });
+        }, null, false);
     }
 
     async function ExportExcel() {
@@ -494,20 +517,34 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         var completeButton = '';
+                        var cancelButton = '';
+
                         // Show complete button only for orders with status "SendVendor" (1)
                         if (dataItem.status === "SendVendor" || dataItem.status === "1" || dataItem.status === 1) {
-                            completeButton = '<button style="margin-right:5px;" onclick="completePAGroup(\'' + dataItem.groupCode + '\')" title="Hoàn thành" class="k-button k-button-md k-rounded-md k-button-solid-warning _permission_" data-enum="44">' +
-                                '<span class="k-icon k-i-check k-button-icon"></span>' +
+                            completeButton = '<button onclick="completePAGroup(\'' + dataItem.groupCode + '\')" title="Hoàn thành" class="btn-action btn-complete _permission_" data-enum="44">' +
+                                '<i class="fas fa-check"></i>' +
                                 '</button>';
                         }
 
-                        return '<button style="margin-right:5px;" onclick="viewPAGroupDetail(\'' + dataItem.groupCode + '\')" title="Xem chi tiết" class="k-button k-button-md k-rounded-md k-button-solid-info _permission_" data-enum="45">' +
-                            '<span class="k-icon k-i-eye k-button-icon"></span>' +
+                        // Show cancel button for orders that are not already cancelled or completed
+                        if (dataItem.status !== "Cancel" && dataItem.status !== "Completed" &&
+                            dataItem.status !== "2" && dataItem.status !== "3" &&
+                            dataItem.status !== 2 && dataItem.status !== 3) {
+                            cancelButton = '<button onclick="cancelPAGroup(\'' + dataItem.groupCode + '\')" title="Hủy" class="btn-action btn-cancel _permission_" data-enum="44">' +
+                                '<i class="fas fa-ban"></i>' +
+                                '</button>';
+                        }
+
+                        return '<div class="action-buttons">' +
+                            '<button onclick="viewPAGroupDetail(\'' + dataItem.groupCode + '\')" title="Xem chi tiết" class="btn-action btn-view _permission_" data-enum="45">' +
+                            '<i class="fas fa-eye"></i>' +
                             '</button>' +
-                            '<button style="margin-right:5px;" onclick="sendToVendors(\'' + dataItem.groupCode + '\')" title="Gửi NCC" class="k-button k-button-md k-rounded-md k-button-solid-success _permission_" data-enum="44">' +
-                            '<span class="k-icon k-i-email k-button-icon"></span>' +
+                            '<button onclick="sendToVendors(\'' + dataItem.groupCode + '\')" title="Gửi NCC" class="btn-action btn-send _permission_" data-enum="44">' +
+                            '<i class="fas fa-paper-plane"></i>' +
                             '</button>' +
-                            completeButton;
+                            completeButton +
+                            cancelButton +
+                            '</div>';
                     }
                 }
             ],
@@ -739,5 +776,74 @@
             width: 100%;
             margin-bottom: 10px;
         }
+    }
+
+    /* Action buttons styling to match PurchaseOrder/Index */
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        color: white;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-action.btn-view {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-action.btn-view:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+
+    .btn-action.btn-send {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-action.btn-send:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .btn-action.btn-complete {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+
+    .btn-action.btn-complete:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+        color: #212529;
+    }
+
+    .btn-action.btn-cancel {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-action.btn-cancel:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
     }
 </style>
