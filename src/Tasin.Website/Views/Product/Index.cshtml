@@ -44,7 +44,7 @@
             isMaterial: false,
             profitMargin: null,
             note: null,
-            isDiscontinued: null,
+            isDiscontinued: false,
             processingFee: null,
             // status: "",
             ...dataProduct
@@ -300,6 +300,7 @@
                     title: "Ngừng sử dụng",
                     label: "Ngừng sử dụng:",
                     colSpan: 1,
+                    editor: "CheckBox",
                 },
                 {
                     field: "processingFee",

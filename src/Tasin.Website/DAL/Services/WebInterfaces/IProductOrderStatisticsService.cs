@@ -18,7 +18,7 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement<JsonResultPaging<List<ProductOrderStatisticsViewModel>>>> GetProductOrderStatistics(ProductOrderStatisticsSearchModel searchModel);
 
         /// <summary>
-        /// Get customer product order statistics grouped by customer for confirmed POs
+        /// Get customer product order statistics grouped by customer for executed POs (đã tạo đơn tổng hợp)
         /// </summary>
         /// <param name="searchModel">Search parameters including filters</param>
         /// <returns>Statistics grouped by customer</returns>

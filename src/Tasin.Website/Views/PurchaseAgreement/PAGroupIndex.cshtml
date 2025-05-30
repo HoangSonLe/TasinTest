@@ -28,7 +28,27 @@
                 <p><strong>Tổng tiền:</strong> #=kendo.toString(totalPrice, 'n0')# VNĐ</p>
             </div>
             <div class="pa-info-col">
-                <p><strong>Trạng thái:</strong> #=statusName#</p>
+                <p><strong>Trạng thái:</strong>
+                    #
+                    var statusClass = "";
+                    switch (status) {
+                        case "New":
+                        case "0":
+                            statusClass = "badge-secondary"; break;
+                        case "SendVendor":
+                        case "1":
+                            statusClass = "badge-warning"; break;
+                        case "Cancel":
+                        case "2":
+                            statusClass = "badge-danger"; break;
+                        case "Completed":
+                        case "3":
+                            statusClass = "badge-success"; break;
+                        default: statusClass = "badge-secondary";
+                    }
+                    #
+                    <span class="badge #=statusClass#">#=statusName#</span>
+                </p>
                 <p><strong>Ghi chú:</strong> #=note || ''#</p>
             </div>
         </div>
@@ -86,7 +106,34 @@
                 { field: "code", title: "Mã hợp đồng", width: "120px" },
                 { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
                 { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
-                { field: "statusName", title: "Trạng thái", width: "120px" },
+                {
+                    field: "statusName",
+                    title: "Trạng thái",
+                    width: "120px",
+                    template: function (dataItem) {
+                        if (!dataItem) {
+                            return '<span class="badge badge-secondary">N/A</span>';
+                        }
+
+                        let statusClass = "";
+                        switch (dataItem.status) {
+                            case "New":
+                            case "0":
+                                statusClass = "badge-secondary"; break;
+                            case "SendVendor":
+                            case "1":
+                                statusClass = "badge-warning"; break;
+                            case "Cancel":
+                            case "2":
+                                statusClass = "badge-danger"; break;
+                            case "Completed":
+                            case "3":
+                                statusClass = "badge-success"; break;
+                            default: statusClass = "badge-secondary";
+                        }
+                        return `<span class="badge ${statusClass}">${dataItem.statusName || 'N/A'}</span>`;
+                    }
+                },
                 {
                     title: "Số sản phẩm",
                     width: "100px",
@@ -378,7 +425,34 @@
                 { field: "code", title: "Mã hợp đồng", width: "120px" },
                 { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
                 { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
-                { field: "statusName", title: "Trạng thái", width: "120px" },
+                {
+                    field: "statusName",
+                    title: "Trạng thái",
+                    width: "120px",
+                    template: function (dataItem) {
+                        if (!dataItem) {
+                            return '<span class="badge badge-secondary">N/A</span>';
+                        }
+
+                        let statusClass = "";
+                        switch (dataItem.status) {
+                            case "New":
+                            case "0":
+                                statusClass = "badge-secondary"; break;
+                            case "SendVendor":
+                            case "1":
+                                statusClass = "badge-warning"; break;
+                            case "Cancel":
+                            case "2":
+                                statusClass = "badge-danger"; break;
+                            case "Completed":
+                            case "3":
+                                statusClass = "badge-success"; break;
+                            default: statusClass = "badge-secondary";
+                        }
+                        return `<span class="badge ${statusClass}">${dataItem.statusName || 'N/A'}</span>`;
+                    }
+                },
                 {
                     title: "Số sản phẩm",
                     width: "100px",
@@ -808,6 +882,31 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 120,
+                    template: function (dataItem) {
+                        // Add null check for dataItem
+                        if (!dataItem) {
+                            return '<span class="badge badge-secondary">N/A</span>';
+                        }
+
+                        let statusClass = "";
+                        // Status có thể được lưu dưới dạng enum name hoặc enum value
+                        switch (dataItem.status) {
+                            case "New":
+                            case "0":
+                                statusClass = "badge-secondary"; break; // Mới
+                            case "SendVendor":
+                            case "1":
+                                statusClass = "badge-warning"; break;   // Đã gửi NCC
+                            case "Cancel":
+                            case "2":
+                                statusClass = "badge-danger"; break;    // Hủy
+                            case "Completed":
+                            case "3":
+                                statusClass = "badge-success"; break;   // Hoàn thành
+                            default: statusClass = "badge-secondary";
+                        }
+                        return `<span class="badge ${statusClass}">${dataItem.statusName || 'N/A'}</span>`;
+                    }
                 },
                 {
                     field: "createdDate",

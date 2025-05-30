@@ -228,7 +228,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var response = new Acknowledgement<JsonResultPaging<List<CustomerProductOrderStatisticsViewModel>>>();
             try
             {
-                // Use optimized single query with proper JOINs for Purchase Orders with Confirmed status
+                // Use optimized single query with proper JOINs for Purchase Orders with Executed status (đã tạo đơn tổng hợp)
                 var query = from po in DbContext.PurchaseOrders
                             join customer in DbContext.Customers on po.Customer_ID equals customer.ID
                             join poItem in DbContext.PurchaseOrderItems on po.ID equals poItem.PO_ID
@@ -236,7 +236,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             join unit in DbContext.Units on poItem.Unit_ID equals unit.ID into unitGroup
                             from unit in unitGroup.DefaultIfEmpty()
                             where po.IsActive == true &&
-                                  po.Status == EPOStatus.Confirmed.ToString()
+                                  po.Status == EPOStatus.Executed.ToString()
                             select new
                             {
                                 PO = po,
@@ -364,7 +364,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                     // Efficient customer statistics calculation
                     var orderedProducts = productStatistics.OrderBy(p => p.ProductName).ToList();
-                    var confirmedPOCount = customerData.Select(x => x.PO.ID).Distinct().Count();
+                    var executedPOCount = customerData.Select(x => x.PO.ID).Distinct().Count();
 
                     statisticsViewModels.Add(new CustomerProductOrderStatisticsViewModel
                     {
@@ -381,7 +381,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         Products = orderedProducts,
                         TotalValue = orderedProducts.Sum(p => p.TotalValue),
                         TotalOrderAmount = orderedProducts.Sum(p => p.TotalOrderAmount),
-                        ConfirmedPOCount = confirmedPOCount
+                        ConfirmedPOCount = executedPOCount
                     });
                 }
 
