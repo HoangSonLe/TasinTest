@@ -368,10 +368,18 @@
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
+                    field: "", title: "Thao tác", width: 150, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=editProcessingType(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                        <button style='margin-right:5px;' onclick=deleteProcessingType(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                    template: function (dataItem) {
+                        return '<div class="action-buttons">' +
+                            '<button onclick="editProcessingType(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="8">' +
+                            '<i class="fas fa-edit"></i>' +
+                            '</button>' +
+                            '<button onclick="deleteProcessingType(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="9">' +
+                            '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
                 }
             ],
             dataBound: function (e) {

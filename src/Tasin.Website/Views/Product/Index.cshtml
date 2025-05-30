@@ -21,13 +21,7 @@
     <div id="window"></div>
     <div id="dialog"></div>
 </div>
-<script type="text/x-kendo-template" id="template_form_header">
-    <div style="width:100%">
-        <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base _permission_' data-enum='6' style='margin-right: 5px;'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
-    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
-        <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
-    </div>
-</script>
+
 <script type="text/javascript">
     let gridId = "#gridId";
 
@@ -614,10 +608,18 @@
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
+                    field: "", title: "Thao tác", width: 150, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=editProduct(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                        <button style='margin-right:5px;' onclick=deleteProduct(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                    template: function (dataItem) {
+                        return '<div class="action-buttons">' +
+                            '<button onclick="editProduct(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="8">' +
+                            '<i class="fas fa-edit"></i>' +
+                            '</button>' +
+                            '<button onclick="deleteProduct(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="9">' +
+                            '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
                 }
             ],
             dataBound: function (e) {

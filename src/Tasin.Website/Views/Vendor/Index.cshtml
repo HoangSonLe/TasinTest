@@ -21,17 +21,10 @@
     <div id="window"></div>
     <div id="dialog"></div>
 </div>
-<script type="text/x-kendo-template" id="template_form_header">
-    <div style="width:100%">
-        <button id='create' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base _permission_' data-enum='6' style='margin-right: 5px;'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
-    @*<button id='active' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-check k-button-icon'></span><span class='k-button-text'>Active</span></button>
-        <button id='importExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='margin-right: 5px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Import Excel</span></button>*@
-        <button id='exportExcel' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base' style='position: absolute; right: 16px;'><span class='k-icon k-i-file-excel k-button-icon'></span><span class='k-button-text'>Export Excel</span></button>
-    </div>
-</script>
+
 <script type="text/javascript">
     let gridId = "#gridId";
-    let ListProduct_ID =[];
+    let ListProduct_ID = [];
 
 
     function addVendorProduct(vendorId) {
@@ -59,178 +52,178 @@
                             }
                         },
                         parse: function (response) {
-                            ListProduct_ID = response.map(e=>e.Product_ID);
+                            ListProduct_ID = response.map(e => e.Product_ID);
                             return response;
                         },
                     }
                 },
-            height: 400,
-            scrollable: true,
-            sortable: true,
-            filterable: false,
-            editable: {
-                mode: "incell",
-                createAt: "bottom"
-            },
-            toolbar: [
-                { name: "create", text: "Thêm sản phẩm" },
-                { name: "save", text: "Lưu tất cả" },
-                { name: "cancel", text: "Hủy" }
-            ],
-            columns: [
-                {
-                    field: "Product_ID",
-                    title: "Sản phẩm (*)",
-                    width: 200,
-                    editor: function (container, options) {
-                        $('<input required data-bind="value:' + options.field + '"/>')
-                            .appendTo(container)
-                            .kendoDropDownList({
-                                dataTextField: "name",
-                                dataValueField: "id",
-                                dataSource: {
-                                    transport: {
-                                        read: {
-                                            url: "/Product/GetProductList",
-                                            datatype: "json",
-                                        },
-                                        parameterMap: function (data, type) {
-                                            if (type == "read") {
-                                                return {
-                                                    pageSize: 100,
-                                                    pageNumber: 1
+                height: 400,
+                scrollable: true,
+                sortable: true,
+                filterable: false,
+                editable: {
+                    mode: "incell",
+                    createAt: "bottom"
+                },
+                toolbar: [
+                    { name: "create", text: "Thêm sản phẩm" },
+                    { name: "save", text: "Lưu tất cả" },
+                    { name: "cancel", text: "Hủy" }
+                ],
+                columns: [
+                    {
+                        field: "Product_ID",
+                        title: "Sản phẩm (*)",
+                        width: 200,
+                        editor: function (container, options) {
+                            $('<input required data-bind="value:' + options.field + '"/>')
+                                .appendTo(container)
+                                .kendoDropDownList({
+                                    dataTextField: "name",
+                                    dataValueField: "id",
+                                    dataSource: {
+                                        transport: {
+                                            read: {
+                                                url: "/Product/GetProductList",
+                                                datatype: "json",
+                                            },
+                                            parameterMap: function (data, type) {
+                                                if (type == "read") {
+                                                    return {
+                                                        pageSize: 100,
+                                                        pageNumber: 1
+                                                    }
                                                 }
-                                            }
+                                            },
+                                        },
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        pageSize: 100,
+                                        schema: {
+                                            type: 'json',
+                                            parse: function (response) {
+                                                if (response.isSuccess == false) {
+                                                    showErrorMessages(response.errorMessageList);
+                                                    return { data: [], total: 0 }
+                                                }
+                                                // return response.data.data.filter(e=> !ListProduct_ID.includes(e.id));
+                                                return response.data;
+                                            },
+                                            model: {
+                                                id: "id",
+                                                fields: {
+                                                    name: { type: "string" },
+                                                    code: { type: "string" }
+                                                }
+                                            },
+                                            data: "data",
+                                            total: "total"
                                         },
                                     },
-                                    serverPaging: true,
-                                    serverFiltering: true,
-                                    pageSize: 100,
-                                    schema: {
-                                        type: 'json',
-                                        parse: function (response) {
-                                            if (response.isSuccess == false) {
-                                                showErrorMessages(response.errorMessageList);
-                                                return { data: [], total: 0 }
-                                            }
-                                            // return response.data.data.filter(e=> !ListProduct_ID.includes(e.id));
-                                            return response.data;
-                                        },
-                                        model: {
-                                            id: "id",
-                                            fields: {
-                                                name: { type: "string" },
-                                                code: { type: "string" }
-                                            }
-                                        },
-                                        data: "data",
-                                        total: "total"
-                                    },
-                                },
-                                change: function (e) {
-                                    var selectedItem = this.dataItem();
-                                    if (selectedItem) {
-                                        var grid = $("#productVendorGrid").data("kendoGrid");
-                                        var dataItem = grid.dataItem(container.closest("tr"));
-                                        dataItem.set("ProductName", selectedItem.name);
-                                        dataItem.ProductName=selectedItem.name;
-                                        ListProduct_ID.push(selectedItem.id);
+                                    change: function (e) {
+                                        var selectedItem = this.dataItem();
+                                        if (selectedItem) {
+                                            var grid = $("#productVendorGrid").data("kendoGrid");
+                                            var dataItem = grid.dataItem(container.closest("tr"));
+                                            dataItem.set("ProductName", selectedItem.name);
+                                            dataItem.ProductName = selectedItem.name;
+                                            ListProduct_ID.push(selectedItem.id);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                        },
+                        // template: "#= ProductName || '' #"
+                        template: function (dataItem) {
+
+                            return dataItem.ProductName || "";
+                        }
                     },
-                    // template: "#= ProductName || '' #"
-                    template: function(dataItem) {
-                        
-                        return dataItem.ProductName || "";
+                    {
+                        field: "Price",
+                        title: "Giá bán",
+                        width: 120,
+                        format: "{0:n0}",
+                        editor: function (container, options) {
+                            $('<input data-bind="value:' + options.field + '"/>')
+                                .appendTo(container)
+                                .kendoNumericTextBox({
+                                    format: "n0",
+                                    decimals: 0
+                                });
+                        }
+                    },
+                    {
+                        field: "UnitPrice",
+                        title: "Đơn giá",
+                        width: 120,
+                        format: "{0:n0}",
+                        editor: function (container, options) {
+                            $('<input data-bind="value:' + options.field + '"/>')
+                                .appendTo(container)
+                                .kendoNumericTextBox({
+                                    format: "n0",
+                                    decimals: 0
+                                });
+                        }
+                    },
+                    {
+                        field: "Priority",
+                        title: "Ưu tiên",
+                        width: 100,
+                        editor: function (container, options) {
+                            $('<input data-bind="value:' + options.field + '"/>')
+                                .appendTo(container)
+                                .kendoNumericTextBox({
+                                    format: "n0",
+                                    decimals: 0,
+                                    min: 1
+                                });
+                        }
+                    },
+                    {
+                        field: "Description",
+                        title: "Mô tả",
+                        width: 200
+                    },
+                    {
+                        command: ["destroy"],
+                        title: "Thao tác",
+                        width: 100
                     }
-                },
-                {
-                    field: "Price",
-                    title: "Giá bán",
-                    width: 120,
-                    format: "{0:n0}",
-                    editor: function (container, options) {
-                        $('<input data-bind="value:' + options.field + '"/>')
-                            .appendTo(container)
-                            .kendoNumericTextBox({
-                                format: "n0",
-                                decimals: 0
-                            });
-                    }
-                },
-                {
-                    field: "UnitPrice",
-                    title: "Đơn giá",
-                    width: 120,
-                    format: "{0:n0}",
-                    editor: function (container, options) {
-                        $('<input data-bind="value:' + options.field + '"/>')
-                            .appendTo(container)
-                            .kendoNumericTextBox({
-                                format: "n0",
-                                decimals: 0
-                            });
-                    }
-                },
-                {
-                    field: "Priority",
-                    title: "Ưu tiên",
-                    width: 100,
-                    editor: function (container, options) {
-                        $('<input data-bind="value:' + options.field + '"/>')
-                            .appendTo(container)
-                            .kendoNumericTextBox({
-                                format: "n0",
-                                decimals: 0,
-                                min: 1
-                            });
-                    }
-                },
-                {
-                    field: "Description",
-                    title: "Mô tả",
-                    width: 200
-                },
-                {
-                    command: ["destroy"],
-                    title: "Thao tác",
-                    width: 100
+                ],
+                save: function (e) {
+                    // Handle save event for individual rows
                 }
-            ],
-            save: function (e) {
-                // Handle save event for individual rows
+            });
+
+            // Handle toolbar save button
+            $("#productVendorGrid").on("click", ".k-grid-save-changes", function (e) {
+                e.preventDefault();
+                saveAllProductVendors(vendorId);
+            });
+
+            function remove() {
+                setTimeout(() => {
+                    if ($(".k-window #window").length > 0) {
+                        $("#window").parent().remove();
+                        $(gridId).after("<div id='window'></div>");
+                    }
+                }, 200)
             }
-        });
 
-        // Handle toolbar save button
-        $("#productVendorGrid").on("click", ".k-grid-save-changes", function (e) {
-            e.preventDefault();
-            saveAllProductVendors(vendorId);
-        });
-
-        function remove() {
-            setTimeout(() => {
-                if ($(".k-window #window").length > 0) {
-                    $("#window").parent().remove();
-                    $(gridId).after("<div id='window'></div>");
-                }
-            }, 200)
-        }
-
-        myWindow.kendoWindow({
-            width: "900px",
-            height: "600px",
-            title: "",
-            visible: false,
-            actions: ["Close"],
-            resizable: true,
-            draggable: true,
-            modal: true,
-            close: function (e) {
-                remove();
-            },
-        });
+            myWindow.kendoWindow({
+                width: "900px",
+                height: "600px",
+                title: "",
+                visible: false,
+                actions: ["Close"],
+                resizable: true,
+                draggable: true,
+                modal: true,
+                close: function (e) {
+                    remove();
+                },
+            });
 
 
             function remove() {
@@ -649,9 +642,19 @@
                 {
                     field: "", title: "Thao tác", width: 200, attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    template: "<button style='margin-right:5px;' onclick=addVendorProduct(#=id#) title='Thêm hàng hoá' class='k-button k-button-md k-rounded-md k-button-solid-success _permission_1' data-enum='8'><span class='k-icon k-i-plus k-button-icon'></span></button>\
-                        <button style='margin-right:5px;' onclick=editVendor(#=id#) title='Chỉnh sửa' class='k-button k-button-md k-rounded-md k-button-solid-warning _permission_' data-enum='8'><span class='k-icon k-i-track-changes k-button-icon'></span></button>\
-                        <button style='margin-right:5px;' onclick=deleteVendor(#=id#) title='Xoá' class='k-button k-button-md k-rounded-md k-button-solid-error _permission_' data-enum='9'><span class='k-icon k-i-trash k-button-icon'></span></button>",
+                    template: function (dataItem) {
+                        return '<div class="action-buttons">' +
+                            '<button onclick="addVendorProduct(' + dataItem.id + ')" title="Thêm hàng hoá" class="btn-action btn-add _permission_" data-enum="8">' +
+                            '<i class="fas fa-plus"></i>' +
+                            '</button>' +
+                            '<button onclick="editVendor(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="8">' +
+                            '<i class="fas fa-edit"></i>' +
+                            '</button>' +
+                            '<button onclick="deleteVendor(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="9">' +
+                            '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
                 }
             ],
             dataBound: function (e) {
@@ -708,5 +711,15 @@
 <style>
     .k-form-buttons {
         justify-content: flex-end;
+    }
+
+    /* Add product button styling */
+    .btn-add {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-add:hover {
+        background: #218838;
     }
 </style>
