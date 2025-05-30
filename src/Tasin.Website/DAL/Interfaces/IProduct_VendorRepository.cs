@@ -7,5 +7,6 @@ namespace Tasin.Website.DAL.Interfaces
     {
         Task<Product_Vendor?> GetByProductIdAsync(int productId);
         Task<List<Product_Vendor>> GetByProductIdsAsync(List<int> productIds);
+        Task<List<Product_Vendor>> GetHighestPriorityVendorsByProductIdsAsync(List<int> productIds);
     }
 }

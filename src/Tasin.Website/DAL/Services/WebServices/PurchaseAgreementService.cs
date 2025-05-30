@@ -595,17 +595,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Get product-vendor relationships for all products
+                // Get product-vendor relationships for all products with highest priority vendors
                 var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
-                var productVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
+                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
 
-                // Create lookup dictionary for better performance
-                var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                // Create lookup dictionary for better performance - each product maps to its highest priority vendor
+                var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
                 // Group items by vendor using lookup
                 var vendorGroups = allOrderItems
-                    .Where(item => productVendorLookup.Contains(item.Product_ID))
-                    .GroupBy(item => productVendorLookup[item.Product_ID].First())
+                    .Where(item => productVendorLookup.ContainsKey(item.Product_ID))
+                    .GroupBy(item => productVendorLookup[item.Product_ID])
                     .ToDictionary(g => g.Key, g => g.ToList());
 
                 if (!vendorGroups.Any())
@@ -723,17 +723,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Get product-vendor relationships for all products
+                // Get product-vendor relationships for all products with highest priority vendors
                 var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
-                var productVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
+                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
 
-                // Create lookup dictionary for better performance
-                var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                // Create lookup dictionary for better performance - each product maps to its highest priority vendor
+                var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
                 // Group items by vendor using lookup
                 var vendorGroups = allOrderItems
-                    .Where(item => productVendorLookup.Contains(item.Product_ID))
-                    .GroupBy(item => productVendorLookup[item.Product_ID].First())
+                    .Where(item => productVendorLookup.ContainsKey(item.Product_ID))
+                    .GroupBy(item => productVendorLookup[item.Product_ID])
                     .ToDictionary(g => g.Key, g => g.ToList());
 
                 if (!vendorGroups.Any())
@@ -921,17 +921,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                         throw new InvalidOperationException("Không có sản phẩm nào trong các đơn hàng đã xác nhận.");
                     }
 
-                    // Get product-vendor relationships for all products
+                    // Get product-vendor relationships for all products with highest priority vendors
                     var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
-                    var productVendors = await unitOfWork.ProductVendors.GetByProductIdsAsync(productIds);
+                    var productVendors = await unitOfWork.ProductVendors.GetHighestPriorityVendorsByProductIdsAsync(productIds);
 
-                    // Create lookup dictionary for better performance
-                    var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                    // Create lookup dictionary for better performance - each product maps to its highest priority vendor
+                    var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
                     // Group items by vendor using lookup
                     var vendorGroups = allOrderItems
-                        .Where(item => productVendorLookup.Contains(item.Product_ID))
-                        .GroupBy(item => productVendorLookup[item.Product_ID].First())
+                        .Where(item => productVendorLookup.ContainsKey(item.Product_ID))
+                        .GroupBy(item => productVendorLookup[item.Product_ID])
                         .ToDictionary(g => g.Key, g => g.ToList());
 
                     if (!vendorGroups.Any())
@@ -1123,9 +1123,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 );
                 var unitLookup = units.ToDictionary(u => u.ID, u => u);
 
-                // Get product-vendor relationships for all products
-                var productVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
-                var productVendorLookup = productVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                // Get product-vendor relationships for all products with highest priority vendors
+                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
+                var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
                 // Get all available vendors using common service
                 var allVendorsResponse = await _commonService.GetDataOptionsDropdown("", ECategoryType.Vendor);
@@ -1150,7 +1150,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var unit = productGroup.UnitId.HasValue && unitLookup.TryGetValue(productGroup.UnitId.Value, out var u) ? u : null;
 
                     // Get available vendors for this product from product-vendor relationships
-                    var availableVendorIds = productVendorLookup[productGroup.ProductId].ToList();
+                    var availableVendorIds = productVendorLookup.ContainsKey(productGroup.ProductId)
+                        ? new List<int> { productVendorLookup[productGroup.ProductId] }
+                        : new List<int>();
 
                     // Filter all vendors to only those available for this product
                     var availableVendors = new List<VendorOptionViewModel>();

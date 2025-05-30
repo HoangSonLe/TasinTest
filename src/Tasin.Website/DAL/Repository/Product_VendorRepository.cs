@@ -28,5 +28,19 @@ namespace Tasin.Website.DAL.Repository
                 orderBy: q => q.OrderBy(pv => pv.Priority ?? int.MaxValue)
             );
         }
+
+        public async Task<List<Product_Vendor>> GetHighestPriorityVendorsByProductIdsAsync(List<int> productIds)
+        {
+            var allProductVendors = await ReadOnlyRespository.GetAsync(
+                filter: pv => productIds.Contains(pv.Product_ID),
+                orderBy: q => q.OrderBy(pv => pv.Priority ?? int.MaxValue)
+            );
+
+            // Group by Product_ID and take the vendor with highest priority (lowest priority number) for each product
+            return allProductVendors
+                .GroupBy(pv => pv.Product_ID)
+                .Select(g => g.OrderBy(pv => pv.Priority ?? int.MaxValue).First())
+                .ToList();
+        }
     }
 }
