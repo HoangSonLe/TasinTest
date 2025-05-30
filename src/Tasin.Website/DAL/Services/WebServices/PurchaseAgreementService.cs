@@ -1123,9 +1123,13 @@ namespace Tasin.Website.DAL.Services.WebServices
                 );
                 var unitLookup = units.ToDictionary(u => u.ID, u => u);
 
-                // Get product-vendor relationships for all products with highest priority vendors
-                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
-                var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                // Get product-vendor relationships for all products (all vendors, not just highest priority)
+                var allProductVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
+                var productVendorLookup = allProductVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+
+                // Also get highest priority vendors for default selection
+                var highestPriorityProductVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
+                var defaultVendorLookup = highestPriorityProductVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
                 // Get all available vendors using common service
                 var allVendorsResponse = await _commonService.GetDataOptionsDropdown("", ECategoryType.Vendor);
@@ -1150,8 +1154,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var unit = productGroup.UnitId.HasValue && unitLookup.TryGetValue(productGroup.UnitId.Value, out var u) ? u : null;
 
                     // Get available vendors for this product from product-vendor relationships
-                    var availableVendorIds = productVendorLookup.ContainsKey(productGroup.ProductId)
-                        ? new List<int> { productVendorLookup[productGroup.ProductId] }
+                    var availableVendorIds = productVendorLookup.Contains(productGroup.ProductId)
+                        ? productVendorLookup[productGroup.ProductId].ToList()
                         : new List<int>();
 
                     // Filter all vendors to only those available for this product
@@ -1170,8 +1174,10 @@ namespace Tasin.Website.DAL.Services.WebServices
                             }).ToList();
                     }
 
-                    // Use first available vendor as default
-                    var defaultVendorId = availableVendorIds.FirstOrDefault();
+                    // Use highest priority vendor as default, fallback to first available vendor
+                    var defaultVendorId = defaultVendorLookup.TryGetValue(productGroup.ProductId, out var highestPriorityVendorId)
+                        ? highestPriorityVendorId
+                        : availableVendorIds.FirstOrDefault();
                     var defaultVendor = availableVendors.FirstOrDefault(v => v.ID == defaultVendorId);
 
                     var mapping = new ProductVendorMappingViewModel
