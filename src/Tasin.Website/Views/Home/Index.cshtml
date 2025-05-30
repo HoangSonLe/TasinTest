@@ -1,15 +1,112 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Trang chủ";
 }
 
-<div id="events-history-panel" class="report-panel">
-    <div id="events-history-title" class="report-title">
-        
+<div class="container-fluid">
+    <h4 class="demo-section wide title">@ViewData["Title"]</h4>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div id="events-history-panel" class="report-panel">
+                <div id="events-history-title" class="report-title">
+                    <h5>Chào mừng bạn đến với hệ thống!</h5>
+                    <p>Đây là trang chủ của ứng dụng quản lý đơn hàng.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Demo Thông Báo Đẹp</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Nhấn các nút bên dưới để xem thông báo mới với thiết kế đẹp:</p>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success" onclick="showSuccessNotification()">
+                            <i class="fa-solid fa-check-circle me-2"></i>Thông báo thành công
+                        </button>
+
+                        <button type="button" class="btn btn-danger" onclick="showErrorNotification()">
+                            <i class="fa-solid fa-times-circle me-2"></i>Thông báo lỗi
+                        </button>
+
+                        <button type="button" class="btn btn-warning" onclick="showWarningNotification()">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>Thông báo cảnh báo
+                        </button>
+
+                        <button type="button" class="btn btn-info" onclick="showInfoNotification()">
+                            <i class="fa-solid fa-info-circle me-2"></i>Thông báo thông tin
+                        </button>
+
+                        <button type="button" class="btn btn-primary" onclick="showMultipleNotifications()">
+                            <i class="fa-solid fa-layer-group me-2"></i>Nhiều thông báo
+                        </button>
+
+                        <hr class="my-3">
+
+                        <a href="/Home/NotificationDemo" class="btn btn-outline-primary w-100">
+                            <i class="fa-solid fa-external-link-alt me-2"></i>Xem Trang Demo Đầy Đủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-
-
 </div>
 
+@section Scripts {
+    <script>
+        function showSuccessNotification() {
+            notification.show({
+                title: "Thành công!",
+                message: "Thao tác đã được thực hiện thành công. Dữ liệu đã được lưu vào hệ thống."
+            }, "success");
+        }
 
+        function showErrorNotification() {
+            notification.show({
+                title: "Lỗi!",
+                message: "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau hoặc liên hệ quản trị viên."
+            }, "error");
+        }
 
+        function showWarningNotification() {
+            notification.show({
+                title: "Cảnh báo!",
+                message: "Hành động này có thể ảnh hưởng đến dữ liệu. Bạn có chắc chắn muốn tiếp tục?"
+            }, "info");
+        }
+
+        function showInfoNotification() {
+            notification.show({
+                title: "Thông tin",
+                message: "Hệ thống sẽ được bảo trì vào lúc 2:00 AM ngày mai. Vui lòng lưu công việc trước thời gian này."
+            }, "info");
+        }
+
+        function showMultipleNotifications() {
+            setTimeout(() => {
+                notification.show({
+                    title: "Bước 1",
+                    message: "Đang khởi tạo quá trình..."
+                }, "info");
+            }, 100);
+
+            setTimeout(() => {
+                notification.show({
+                    title: "Bước 2",
+                    message: "Đang xử lý dữ liệu..."
+                }, "info");
+            }, 800);
+
+            setTimeout(() => {
+                notification.show({
+                    title: "Hoàn thành!",
+                    message: "Tất cả các bước đã được thực hiện thành công!"
+                }, "success");
+            }, 1500);
+        }
+    </script>
+}

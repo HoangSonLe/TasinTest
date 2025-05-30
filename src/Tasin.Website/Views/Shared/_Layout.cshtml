@@ -28,6 +28,7 @@
     <link href="~/lib/kendo/styles/kendo.common-bootstrap.min.css" rel="stylesheet" />
     <link href="~/lib/kendo/styles/kendo.bootstrap.min.css" rel="stylesheet" />
     <link href="~/lib/kendo/styles/kendo.bootstrap.mobile.min.css" rel="stylesheet" />
+    <link href="~/css/notification-common.css" rel="stylesheet" />
 
     @await RenderSectionAsync("Styles", required: false)
 
@@ -75,48 +76,6 @@
 
         .k-grid table {
             width: 100% !important;
-        }
-
-        /* Notifications */
-        .k-notification h3 {
-            padding: 30px 10px 5px;
-            font-size: 1em;
-            line-height: normal;
-        }
-
-        .k-notification img {
-            margin: 20px;
-            float: left;
-        }
-
-        .k-notification {
-            margin-bottom: 8px;
-        }
-
-        /* Info template */
-        .wrong-temp {
-            background-color: #c1570b;
-            color: black;
-            min-width: 300px;
-            max-width: 400px;
-            min-height: 100px;
-        }
-
-        /* Error template */
-        .wrong-pass {
-            background-color: #ba4e4e;
-            color: black;
-            min-width: 300px;
-            max-width: 400px;
-            min-height: 100px;
-        }
-
-        /* Success template */
-        .upload-success {
-            background-color: #3bb23b;
-            min-width: 300px;
-            max-width: 400px;
-            min-height: 100px;
         }
 
         .customClass {
@@ -274,43 +233,46 @@
 
     <script id="wrongTemplate" type="text/x-kendo-template">
         <div class="wrong-temp">
-            <div class="d-flex flex-column">
-                <div>
-                    <img src="../content/images/notification/error-icon.png" />
-                    <h3>#= title #</h3>
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
                 </div>
-                <div class="px-2">
-                    <p style="word-wrap: break-word;white-space: -moz-pre-wrap;white-space: pre-wrap;text-indent: 10px;">#= message #</p>
+                <div class="notification-text">
+                    <h3 class="notification-title">#= title #</h3>
+                    <p class="notification-message">#= message #</p>
                 </div>
             </div>
+            <div class="notification-progress"></div>
         </div>
     </script>
 
     <script id="errorTemplate" type="text/x-kendo-template">
         <div class="wrong-pass">
-            <div class="d-flex flex-column">
-                <div>
-                    <img src="../content/images/notification/error-icon.png" />
-                    <h3>#= title #</h3>
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="fa-solid fa-times-circle"></i>
                 </div>
-                <div class="px-2">
-                    <p style="word-wrap: break-word;white-space: -moz-pre-wrap;white-space: pre-wrap;text-indent: 10px;">#= message #</p>
+                <div class="notification-text">
+                    <h3 class="notification-title">#= title #</h3>
+                    <p class="notification-message">#= message #</p>
                 </div>
             </div>
+            <div class="notification-progress"></div>
         </div>
     </script>
 
     <script id="successTemplate" type="text/x-kendo-template">
         <div class="upload-success">
-            <div class="d-flex flex-column">
-                <div>
-                    <img src="../content/images/notification/success-icon.png" />
-                    <h3>#= title #</h3>
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="fa-solid fa-check-circle"></i>
                 </div>
-                <div class="px-2">
-                    <p style="word-wrap: break-word;white-space: -moz-pre-wrap;white-space: pre-wrap;text-indent: 10px;">#= message #</p>
+                <div class="notification-text">
+                    <h3 class="notification-title">#= title #</h3>
+                    <p class="notification-message">#= message #</p>
                 </div>
             </div>
+            <div class="notification-progress"></div>
         </div>
     </script>
 

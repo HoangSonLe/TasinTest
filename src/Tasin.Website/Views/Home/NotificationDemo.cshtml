@@ -1,0 +1,516 @@
+@{
+    ViewData["Title"] = "Demo Hệ Thống Thông Báo";
+    Layout = "_Layout";
+}
+
+<style>
+    .demo-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    .demo-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .demo-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+    }
+
+    .demo-section {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .demo-section:last-child {
+        border-bottom: none;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .btn-demo {
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-demo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-demo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-demo:hover::before {
+        left: 100%;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .icon-success {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+
+    .icon-error {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+    }
+
+    .icon-warning {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+    }
+
+    .icon-info {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+    }
+
+    .code-block {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 10px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        overflow-x: auto;
+        margin: 15px 0;
+    }
+
+    .highlight {
+        color: #68d391;
+    }
+
+    .string {
+        color: #fbb6ce;
+    }
+
+    .settings-panel {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .form-range {
+        margin: 10px 0;
+    }
+
+    .badge-demo {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="demo-container">
+    <div class="container">
+        <div class="demo-card">
+            <!-- Header -->
+            <div class="demo-header">
+                <h1 class="mb-3">
+                    <i class="fa-solid fa-bell me-3"></i>
+                    Demo Hệ Thống Thông Báo
+                </h1>
+                <p class="mb-0 fs-5">Trải nghiệm hệ thống thông báo hiện đại với thiết kế đẹp mắt và animations mượt mà
+                </p>
+                <div class="mt-3">
+                    <span class="badge-demo me-2">Modern Design</span>
+                    <span class="badge-demo me-2">Responsive</span>
+                    <span class="badge-demo">Accessible</span>
+                </div>
+            </div>
+
+            <!-- Quick Demo Section -->
+            <div class="demo-section">
+                <h3 class="mb-4">
+                    <i class="fa-solid fa-rocket me-2 text-primary"></i>
+                    Demo Nhanh
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-demo w-100" onclick="showSuccessDemo()">
+                            <i class="fa-solid fa-check-circle me-2"></i>Thành công
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-danger btn-demo w-100" onclick="showErrorDemo()">
+                            <i class="fa-solid fa-times-circle me-2"></i>Lỗi
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-demo w-100" onclick="showWarningDemo()">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>Cảnh báo
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info btn-demo w-100" onclick="showInfoDemo()">
+                            <i class="fa-solid fa-info-circle me-2"></i>Thông tin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="demo-section">
+                <h3 class="mb-4">
+                    <i class="fa-solid fa-star me-2 text-warning"></i>
+                    Tính Năng Nổi Bật
+                </h3>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon icon-success mx-auto">
+                                <i class="fa-solid fa-palette"></i>
+                            </div>
+                            <h5>Thiết Kế Đẹp</h5>
+                            <p class="text-muted small">Gradient backgrounds, rounded corners, và shadows hiện đại</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon icon-info mx-auto">
+                                <i class="fa-solid fa-mobile-alt"></i>
+                            </div>
+                            <h5>Responsive</h5>
+                            <p class="text-muted small">Tự động điều chỉnh cho mọi kích thước màn hình</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon icon-warning mx-auto">
+                                <i class="fa-solid fa-magic"></i>
+                            </div>
+                            <h5>Animations</h5>
+                            <p class="text-muted small">Slide-in mượt mà với progress bar countdown</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon icon-error mx-auto">
+                                <i class="fa-solid fa-universal-access"></i>
+                            </div>
+                            <h5>Accessible</h5>
+                            <p class="text-muted small">Hỗ trợ high contrast và reduced motion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Demo Section -->
+            <div class="demo-section">
+                <h3 class="mb-4">
+                    <i class="fa-solid fa-cogs me-2 text-info"></i>
+                    Demo Nâng Cao
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="settings-panel">
+                            <h5 class="mb-3">Tùy Chỉnh Thông Báo</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label">Loại thông báo:</label>
+                                <select class="form-select" id="notificationType">
+                                    <option value="success">Thành công</option>
+                                    <option value="error">Lỗi</option>
+                                    <option value="info">Thông tin</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Tiêu đề:</label>
+                                <input type="text" class="form-control" id="notificationTitle"
+                                    value="Tiêu đề tùy chỉnh">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nội dung:</label>
+                                <textarea class="form-control" id="notificationMessage"
+                                    rows="3">Đây là nội dung thông báo tùy chỉnh của bạn.</textarea>
+                            </div>
+
+                            <button class="btn btn-primary btn-demo w-100" onclick="showCustomNotification()">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Gửi Thông Báo Tùy Chỉnh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Demo Scenarios</h5>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-demo" onclick="showMultipleNotifications()">
+                                <i class="fa-solid fa-layer-group me-2"></i>Nhiều Thông Báo Liên Tiếp
+                            </button>
+
+                            <button class="btn btn-outline-success btn-demo" onclick="showProgressNotification()">
+                                <i class="fa-solid fa-tasks me-2"></i>Thông Báo Tiến Trình
+                            </button>
+
+                            <button class="btn btn-outline-warning btn-demo" onclick="showLongMessage()">
+                                <i class="fa-solid fa-align-left me-2"></i>Thông Báo Nội Dung Dài
+                            </button>
+
+                            <button class="btn btn-outline-info btn-demo" onclick="showSystemNotifications()">
+                                <i class="fa-solid fa-server me-2"></i>Thông Báo Hệ Thống
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Example Section -->
+            <div class="demo-section">
+                <h3 class="mb-4">
+                    <i class="fa-solid fa-code me-2 text-success"></i>
+                    Cách Sử Dụng
+                </h3>
+
+                <p>Để sử dụng hệ thống thông báo trong ứng dụng của bạn:</p>
+
+                <div class="code-block">
+                    <span class="highlight">// Thông báo thành công</span>
+                    notification.show({
+                    <span class="highlight">title</span>: <span class="string">"Thành công!"</span>,
+                    <span class="highlight">message</span>: <span class="string">"Dữ liệu đã được lưu thành
+                        công."</span>
+                    }, <span class="string">"success"</span>);
+
+                    <span class="highlight">// Thông báo lỗi</span>
+                    notification.show({
+                    <span class="highlight">title</span>: <span class="string">"Lỗi!"</span>,
+                    <span class="highlight">message</span>: <span class="string">"Đã xảy ra lỗi trong quá trình xử
+                        lý."</span>
+                    }, <span class="string">"error"</span>);
+
+                    <span class="highlight">// Thông báo thông tin</span>
+                    notification.show({
+                    <span class="highlight">title</span>: <span class="string">"Thông tin"</span>,
+                    <span class="highlight">message</span>: <span class="string">"Hệ thống sẽ bảo trì vào 2:00
+                        AM."</span>
+                    }, <span class="string">"info"</span>);
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fa-solid fa-lightbulb me-2"></i>
+                    <strong>Mẹo:</strong> Hệ thống tự động hiển thị progress bar và tự ẩn sau 5 giây.
+                    Notifications được stack theo chiều dọc và có animation mượt mà.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            // Demo functions
+            function showSuccessDemo() {
+                notification.show({
+                    title: "Thành công!",
+                    message: "Thao tác đã được thực hiện thành công. Dữ liệu đã được lưu vào hệ thống."
+                }, "success");
+            }
+
+            function showErrorDemo() {
+                notification.show({
+                    title: "Lỗi!",
+                    message: "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng kiểm tra lại thông tin và thử lại."
+                }, "error");
+            }
+
+            function showWarningDemo() {
+                notification.show({
+                    title: "Cảnh báo!",
+                    message: "Hành động này có thể ảnh hưởng đến dữ liệu hiện tại. Bạn có chắc chắn muốn tiếp tục?"
+                }, "info");
+            }
+
+            function showInfoDemo() {
+                notification.show({
+                    title: "Thông tin",
+                    message: "Hệ thống sẽ được bảo trì vào lúc 2:00 AM ngày mai. Vui lòng lưu công việc."
+                }, "info");
+            }
+
+            function showCustomNotification() {
+                const type = document.getElementById('notificationType').value;
+                const title = document.getElementById('notificationTitle').value;
+                const message = document.getElementById('notificationMessage').value;
+
+                notification.show({
+                    title: title || "Tiêu đề",
+                    message: message || "Nội dung thông báo"
+                }, type);
+            }
+
+            function showMultipleNotifications() {
+                const messages = [
+                    { title: "Bước 1", message: "Đang khởi tạo quá trình...", type: "info" },
+                    { title: "Bước 2", message: "Đang xử lý dữ liệu...", type: "info" },
+                    { title: "Bước 3", message: "Đang xác thực thông tin...", type: "info" },
+                    { title: "Hoàn thành!", message: "Tất cả các bước đã được thực hiện thành công!", type: "success" }
+                ];
+
+                messages.forEach((msg, index) => {
+                    setTimeout(() => {
+                        notification.show({
+                            title: msg.title,
+                            message: msg.message
+                        }, msg.type);
+                    }, index * 800);
+                });
+            }
+
+            function showProgressNotification() {
+                const steps = [
+                    "Đang tải dữ liệu... (25%)",
+                    "Đang xử lý thông tin... (50%)",
+                    "Đang lưu kết quả... (75%)",
+                    "Hoàn thành! (100%)"
+                ];
+
+                steps.forEach((step, index) => {
+                    setTimeout(() => {
+                        const isLast = index === steps.length - 1;
+                        notification.show({
+                            title: isLast ? "Thành công!" : "Đang xử lý...",
+                            message: step
+                        }, isLast ? "success" : "info");
+                    }, index * 1000);
+                });
+            }
+
+            function showLongMessage() {
+                notification.show({
+                    title: "Thông báo quan trọng",
+                    message: "Đây là một thông báo có nội dung rất dài để kiểm tra khả năng hiển thị của hệ thống. Thông báo này bao gồm nhiều thông tin chi tiết và có thể xuống dòng để đảm bảo người dùng có thể đọc được toàn bộ nội dung một cách dễ dàng và thuận tiện."
+                }, "info");
+            }
+
+            function showSystemNotifications() {
+                const systemMessages = [
+                    { title: "Hệ thống", message: "Đã kết nối thành công đến server", type: "success" },
+                    { title: "Bảo mật", message: "Phiên đăng nhập sẽ hết hạn sau 5 phút", type: "info" },
+                    { title: "Cập nhật", message: "Có phiên bản mới của ứng dụng", type: "info" },
+                    { title: "Sao lưu", message: "Dữ liệu đã được sao lưu tự động", type: "success" }
+                ];
+
+                systemMessages.forEach((msg, index) => {
+                    setTimeout(() => {
+                        notification.show({
+                            title: msg.title,
+                            message: msg.message
+                        }, msg.type);
+                    }, index * 600);
+                });
+            }
+
+            // Add some interactive effects
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add hover effects to feature cards
+                const featureCards = document.querySelectorAll('.feature-card');
+                featureCards.forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-5px) scale(1.02)';
+                    });
+
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                });
+
+                // Add ripple effect to buttons
+                const buttons = document.querySelectorAll('.btn-demo');
+                buttons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        const ripple = document.createElement('span');
+                        const rect = this.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.cssText = `
+                            position: absolute;
+                            width: ${size}px;
+                            height: ${size}px;
+                            left: ${x}px;
+                            top: ${y}px;
+                            background: rgba(255, 255, 255, 0.5);
+                            border-radius: 50%;
+                            transform: scale(0);
+                            animation: ripple 0.6s linear;
+                            pointer-events: none;
+                        `;
+
+                        this.appendChild(ripple);
+
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 600);
+                    });
+                });
+
+                // Add CSS for ripple animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @@keyframes ripple {
+                        to {
+                            transform: scale(4);
+                            opacity: 0;
+                        }
+                    }
+                    .btn-demo {
+                        position: relative;
+                        overflow: hidden;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+        </script>
+}

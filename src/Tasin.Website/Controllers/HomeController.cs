@@ -32,6 +32,12 @@ namespace Tasin.Website.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult NotificationDemo()
+        {
+            return View();
+        }
+
 
 
         public IActionResult Privacy()

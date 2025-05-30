@@ -619,7 +619,7 @@
 
         ajax("POST", "/PurchaseAgreement/CreatePAGroupWithCustomMapping", request, function (response) {
             if (response.isSuccess) {
-                showSuccessMessages(["Tạo tổng hợp đơn với mapping tùy chỉnh thành công!"]);
+                showSuccessMessages(["Tạo tổng hợp đơn thành công!"]);
                 $(gridId).data("kendoGrid").dataSource.filter({});
             } else {
                 showErrorMessages(response.errorMessageList || ["Có lỗi xảy ra khi tạo tổng hợp đơn"]);

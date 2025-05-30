@@ -1404,7 +1404,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 // Rollback transaction on any error
                 await transaction.RollbackAsync();
 
-                ack.AddMessage($"Lỗi khi tạo PA tổng hợp với mapping tùy chỉnh: {ex.Message}");
+                ack.AddMessage($"Lỗi khi tạo PA tổng hợp: {ex.Message}");
                 _logger.LogError(ex, "Error creating PA group with custom mapping - Transaction rolled back");
             }
             return ack;
