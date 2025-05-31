@@ -8,8 +8,8 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
     {
         public void Configure(EntityTypeBuilder<Purchase_Order_Item> builder)
         {
-            // Primary key
-            builder.HasKey(p => new { p.PO_ID, p.ID });
+            // Primary key - Use ID as single primary key
+            builder.HasKey(p => p.ID);
 
             // Properties
             builder.Property(p => p.PO_ID).HasColumnName("PO_ID").IsRequired();
@@ -30,18 +30,23 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
                 .WithMany(p => p.PurchaseOrderItems)
                 .HasForeignKey(p => p.PO_ID)
                 .OnDelete(DeleteBehavior.Cascade);
-                
+
             builder.HasOne(p => p.Product)
                 .WithMany(p => p.PurchaseOrderItems)
                 .HasForeignKey(p => p.Product_ID);
-                
+
             builder.HasOne(p => p.Unit)
                 .WithMany(p => p.PurchaseOrderItems)
                 .HasForeignKey(p => p.Unit_ID);
-                
+
             builder.HasOne(p => p.ProcessingType)
                 .WithMany(p => p.PurchaseOrderItems)
                 .HasForeignKey(p => p.ProcessingType_ID);
+
+            // Indexes
+            builder.HasIndex(p => new { p.PO_ID, p.Product_ID })
+                .HasDatabaseName("IX_Purchase_Order_Item_PO_Product")
+                .IsUnique();
 
             // Table
             builder.ToTable("Purchase_Order_Item");

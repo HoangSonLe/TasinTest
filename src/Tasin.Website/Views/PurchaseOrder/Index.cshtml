@@ -680,8 +680,8 @@
                             </div>
                             <div class="grid-col-4-1">
                                 <div class="form-group">
-                                    <label>Lợi nhuận (%)</label>
-                                    <input type="number" id="item-profitMargin" class="form-control" step="0.1" min="0"/>
+                                    <label>Thành tiền</label>
+                                    <input type="number" id="item-totalAmount" class="form-control" step="0.01" min="0" readonly/>
                                 </div>
                             </div>
                         </div>
@@ -888,12 +888,12 @@
                     loadProductDetails(selectedProduct.value);
                 } else {
                     // Clear product details if no valid selection
-                    $("#item-unitName").val('');
+                    $("#item-unitName").val('').removeData("unitId");
                     $("#item-price").val('');
                     $("#item-taxRate").val('');
                     $("#item-lossRate").val('');
                     $("#item-processingFee").val('');
-                    $("#item-profitMargin").val('');
+                    $("#item-totalAmount").val('');
 
                     // Clear processing type dropdown
                     var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
@@ -1006,11 +1006,10 @@
                             lossRate: { type: "number" },
                             taxRate: { type: "number" },
                             processingFee: { type: "number" },
-                            profitMargin: { type: "number" },
+                            totalAmount: { type: "number" },
                             processingTypeId: { type: "number" },
                             processingTypeName: { type: "string" },
-                            note: { type: "string" },
-                            totalAmount: { type: "number" }
+                            note: { type: "string" }
                         }
                     }
                 }
@@ -1023,10 +1022,9 @@
                 { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
                 { field: "taxRate", title: "Thuế (%)", width: "80px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
-                { field: "profitMargin", title: "Lợi nhuận (%)", width: "90px", template: "#= profitMargin ? kendo.toString(profitMargin, 'n1') + '%' : '' #" },
+                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
                 { field: "processingTypeName", title: "Loại gia công", width: "120px" },
                 { field: "note", title: "Ghi chú", width: "150px" },
-                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
                 {
                     title: "Thao tác",
                     width: "80px",
@@ -1473,13 +1471,16 @@
             if (response.isSuccess && response.data) {
                 var product = response.data;
                 $("#item-unitName").val(product.unitName || '');
+                $("#item-unitName").data("unitId", product.unit_ID || null); // Store unit_ID for later use
                 $("#item-price").val(product.profitMargin || 0); // Đơn giá = profitMargin
                 $("#item-taxRate").val(product.taxRate || 0);
 
                 // Auto-fill the requested fields
                 $("#item-lossRate").val(product.lossRate || 0);
                 $("#item-processingFee").val(product.processingFee || 0);
-                $("#item-profitMargin").val(product.profitMargin || 0);
+
+                // Calculate total amount when product is loaded
+                calculateTotalAmount();
 
                 // Auto-fill processing type dropdown
                 if (product.processingType_ID) {
@@ -1498,6 +1499,16 @@
         }, false);
     }
 
+    // Function to calculate total amount: (Đơn giá * Số lượng) + (Phí gia công * Số lượng)
+    function calculateTotalAmount() {
+        var quantity = parseFloat($("#item-quantity").val()) || 0;
+        var price = parseFloat($("#item-price").val()) || 0;
+        var processingFee = parseFloat($("#item-processingFee").val()) || 0;
+
+        var totalAmount = (price * quantity) + (processingFee * quantity);
+        $("#item-totalAmount").val(totalAmount.toFixed(2));
+    }
+
     function addItemToGrid() {
         var productDropdown = $("#item-productId").data("kendoComboBox");
         var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
@@ -1506,11 +1517,12 @@
         var productName = productDropdown ? productDropdown.text() : "";
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var unitName = $("#item-unitName").val();
+        var unitId = $("#item-unitName").data("unitId"); // Get stored unit_ID
         var price = parseFloat($("#item-price").val()) || 0;
         var lossRate = parseFloat($("#item-lossRate").val()) || 0;
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
-        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0;
+        var totalAmount = parseFloat($("#item-totalAmount").val()) || 0;
         var processingTypeId = processingTypeDropdown.value();
         var processingTypeName = processingTypeDropdown.text();
         var note = $("#item-note").val();
@@ -1525,14 +1537,8 @@
             return;
         }
 
-        // Calculate total amount
-        var baseAmount = quantity * price;
-        var lossAmount = baseAmount * (lossRate / 100);
-        var totalBeforeTax = baseAmount + lossAmount + processingFee;
-        var profitAmount = totalBeforeTax * (profitMargin / 100);
-        var totalAfterProfit = totalBeforeTax + profitAmount;
-        var taxAmount = totalAfterProfit * (taxRate / 100);
-        var totalAmount = totalAfterProfit + taxAmount;
+        // Recalculate total amount to ensure accuracy
+        var calculatedTotalAmount = (price * quantity) + (processingFee * quantity);
 
         var newItem = {
             tempId: generateTempId(),
@@ -1540,15 +1546,15 @@
             productName: productName,
             quantity: quantity,
             unitName: unitName,
+            unitId: unitId, // Include unit_ID
             price: price,
             lossRate: lossRate,
             taxRate: taxRate,
             processingFee: processingFee,
-            profitMargin: profitMargin,
+            totalAmount: calculatedTotalAmount,
             processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
             processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName,
-            note: note,
-            totalAmount: totalAmount
+            note: note
         };
 
         var grid = $("#itemsGrid").data("kendoGrid");
@@ -1576,12 +1582,12 @@
             productComboBox.value("");
         }
         $("#item-quantity").val("");
-        $("#item-unitName").val("");
+        $("#item-unitName").val("").removeData("unitId");
         $("#item-price").val("");
         $("#item-lossRate").val("");
         $("#item-taxRate").val("");
         $("#item-processingFee").val("");
-        $("#item-profitMargin").val("");
+        $("#item-totalAmount").val("");
         var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
         if (processingTypeDropdown) {
             processingTypeDropdown.value("");
@@ -1652,6 +1658,7 @@
                             productName: item.productName,
                             quantity: item.quantity,
                             unitName: item.unitName,
+                            unitId: item.unit_ID || item.unitId, // Include unit_ID for existing items
                             price: item.price,
                             lossRate: item.lossRate,
                             taxRate: item.taxRate,
@@ -1707,15 +1714,18 @@
             status: status || 0,
             purchaseOrderItems: items.map(function (item) {
                 return {
-                    productId: item.productId,
+                    id: 0, // Always 0 for new items
+                    po_ID: 0, // Will be set by the server
+                    product_ID: item.productId,
                     quantity: item.quantity,
+                    unit_ID: item.unitId, // Use captured unit_ID from product
                     price: item.price,
-                    lossRate: item.lossRate,
                     taxRate: item.taxRate,
+                    processingType_ID: item.processingTypeId,
+                    lossRate: item.lossRate,
                     processingFee: item.processingFee,
-                    profitMargin: item.profitMargin,
-                    processingTypeId: item.processingTypeId,
-                    note: item.note
+                    note: item.note,
+                    profitMargin: item.profitMargin
                 };
             })
         };
@@ -1739,6 +1749,11 @@
     InitKendoToolBar();
     $(document).ready(function () {
         $(window).trigger("resize");
+
+        // Add event listeners for automatic total amount calculation
+        $(document).on('input', '#item-quantity, #item-price, #item-processingFee', function () {
+            calculateTotalAmount();
+        });
 
         // Auto load data with default filter (last 1 month)
         setTimeout(function () {

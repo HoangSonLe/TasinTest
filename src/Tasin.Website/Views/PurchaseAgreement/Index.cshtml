@@ -532,6 +532,24 @@
                                 <input type="number" id="itemPrice" class="form-control" min="0" step="0.01" />
                             </div>
                             <div class="form-group">
+                                <label>Hao hụt (%)</label>
+                                <input type="number" id="itemLossRate" class="form-control" min="0" step="0.1" />
+                            </div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="form-group">
+                                <label>Phí gia công</label>
+                                <input type="number" id="itemProcessingFee" class="form-control" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label>Loại gia công</label>
+                                <select id="itemProcessingTypeId" class="form-control"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Thành tiền</label>
+                                <input type="number" id="itemTotalAmount" class="form-control" min="0" step="0.01" readonly />
+                            </div>
+                            <div class="form-group">
                                 <label>&nbsp;</label>
                                 <button type="button" id="addItemBtn" class="btn btn-primary form-control">
                                     <i class="fas fa-plus"></i> Thêm
@@ -669,12 +687,37 @@
                     $("#itemPrice").val("");
                     $("#itemLossRate").val("");
                     $("#itemProcessingFee").val("");
-                    $("#itemProfitMargin").val("");
+                    $("#itemTotalAmount").val("");
 
                     // Clear processing type dropdown if it exists
                     var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
                     if (processingTypeDropdown) {
                         processingTypeDropdown.value('');
+                    }
+                }
+            }
+        });
+
+        // Initialize processing type dropdown
+        $("#itemProcessingTypeId").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "dataRaw",
+            optionLabel: "-- Chọn loại gia công --",
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Common/GetDataOptionsDropdown",
+                        data: { type: "ProcessingType" }
+                    }
+                },
+                schema: {
+                    parse: function (response) {
+                        if (response && response.isSuccess && response.data) {
+                            return response.data.filter(function (item) {
+                                return item && item.text && item.dataRaw !== undefined;
+                            });
+                        }
+                        return [];
                     }
                 }
             }
@@ -699,21 +742,25 @@
                     model: {
                         fields: {
                             quantity: { type: "number" },
-                            price: { type: "number" }
+                            price: { type: "number" },
+                            lossRate: { type: "number" },
+                            processingFee: { type: "number" },
+                            totalAmount: { type: "number" },
+                            processingTypeId: { type: "number" },
+                            processingTypeName: { type: "string" }
                         }
                     }
                 }
             },
             columns: [
-                { field: "productName", title: "Sản phẩm", width: "200px" },
-                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n0') #" },
+                { field: "productName", title: "Sản phẩm", width: "150px" },
+                { field: "quantity", title: "Số lượng", width: "80px", template: "#= kendo.toString(quantity, 'n2') #" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
-                {
-                    title: "Thành tiền",
-                    width: "120px",
-                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ"
-                },
+                { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
+                { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
+                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
+                { field: "processingTypeName", title: "Loại gia công", width: "120px" },
                 {
                     title: "Thao tác",
                     width: "80px",
@@ -740,6 +787,12 @@
             var quantity = parseFloat($("#itemQuantity").val()) || 0;
             var unitName = $("#itemUnitName").val();
             var price = parseFloat($("#itemPrice").val()) || 0;
+            var lossRate = parseFloat($("#itemLossRate").val()) || 0;
+            var processingFee = parseFloat($("#itemProcessingFee").val()) || 0;
+            var totalAmount = parseFloat($("#itemTotalAmount").val()) || 0;
+            var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
+            var processingTypeId = processingTypeDropdown ? processingTypeDropdown.value() : null;
+            var processingTypeName = processingTypeDropdown ? processingTypeDropdown.text() : "";
 
             if (!productId || quantity <= 0 || price < 0) {
                 showErrorMessage("Vui lòng nhập đầy đủ thông tin sản phẩm hợp lệ.");
@@ -756,13 +809,21 @@
                 return;
             }
 
+            // Recalculate total amount to ensure accuracy
+            var calculatedTotalAmount = (price * quantity) + (processingFee * quantity);
+
             var newItem = {
                 tempId: tempItemId++,
                 product_ID: parseInt(productId),
                 productName: productName,
                 quantity: quantity,
                 unitName: unitName,
-                price: price
+                price: price,
+                lossRate: lossRate,
+                processingFee: processingFee,
+                totalAmount: calculatedTotalAmount,
+                processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
+                processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName
             };
 
             dataSource.add(newItem);
@@ -772,6 +833,12 @@
             $("#itemQuantity").val("");
             $("#itemUnitName").val("");
             $("#itemPrice").val("");
+            $("#itemLossRate").val("");
+            $("#itemProcessingFee").val("");
+            $("#itemTotalAmount").val("");
+            if (processingTypeDropdown) {
+                processingTypeDropdown.value("");
+            }
 
             // Update total price
             updateTotalPrice();
@@ -783,7 +850,7 @@
             var total = 0;
 
             items.forEach(function (item) {
-                total += (item.quantity || 0) * (item.price || 0);
+                total += item.totalAmount || ((item.quantity || 0) * (item.price || 0) + (item.processingFee || 0) * (item.quantity || 0));
             });
 
             $("#formTotalPrice").val(kendo.toString(total, 'n0'));
@@ -811,7 +878,6 @@
                     // Auto-fill the requested fields
                     $("#itemLossRate").val(product.lossRate || 0);
                     $("#itemProcessingFee").val(product.processingFee || 0);
-                    $("#itemProfitMargin").val(product.profitMargin || 0);
 
                     // Auto-fill processing type dropdown if it exists
                     if (product.processingType_ID) {
@@ -820,8 +886,21 @@
                             processingTypeDropdown.value(product.processingType_ID);
                         }
                     }
+
+                    // Calculate total amount when product is loaded
+                    calculatePATotalAmount();
                 }
             });
+        }
+
+        // Function to calculate total amount for PA: (Đơn giá * Số lượng) + (Phí gia công * Số lượng)
+        function calculatePATotalAmount() {
+            var quantity = parseFloat($("#itemQuantity").val()) || 0;
+            var price = parseFloat($("#itemPrice").val()) || 0;
+            var processingFee = parseFloat($("#itemProcessingFee").val()) || 0;
+
+            var totalAmount = (price * quantity) + (processingFee * quantity);
+            $("#itemTotalAmount").val(totalAmount.toFixed(2));
         }
 
         function savePurchaseAgreement() {
@@ -877,5 +956,13 @@
         window.open(`/PurchaseAgreement/ExportExcel?${params}`, '_blank');
     }
 
+    // Add event listeners for automatic total amount calculation in PA forms
+    $(document).ready(function () {
+        $(document).on('input', '#itemQuantity, #itemPrice, #itemProcessingFee', function () {
+            if (typeof calculatePATotalAmount === 'function') {
+                calculatePATotalAmount();
+            }
+        });
+    });
 
 </script>
