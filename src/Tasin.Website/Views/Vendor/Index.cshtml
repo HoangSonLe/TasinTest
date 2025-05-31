@@ -5,7 +5,7 @@
 @section Styles {
     <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
     <link href="~/css/toolbar-common.css" rel="stylesheet" />
-    <link href="~/css/vendor-form.css" rel="stylesheet" />
+@* <link href="~/css/vendor-form.css" rel="stylesheet" /> *@
 }
 
 <div>
@@ -30,8 +30,25 @@
 
     function addVendorProduct(vendorId) {
         let myWindow = $("#window");
-        $("#window").html("<div class='vendor-product-container'><div id='productVendorGrid'></div></div>");
+        $("#window").html(`
+            <div class="product-vendor-popup">
+                <div class="search-container">
+                    <div class="row mb-3 gx-0">
+                        <div class="col-md-12">
+                            <div class="search-input-wrapper">
+                                <input type="text" id="productSearchInput" class="search-input"
+                                       placeholder="Nhập tên sản phẩm hoặc mô tả để tìm kiếm..." />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div id='productVendorGrid'></div>
+                </div>
+            </div>
+        `);
 
+        $("#productSearchInput").kendoTextBox({});
         let title = "THÊM NHIỀU HÀNG HOÁ CHO NHÀ CUNG CẤP";
 
         // Function to initialize the grid with data
@@ -65,12 +82,17 @@
                 resizable: true,
                 editable: {
                     mode: "incell",
-                    createAt: "bottom"
+                    createAt: "top"
                 },
                 toolbar: [
-                    { name: "create", text: "Thêm sản phẩm", iconClass: "k-icon k-i-plus" },
-                    { name: "save", text: "Lưu tất cả", iconClass: "k-icon k-i-save" },
-                    { name: "cancel", text: "Hủy", iconClass: "k-icon k-i-cancel" }
+                    { name: "create", text: "Thêm sản phẩm", iconClass: "k-icon k-i-plus",
+                        className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-success"
+                    },
+                    { name: "save", text: "Lưu tất cả", iconClass: "k-icon k-i-save",
+                        className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary"
+                    },
+                    { name: "cancel", text: "Hủy", iconClass: "k-icon k-i-cancel",
+                        className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"}
                 ],
                 columns: [
                     {
@@ -85,6 +107,7 @@
                                 .kendoDropDownList({
                                     dataTextField: "name",
                                     dataValueField: "id",
+                                    filter: filterCustom,
                                     dataSource: {
                                         transport: {
                                             read: {
@@ -142,22 +165,7 @@
                             return dataItem.ProductName || "";
                         }
                     },
-                    {
-                        field: "Price",
-                        title: "Giá bán",
-                        width: 130,
-                        format: "{0:n0}",
-                        headerAttributes: { style: "text-align: center; font-weight: 600;" },
-                        attributes: { style: "text-align: right;" },
-                        editor: function (container, options) {
-                            $('<input data-bind="value:' + options.field + '"/>')
-                                .appendTo(container)
-                                .kendoNumericTextBox({
-                                    format: "n0",
-                                    decimals: 0
-                                });
-                        }
-                    },
+
                     {
                         field: "UnitPrice",
                         title: "Đơn giá",
@@ -198,7 +206,10 @@
                         attributes: { style: "text-align: left;" }
                     },
                     {
-                        command: ["destroy"],
+                        command: [
+                            { name: "destroy", text: "Xoá",className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"}
+                        ],
+                        
                         title: "Thao tác",
                         width: 120,
                         headerAttributes: { style: "text-align: center; font-weight: 600;" },
@@ -214,6 +225,52 @@
             $("#productVendorGrid").on("click", ".k-grid-save-changes", function (e) {
                 e.preventDefault();
                 saveAllProductVendors(vendorId);
+            });
+
+            // Handle search functionality with debounce for better performance
+            let searchTimeout;
+            $("#productSearchInput").on("input", function () {
+                clearTimeout(searchTimeout);
+
+                // Show loading state
+                $("#searchResultCount").html('<i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...');
+                $("#searchResultCount").addClass('search-loading');
+
+                searchTimeout = setTimeout(() => {
+                var searchValue = $(this).val().trim();
+                var grid = $("#productVendorGrid").data("kendoGrid");
+
+                if (searchValue === "") {
+                    grid.dataSource.filter({});
+                } else {
+                    // Search in multiple fields: ProductName and Description (case-insensitive)
+                    grid.dataSource.filter({
+                        logic: "or",
+                        filters: [
+                            {
+                                field: "ProductName",
+                                operator: filterCustom,
+                                value: searchValue,
+                                ignoreCase: true
+                            },
+                            {
+                                field: "Description",
+                                operator: filterCustom,
+                                value: searchValue,
+                                ignoreCase: true
+                            }
+                        ]
+                    });
+                }
+                }, 300); // 300ms debounce
+            });
+
+             // Handle Enter key for search
+            $("#productSearchInput").on("keypress", function (e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    $(this).trigger("input");
+                }
             });
 
             function remove() {
@@ -249,7 +306,6 @@
                 productVendorData = response.data.map(item => ({
                     Product_ID: item.product_ID,
                     ProductName: item.productName,
-                    Price: item.price,
                     UnitPrice: item.unitPrice,
                     Priority: item.priority,
                     Description: item.description
@@ -285,7 +341,6 @@
 
             products.push({
                 Product_ID: item.Product_ID,
-                Price: item.Price || 0,
                 UnitPrice: item.UnitPrice || 0,
                 Priority: item.Priority || 1,
                 Description: item.Description || ""
@@ -709,7 +764,7 @@
         color: white;
     }
 
-    .btn-add:hover {
-        background: #218838;
-    }
+        .btn-add:hover {
+            background: #218838;
+        }
 </style>

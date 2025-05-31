@@ -129,7 +129,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         Vendor_ID = e.Vendor_ID,
                         Product_ID = e.Product_ID,
-                        Price = e.Price,
                         UnitPrice = e.UnitPrice,
                         Priority = e.Priority,
                         Description = e.Description,
@@ -318,7 +317,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         // Update existing relationship
                         var existing = existingRelationships.First(pv => pv.Product_ID == productItem.Product_ID);
-                        existing.Price = productItem.Price;
                         existing.UnitPrice = productItem.UnitPrice;
                         existing.Priority = productItem.Priority;
                         existing.Description = productItem.Description;
@@ -331,7 +329,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                         {
                             Vendor_ID = model.VendorId,
                             Product_ID = productItem.Product_ID,
-                            Price = productItem.Price,
                             UnitPrice = productItem.UnitPrice,
                             Priority = productItem.Priority,
                             Description = productItem.Description

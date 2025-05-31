@@ -95,11 +95,6 @@ namespace Tasin.Website.Models.ViewModels
         public int Product_ID { get; set; }
 
         /// <summary>
-        /// Price
-        /// </summary>
-        public decimal? Price { get; set; }
-
-        /// <summary>
         /// Unit Price
         /// </summary>
         public decimal? UnitPrice { get; set; }
