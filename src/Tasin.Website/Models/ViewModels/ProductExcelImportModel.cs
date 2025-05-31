@@ -76,12 +76,12 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Company tax rate (%)
         /// </summary>
-        public decimal CompanyTaxRate { get; set; }
+        public decimal? CompanyTaxRate { get; set; }
 
         /// <summary>
         /// Consumer tax rate (%)
         /// </summary>
-        public decimal ConsumerTaxRate { get; set; }
+        public decimal? ConsumerTaxRate { get; set; }
 
         /// <summary>
         /// Note

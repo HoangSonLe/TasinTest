@@ -23,11 +23,12 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.IsMaterial).HasColumnName("IsMaterial").HasDefaultValue(false);
             builder.Property(p => p.ProfitMargin).HasColumnName("ProfitMargin").HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.DefaultPrice).HasColumnName("DefaultPrice").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.Note).HasColumnName("Note").HasColumnType("TEXT");
             builder.Property(p => p.IsDiscontinued).HasColumnName("IsDiscontinued").HasDefaultValue(false);
             builder.Property(p => p.ProcessingFee).HasColumnName("ProcessingFee").HasColumnType("NUMERIC(18, 2)");
-            builder.Property(p => p.CompanyTaxRate).HasColumnName("CompanyTaxRate").IsRequired().HasColumnType("NUMERIC(5, 2)");
-            builder.Property(p => p.ConsumerTaxRate).HasColumnName("ConsumerTaxRate").IsRequired().HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.CompanyTaxRate).HasColumnName("CompanyTaxRate").HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.ConsumerTaxRate).HasColumnName("ConsumerTaxRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.SpecialProductTaxRate_ID).HasColumnName("SpecialProductTaxRate_ID");
             builder.Property(p => p.Status).HasColumnName("Status").HasMaxLength(50);
             builder.Property(p => p.IsActive).HasColumnName("IsActive").HasDefaultValue(true);

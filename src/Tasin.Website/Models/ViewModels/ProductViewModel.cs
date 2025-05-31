@@ -125,13 +125,13 @@ namespace Tasin.Website.Models.ViewModels
         /// Company Tax Rate
         /// </summary>
         [Display(Name = "CompanyTaxRate")]
-        public decimal CompanyTaxRate { get; set; }
+        public decimal? CompanyTaxRate { get; set; }
 
         /// <summary>
         /// Consumer Tax Rate
         /// </summary>
         [Display(Name = "ConsumerTaxRate")]
-        public decimal ConsumerTaxRate { get; set; }
+        public decimal? ConsumerTaxRate { get; set; }
 
         /// <summary>
         /// Special Product Tax Rate ID

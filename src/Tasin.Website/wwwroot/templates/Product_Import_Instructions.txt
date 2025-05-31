@@ -8,8 +8,8 @@ HƯỚNG DẪN IMPORT SẢN PHẨM
 2. Các cột tùy chọn:
    - Tên tiếng Anh: Có thể để trống
    - Mã đơn vị: Phải tồn tại trong hệ thống (ví dụ: KG, THUNG, CAI)
-   - Mã danh mục: Phải tồn tại trong hệ thống
-   - Mã loại chế biến: Phải tồn tại trong hệ thống
+   - Mã quy cách: Phải tồn tại trong hệ thống
+   - Mã phân loại: Phải tồn tại trong hệ thống
    - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0
    - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống
    - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)
@@ -27,9 +27,8 @@ HƯỚNG DẪN IMPORT SẢN PHẨM
 
 4. Các mã thường dùng:
    - Đơn vị: KG, THUNG, CAI, GOI, HOP
-   - Danh mục: CAT001, CAT002, CAT003
-   - Loại chế biến: PT001, PT002, PT003
-   - Nguyên liệu: MAT001, MAT002, MAT003
+   - Quy cách: CAT001, CAT002, CAT003
+   - Phân loại: PT001, PT002, PT003
 
 5. Quy trình import:
    - Tải file mẫu từ hệ thống

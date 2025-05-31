@@ -20,8 +20,8 @@ namespace Tasin.Website.Scripts
                     "Tên sản phẩm (*)",
                     "Tên tiếng Anh",
                     "Mã đơn vị",
-                    "Mã danh mục",
-                    "Mã loại chế biến",
+                    "Mã quy cách",
+                    "Mã phân loại",
                     "Là nguyên liệu (Y/N)",
                     "Mã thuế suất đặc biệt",
                     "Thuế suất (%)",
@@ -29,8 +29,8 @@ namespace Tasin.Website.Scripts
                     "Tỷ lệ lợi nhuận (%)",
                     "Phí chế biến",
                     "Đơn giá mặc định",
-                    "Thuế suất công ty (%)",
-                    "Thuế suất người tiêu dùng (%)",
+                    "Thuế suất công ty (%) - Tùy chọn",
+                    "Thuế suất người tiêu dùng (%) - Tùy chọn",
                     "Ghi chú",
                     "Ngừng sản xuất (Y/N)"
                 };
@@ -100,8 +100,8 @@ namespace Tasin.Website.Scripts
                     "2. Các cột tùy chọn:",
                     "   - Tên tiếng Anh: Có thể để trống",
                     "   - Mã đơn vị: Phải tồn tại trong hệ thống (ví dụ: KG, THUNG, CAI)",
-                    "   - Mã danh mục: Phải tồn tại trong hệ thống",
-                    "   - Mã loại chế biến: Phải tồn tại trong hệ thống",
+                    "   - Mã quy cách: Phải tồn tại trong hệ thống",
+                    "   - Mã phân loại: Phải tồn tại trong hệ thống",
                     "   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0",
                     "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
                     "   - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)",
@@ -119,8 +119,8 @@ namespace Tasin.Website.Scripts
                     "",
                     "4. Các mã thường dùng:",
                     "   - Đơn vị: KG, THUNG, CAI, GOI, HOP",
-                    "   - Danh mục: CAT001, CAT002, CAT003",
-                    "   - Loại chế biến: PT001, PT002, PT003",
+                    "   - Quy cách: CAT001, CAT002, CAT003",
+                    "   - Phân loại: PT001, PT002, PT003",
                     "   - Nguyên liệu: MAT001, MAT002, MAT003"
                 };
 

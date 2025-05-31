@@ -23,8 +23,8 @@ namespace Tasin.Website.Domains.Entitites
         public string? Note { get; set; }
         public bool IsDiscontinued { get; set; } = false;
         public decimal? ProcessingFee { get; set; }
-        public decimal CompanyTaxRate { get; set; }
-        public decimal ConsumerTaxRate { get; set; }
+        public decimal? CompanyTaxRate { get; set; }
+        public decimal? ConsumerTaxRate { get; set; }
         public int? SpecialProductTaxRate_ID { get; set; }
 
         // Navigation properties

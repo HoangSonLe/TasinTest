@@ -49,6 +49,7 @@
             // status: "",
             ...dataProduct
         };
+
         let strSubmit = "Thêm";
         let title = "THÊM MỚI"
         let element;
@@ -66,6 +67,17 @@
             type: "group",
             items: [
                 // ===== NHÓM 1: THÔNG TIN CỞ BẢN =====
+                {
+                    field: "code",
+                    title: "Mã hàng hoá",
+                    label: "Mã hàng hoá:",
+                    colSpan: 1,
+                    attributes: {
+                        placeholder: "Mã sẽ được sinh tự động...",
+                        disabled: true,
+                        readonly: true
+                    }
+                },
                 {
                     field: "name",
                     title: "Hàng hoá",
@@ -85,9 +97,13 @@
                 {
                     field: "unit_ID",
                     title: "Đơn vị",
-                    label: "Đơn vị:",
+                    label: "Đơn vị (*):",
                     colSpan: 1,
                     editor: "DropDownList",
+                    validation: {
+                        validationMessage: "Vui lòng chọn đơn vị",
+                        required: true
+                    },
                     editorOptions: {
                         optionLabel: "Chọn đơn vị",
                         dataTextField: "name",
@@ -101,7 +117,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -118,6 +133,16 @@
                                 total: "data.total"
                             },
                         },
+                        select: function (e) {
+                            // Ensure only ID is set, not the whole object
+                            var dataItem = e.dataItem;
+                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
+                                // Force set the value to ID only after selection
+                                setTimeout(() => {
+                                    this.value(dataItem.id);
+                                }, 0);
+                            }
+                        }
                     },
                 },
                 {
@@ -139,7 +164,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -156,6 +180,16 @@
                                 total: "data.total"
                             },
                         },
+                        select: function (e) {
+                            // Ensure only ID is set, not the whole object
+                            var dataItem = e.dataItem;
+                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
+                                // Force set the value to ID only after selection
+                                setTimeout(() => {
+                                    this.value(dataItem.id);
+                                }, 0);
+                            }
+                        }
                     },
                 },
 
@@ -179,7 +213,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -196,6 +229,16 @@
                                 total: "data.total"
                             },
                         },
+                        select: function (e) {
+                            // Ensure only ID is set, not the whole object
+                            var dataItem = e.dataItem;
+                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
+                                // Force set the value to ID only after selection
+                                setTimeout(() => {
+                                    this.value(dataItem.id);
+                                }, 0);
+                            }
+                        }
                     },
                 },
                 {
@@ -250,7 +293,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -264,9 +306,33 @@
                             pageSize: 9999,
                             schema: {
                                 data: "data.data",
-                                total: "data.total"
+                                total: "data.total",
+                                model: {
+                                    id: "id",
+                                    fields: {
+                                        id: { type: "number" },
+                                        name: { type: "string" }
+                                    }
+                                }
                             },
                         },
+                        select: function (e) {
+                            // Ensure only ID is set, not the whole object
+                            var dataItem = e.dataItem;
+                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
+                                // Force set the value to ID only after selection
+                                setTimeout(() => {
+                                    this.value(dataItem.id);
+                                }, 0);
+                            }
+                        },
+                        change: function (e) {
+                            // Double check to ensure only ID is set
+                            var value = this.value();
+                            if (value && typeof value === 'object' && value.id) {
+                                this.value(value.id);
+                            }
+                        }
                     },
                 },
 
@@ -348,6 +414,14 @@
             },
             submit: function (e) {
                 e.preventDefault();
+
+                // Validate form before submitting
+                var form = $("#formCreateAndEdit").data("kendoForm");
+                if (!form.validate()) {
+                    kendo.alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+                    return;
+                }
+
                 let dataItem = {
                     ...formData,
                     ...e.model,
