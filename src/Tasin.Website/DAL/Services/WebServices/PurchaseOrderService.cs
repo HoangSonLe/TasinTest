@@ -357,15 +357,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // Calculate totals
                     CalculateTotals(newPurchaseOrder, postData.PurchaseOrderItems);
 
-                    // Add purchase order to context (without saving)
                     await _purchaseOrderRepository.Repository.AddWithoutSaveAsync(newPurchaseOrder);
-                    await DbContext.SaveChangesAsync(); // Save to get the generated ID
+                    await DbContext.SaveChangesAsync();
 
-                    if (postData.PurchaseOrderItems.Any())
+                    if (postData.PurchaseOrderItems.Count > 0)
                     {
-                        // Save purchase order items within the same transaction
                         await SavePurchaseOrderItemsInTransaction(newPurchaseOrder.ID, postData.PurchaseOrderItems);
-                        // Save the purchase order items to database
                         await DbContext.SaveChangesAsync();
                     }
 
@@ -428,12 +425,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // Update purchase order (without saving)
                     _purchaseOrderRepository.Repository.UpdateWithoutSave(existingPurchaseOrder);
 
-                    if (postData.PurchaseOrderItems.Any())
+                    if (postData.PurchaseOrderItems.Count > 0)
                     {
-                        // Delete existing items within transaction
                         await DeletePurchaseOrderItemsInTransaction(postData.Id);
-
-                        // Save new items within transaction
                         await SavePurchaseOrderItemsInTransaction(existingPurchaseOrder.ID, postData.PurchaseOrderItems);
                     }
 
@@ -447,7 +441,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CreateOrUpdatePurchaseOrder: {ex.Message}");
+                _logger.LogError("CreateOrUpdatePurchaseOrder failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
                 ack.IsSuccess = false;
 
@@ -458,14 +452,14 @@ namespace Tasin.Website.DAL.Services.WebServices
                 }
                 catch (Exception rollbackEx)
                 {
-                    _logger.LogError($"Transaction rollback failed: {rollbackEx.Message}");
+                    _logger.LogError("Transaction rollback failed: {ErrorMessage}", rollbackEx.Message);
                 }
             }
 
             return ack;
         }
 
-        private void CalculateTotals(Purchase_Order purchaseOrder, List<PurchaseOrderItemViewModel> items)
+        private static void CalculateTotals(Purchase_Order purchaseOrder, List<PurchaseOrderItemViewModel> items)
         {
             decimal totalPrice = 0;
             decimal totalPriceNoTax = 0;
@@ -474,25 +468,13 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 if (item.Price.HasValue)
                 {
-                    // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
                     decimal baseAmount = item.Quantity * item.Price.Value;
-
-                    // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
                     decimal lossAmount = baseAmount * ((item.LossRate ?? 0) / 100);
-
-                    // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
                     decimal totalBeforeTax = baseAmount + lossAmount + (item.ProcessingFee ?? 0);
-
-                    // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
                     decimal profitAmount = totalBeforeTax * ((item.ProfitMargin ?? 0) / 100);
-
-                    // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
                     decimal totalAfterProfit = totalBeforeTax + profitAmount;
-
-                    // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
                     decimal taxAmount = totalAfterProfit * ((item.TaxRate ?? 0) / 100);
 
-                    // Cộng dồn vào tổng
                     totalPriceNoTax += totalAfterProfit;
                     totalPrice += totalAfterProfit + taxAmount;
                 }
@@ -507,7 +489,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         /// </summary>
         private async Task SavePurchaseOrderItemsInTransaction(int purchaseOrderId, List<PurchaseOrderItemViewModel> items)
         {
-            if (items == null || !items.Any())
+            if (items == null || items.Count == 0)
                 return;
 
             var purchaseOrderItems = new List<Purchase_Order_Item>();
@@ -545,9 +527,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 filter: item => item.PO_ID == purchaseOrderId
             );
 
-            if (existingItems.Any())
+            if (existingItems.Count > 0)
             {
-                _purchaseOrderItemRepository.Repository.DeleteRangeWithoutSave(existingItems.ToList());
+                _purchaseOrderItemRepository.Repository.DeleteRangeWithoutSave(existingItems);
             }
         }
 
@@ -605,7 +587,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             catch (Exception ex)
             {
-                _logger.LogError($"DeletePurchaseOrderById: {ex.Message}");
+                _logger.LogError("DeletePurchaseOrderById failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
             }
 
@@ -671,7 +653,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CancelPurchaseOrderById: {ex.Message}");
+                _logger.LogError("CancelPurchaseOrderById failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
             }
 
@@ -680,10 +662,8 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public new void Dispose()
         {
-            // Call base class Dispose which handles common resources
             base.Dispose();
-
-            // No need to dispose repositories as they are managed by DI container
+            GC.SuppressFinalize(this);
         }
     }
 }
