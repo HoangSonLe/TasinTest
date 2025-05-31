@@ -19,6 +19,7 @@ namespace Tasin.Website.Domains.Entitites
         public decimal? LossRate { get; set; }
         public bool IsMaterial { get; set; } = false;
         public decimal? ProfitMargin { get; set; }
+        public decimal? DefaultPrice { get; set; }
         public string? Note { get; set; }
         public bool IsDiscontinued { get; set; } = false;
         public decimal? ProcessingFee { get; set; }

@@ -873,7 +873,7 @@
                 if (response.isSuccess && response.data) {
                     var product = response.data;
                     $("#itemUnitName").val(product.unitName || "");
-                    $("#itemPrice").val(product.profitMargin || 0); // Đơn giá = profitMargin
+                    $("#itemPrice").val(product.defaultPrice || 0); // Đơn giá = defaultPrice
 
                     // Auto-fill the requested fields
                     $("#itemLossRate").val(product.lossRate || 0);

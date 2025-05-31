@@ -365,6 +365,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         // Save purchase order items within the same transaction
                         await SavePurchaseOrderItemsInTransaction(newPurchaseOrder.ID, postData.PurchaseOrderItems);
+                        // Save the purchase order items to database
+                        await DbContext.SaveChangesAsync();
                     }
 
                     ack.IsSuccess = true;
@@ -472,18 +474,27 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 if (item.Price.HasValue)
                 {
-                    decimal itemTotal = item.Quantity * item.Price.Value;
-                    totalPriceNoTax += itemTotal;
+                    // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
+                    decimal baseAmount = item.Quantity * item.Price.Value;
 
-                    if (item.TaxRate.HasValue)
-                    {
-                        decimal taxAmount = itemTotal * (item.TaxRate.Value / 100);
-                        totalPrice += itemTotal + taxAmount;
-                    }
-                    else
-                    {
-                        totalPrice += itemTotal;
-                    }
+                    // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
+                    decimal lossAmount = baseAmount * ((item.LossRate ?? 0) / 100);
+
+                    // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
+                    decimal totalBeforeTax = baseAmount + lossAmount + (item.ProcessingFee ?? 0);
+
+                    // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
+                    decimal profitAmount = totalBeforeTax * ((item.ProfitMargin ?? 0) / 100);
+
+                    // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
+                    decimal totalAfterProfit = totalBeforeTax + profitAmount;
+
+                    // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
+                    decimal taxAmount = totalAfterProfit * ((item.TaxRate ?? 0) / 100);
+
+                    // Cộng dồn vào tổng
+                    totalPriceNoTax += totalAfterProfit;
+                    totalPrice += totalAfterProfit + taxAmount;
                 }
             }
 

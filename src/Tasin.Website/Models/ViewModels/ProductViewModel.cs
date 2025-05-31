@@ -98,6 +98,12 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? ProfitMargin { get; set; }
 
         /// <summary>
+        /// Default Price
+        /// </summary>
+        [Display(Name = "DefaultPrice")]
+        public decimal? DefaultPrice { get; set; }
+
+        /// <summary>
         /// Note
         /// </summary>
         [Display(Name = "Note")]

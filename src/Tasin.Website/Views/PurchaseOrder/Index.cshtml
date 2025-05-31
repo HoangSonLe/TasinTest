@@ -61,7 +61,7 @@
                     { value: "Trạng thái", textAlign: "center", background: "#428dd8" },
                     { value: "Tổng tiền chưa thuế", textAlign: "center", background: "#428dd8" },
                     { value: "Tổng tiền", textAlign: "center", background: "#428dd8" },
-                    { value: "Ngày tạo", textAlign: "center", background: "#428dd8" },
+                    { value: "Ngày cập nhật", textAlign: "center", background: "#428dd8" },
                     { value: "Người tạo", textAlign: "center", background: "#428dd8" }
                 ]
             }];
@@ -86,7 +86,7 @@
                     { value: dataSourcePO[index].statusName },
                     { value: dataSourcePO[index].totalPriceNoTax },
                     { value: dataSourcePO[index].totalPrice },
-                    { value: dataSourcePO[index].createdDate ? kendo.toString(kendo.parseDate(dataSourcePO[index].createdDate), "dd/MM/yyyy HH:mm") : '' },
+                    { value: (dataSourcePO[index].updatedDate || dataSourcePO[index].createdDate) ? kendo.toString(kendo.parseDate(dataSourcePO[index].updatedDate || dataSourcePO[index].createdDate), "dd/MM/yyyy HH:mm") : '' },
                     { value: dataSourcePO[index].createdByName }
                 ]
             })
@@ -115,7 +115,7 @@
         $("#window").html("<form id='formCreateAndEdit'></form>");
 
         let formData = {
-            id: 0,
+            id: isCreate ? 0 : (dataPO.id || 0),
             code: "",
             customer_ID: null,
             status: 0,
@@ -424,7 +424,10 @@
                 { field: "quantity", title: "Số lượng", width: 100, format: "{0:n2}" },
                 { field: "unitName", title: "Đơn vị", width: 100 },
                 { field: "price", title: "Đơn giá", width: 120, format: "{0:n0}" },
+                { field: "lossRate", title: "Hao hụt (%)", width: 100, format: "{0:n1}" },
+                { field: "profitMargin", title: "Lợi nhuận (%)", width: 110, format: "{0:n1}" },
                 { field: "taxRate", title: "Thuế suất (%)", width: 100, format: "{0:n1}" },
+                { field: "processingFee", title: "Phí gia công", width: 120, format: "{0:n0}" },
                 {
                     title: "Thành tiền",
                     width: 150,
@@ -588,6 +591,7 @@
             <div class="">
                 <!-- Header Info Section -->
                 <div class="po-header-section">
+                    <h5>Thông tin đơn hàng</h5>
                     <div class="header-grid-3col">
                         <div class="header-col-3-1">
                             <div class="form-group">
@@ -605,6 +609,7 @@
                             <div class="form-group">
                                 <label>Mã đơn hàng</label>
                                 <input type="text" id="po-code" class="form-control" readonly placeholder="Tự động tạo"/>
+                                <input type="hidden" id="po-id" value="0"/>
                             </div>
                         </div>
                         <div class="header-col-3-1">
@@ -631,7 +636,7 @@
                 <div class="po-item-section">
                     <h5>Thêm sản phẩm vào đơn hàng</h5>
                     <div class="item-input-grid">
-                        <!-- Row 1: 4 columns -->
+                        <!-- Row 1: Thông tin cơ bản sản phẩm -->
                         <div class="grid-row-4col">
                             <div class="grid-col-4-1">
                                 <div class="form-group">
@@ -658,18 +663,13 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Row 2: 4 columns -->
+
+                        <!-- Row 2: Thông tin chi phí và tỷ lệ -->
                         <div class="grid-row-4col">
                             <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Hao hụt (%)</label>
                                     <input type="number" id="item-lossRate" class="form-control" step="0.1" min="0" max="100"/>
-                                </div>
-                            </div>
-                            <div class="grid-col-4-1">
-                                <div class="form-group">
-                                    <label>Thuế (%)</label>
-                                    <input type="number" id="item-taxRate" class="form-control" step="0.1" min="0" max="100"/>
                                 </div>
                             </div>
                             <div class="grid-col-4-1">
@@ -680,17 +680,30 @@
                             </div>
                             <div class="grid-col-4-1">
                                 <div class="form-group">
-                                    <label>Thành tiền</label>
-                                    <input type="number" id="item-totalAmount" class="form-control" step="0.01" min="0" readonly/>
+                                    <label>Lợi nhuận (%)</label>
+                                    <input type="number" id="item-profitMargin" class="form-control" step="0.01" min="0" value="0"/>
+                                </div>
+                            </div>
+                            <div class="grid-col-4-1">
+                                <div class="form-group">
+                                    <label>Thuế (%)</label>
+                                    <input type="number" id="item-taxRate" class="form-control" step="0.1" min="0" max="100"/>
                                 </div>
                             </div>
                         </div>
-                        <!-- Row 3: 4 columns -->
+
+                        <!-- Row 3: Thông tin bổ sung -->
                         <div class="grid-row-4col">
-                            <div class="grid-col-4-2">
+                            <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Loại gia công</label>
                                     <select id="item-processingTypeId" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="grid-col-4-1">
+                                <div class="form-group">
+                                    <label>Thành tiền</label>
+                                    <input type="text" id="item-totalAmount" class="form-control total-amount-highlight" readonly/>
                                 </div>
                             </div>
                             <div class="grid-col-4-2">
@@ -700,13 +713,12 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Row 4: Button row -->
-                        <div class="grid-row-button">
-                            <div class="form-group">
-                                <button type="button" id="addItemBtn" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Thêm sản phẩm
-                                </button>
-                            </div>
+                        <div class="grid-row-button d-flex justify-content-end">
+                            <button type="button" id="addItemBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm sản phẩm
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -889,6 +901,7 @@
                 } else {
                     // Clear product details if no valid selection
                     $("#item-unitName").val('').removeData("unitId");
+                    $("#item-profitMargin").val("0");
                     $("#item-price").val('');
                     $("#item-taxRate").val('');
                     $("#item-lossRate").val('');
@@ -1004,6 +1017,7 @@
                             unitName: { type: "string" },
                             price: { type: "number" },
                             lossRate: { type: "number" },
+                            profitMargin: { type: "number" },
                             taxRate: { type: "number" },
                             processingFee: { type: "number" },
                             totalAmount: { type: "number" },
@@ -1020,6 +1034,7 @@
                 { field: "unitName", title: "Đơn vị", width: "80px" },
                 { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
                 { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
+                { field: "profitMargin", title: "Lợi nhuận (%)", width: "90px", template: "#= profitMargin ? kendo.toString(profitMargin, 'n1') + '%' : '' #" },
                 { field: "taxRate", title: "Thuế (%)", width: "80px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
                 { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
@@ -1232,12 +1247,16 @@
                     template: "<span class='currency'>#: kendo.toString(totalPrice, 'n0') # VNĐ</span>",
                 },
                 {
-                    field: "createdDate",
-                    title: "Ngày tạo",
+                    field: "updatedDate",
+                    title: "Ngày cập nhật",
                     width: 150,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    template: '#: kendo.toString(kendo.parseDate(createdDate), "dd/MM/yyyy HH:mm")#',
+                    template: function (dataItem) {
+                        // Display creation date when update date is null (user preference)
+                        var dateToShow = dataItem.updatedDate || dataItem.createdDate;
+                        return dateToShow ? kendo.toString(kendo.parseDate(dateToShow), "dd/MM/yyyy HH:mm") : '';
+                    }
                 },
                 {
                     field: "",
@@ -1455,13 +1474,13 @@
             renderPurchaseOrderForm();
         });
 
-        // Set default date range to last 1 month
+        // Set default date range to last 1 week (user preference)
         var today = new Date();
-        var oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(today.getMonth() - 1);
+        var oneWeekAgo = new Date();
+        oneWeekAgo.setDate(today.getDate() - 7);
 
         // Set default values for date pickers
-        $("#dateFrom").data("kendoDatePicker").value(oneMonthAgo);
+        $("#dateFrom").data("kendoDatePicker").value(oneWeekAgo);
         $("#dateTo").data("kendoDatePicker").value(today);
     }
 
@@ -1472,12 +1491,15 @@
                 var product = response.data;
                 $("#item-unitName").val(product.unitName || '');
                 $("#item-unitName").data("unitId", product.unit_ID || null); // Store unit_ID for later use
-                $("#item-price").val(product.profitMargin || 0); // Đơn giá = profitMargin
+                $("#item-price").val(product.defaultPrice || 0); // Đơn giá = defaultPrice
                 $("#item-taxRate").val(product.taxRate || 0);
 
                 // Auto-fill the requested fields
                 $("#item-lossRate").val(product.lossRate || 0);
                 $("#item-processingFee").val(product.processingFee || 0);
+
+                // Store profitMargin for calculation
+                $("#item-profitMargin").val(product.profitMargin || 0);
 
                 // Calculate total amount when product is loaded
                 calculateTotalAmount();
@@ -1499,14 +1521,37 @@
         }, false);
     }
 
-    // Function to calculate total amount: (Đơn giá * Số lượng) + (Phí gia công * Số lượng)
+    // Function to calculate total amount with full formula including profit margin and tax
     function calculateTotalAmount() {
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var price = parseFloat($("#item-price").val()) || 0;
+        var lossRate = parseFloat($("#item-lossRate").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
+        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0;
+        var taxRate = parseFloat($("#item-taxRate").val()) || 0;
 
-        var totalAmount = (price * quantity) + (processingFee * quantity);
-        $("#item-totalAmount").val(totalAmount.toFixed(2));
+        // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
+        var baseAmount = quantity * price;
+
+        // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
+        var lossAmount = baseAmount * (lossRate / 100);
+
+        // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
+        var totalBeforeTax = baseAmount + lossAmount + processingFee;
+
+        // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
+        var profitAmount = totalBeforeTax * (profitMargin / 100);
+
+        // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
+        var totalAfterProfit = totalBeforeTax + profitAmount;
+
+        // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
+        var taxAmount = totalAfterProfit * (taxRate / 100);
+
+        // Bước 7: Tổng cuối cùng (tổng sau lợi nhuận + thuế)
+        var finalAmount = totalAfterProfit + taxAmount;
+
+        $("#item-totalAmount").val(finalAmount.toFixed(2));
     }
 
     function addItemToGrid() {
@@ -1518,6 +1563,7 @@
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var unitName = $("#item-unitName").val();
         var unitId = $("#item-unitName").data("unitId"); // Get stored unit_ID
+        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0; // Get stored profitMargin
         var price = parseFloat($("#item-price").val()) || 0;
         var lossRate = parseFloat($("#item-lossRate").val()) || 0;
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
@@ -1537,8 +1583,8 @@
             return;
         }
 
-        // Recalculate total amount to ensure accuracy
-        var calculatedTotalAmount = (price * quantity) + (processingFee * quantity);
+        // Use the calculated total amount from the form (already calculated by calculateTotalAmount)
+        var calculatedTotalAmount = parseFloat($("#item-totalAmount").val()) || 0;
 
         var newItem = {
             tempId: generateTempId(),
@@ -1554,7 +1600,8 @@
             totalAmount: calculatedTotalAmount,
             processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
             processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName,
-            note: note
+            note: note,
+            profitMargin: profitMargin // Include profitMargin for calculation
         };
 
         var grid = $("#itemsGrid").data("kendoGrid");
@@ -1583,6 +1630,7 @@
         }
         $("#item-quantity").val("");
         $("#item-unitName").val("").removeData("unitId");
+        $("#item-profitMargin").val("0");
         $("#item-price").val("");
         $("#item-lossRate").val("");
         $("#item-taxRate").val("");
@@ -1601,16 +1649,27 @@
 
         var totalPriceNoTax = 0;
         var totalPrice = 0;
-
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
+            // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
             var baseAmount = item.quantity * item.price;
-            var lossAmount = baseAmount * (item.lossRate / 100);
-            var totalBeforeTax = baseAmount + lossAmount + item.processingFee;
-            var profitAmount = totalBeforeTax * (item.profitMargin / 100);
-            var totalAfterProfit = totalBeforeTax + profitAmount;
-            var taxAmount = totalAfterProfit * (item.taxRate / 100);
 
+            // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
+            var lossAmount = baseAmount * (item.lossRate / 100);
+
+            // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
+            var totalBeforeTax = baseAmount + lossAmount + (item.processingFee || 0);
+
+            // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
+            var profitAmount = totalBeforeTax * ((item.profitMargin || 0) / 100);
+
+            // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
+            var totalAfterProfit = totalBeforeTax + profitAmount;
+
+            // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
+            var taxAmount = totalAfterProfit * ((item.taxRate || 0) / 100);
+
+            // Cộng dồn vào tổng
             totalPriceNoTax += totalAfterProfit;
             totalPrice += totalAfterProfit + taxAmount;
         }
@@ -1641,6 +1700,7 @@
             }
 
             $("#po-code").val(data.code || '');
+            $("#po-id").val(data.id || 0);
 
             // Load items
             if (data.purchaseOrderItems && data.purchaseOrderItems.length > 0) {
@@ -1663,10 +1723,10 @@
                             lossRate: item.lossRate,
                             taxRate: item.taxRate,
                             processingFee: item.processingFee,
-                            profitMargin: item.profitMargin,
                             processingTypeId: item.processingType_ID || item.processingTypeId,
                             processingTypeName: item.processingTypeName,
                             note: item.note,
+                            profitMargin: item.profitMargin || 0, // Thêm profitMargin
                             totalAmount: (item.quantity || 0) * (item.price || 0)
                         };
                         grid.dataSource.add(gridItem);
@@ -1708,14 +1768,19 @@
             return;
         }
 
+        // Check if this is an edit operation by looking for existing PO ID
+        var poId = parseInt($("#po-id").val()) || 0;
+        var isEdit = poId > 0;
+
         // Prepare data
         var purchaseOrderData = {
+            id: poId,
             customer_ID: parseInt(customerId),
             status: status || 0,
             purchaseOrderItems: items.map(function (item) {
                 return {
-                    id: 0, // Always 0 for new items
-                    po_ID: 0, // Will be set by the server
+                    id: 0, // Always 0 for new items (will be handled by server)
+                    po_ID: poId, // Set the PO ID for existing orders
                     product_ID: item.productId,
                     quantity: item.quantity,
                     unit_ID: item.unitId, // Use captured unit_ID from product
@@ -1725,18 +1790,19 @@
                     lossRate: item.lossRate,
                     processingFee: item.processingFee,
                     note: item.note,
-                    profitMargin: item.profitMargin
+                    profitMargin: item.profitMargin || 0
                 };
             })
         };
 
-        // Save
-        var url = "/PurchaseOrder/CreatePurchaseOrder";
-        var method = "POST";
+        // Determine URL and method based on operation type
+        var url = isEdit ? "/PurchaseOrder/UpdatePurchaseOrder" : "/PurchaseOrder/CreatePurchaseOrder";
+        var method = isEdit ? "PUT" : "POST";
+        var successMessage = isEdit ? "Cập nhật đơn hàng thành công!" : "Lưu đơn hàng thành công!";
 
         ajax(method, url, purchaseOrderData, function (response) {
             if (response.isSuccess) {
-                showSuccessMessages(["Lưu đơn hàng thành công!"]);
+                showSuccessMessages([successMessage]);
                 $("#window").data("kendoWindow").close();
                 $(gridId).data("kendoGrid").dataSource.read();
             }
@@ -1751,11 +1817,11 @@
         $(window).trigger("resize");
 
         // Add event listeners for automatic total amount calculation
-        $(document).on('input', '#item-quantity, #item-price, #item-processingFee', function () {
+        $(document).on('input', '#item-quantity, #item-price, #item-processingFee, #item-profitMargin, #item-lossRate, #item-taxRate', function () {
             calculateTotalAmount();
         });
 
-        // Auto load data with default filter (last 1 month)
+        // Auto load data with default filter (last 1 week)
         setTimeout(function () {
 
             $(window).trigger("resize");
@@ -1912,5 +1978,118 @@
         font-size: 12px;
         opacity: 0.6;
         pointer-events: none;
+    }
+
+    /* Enhanced styling for header section */
+    .po-header-section {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .po-header-section h5 {
+        color: #096b73;
+        margin-bottom: 20px;
+        font-weight: 600;
+        border-bottom: 2px solid #096b73;
+        padding-bottom: 8px;
+    }
+
+    /* Enhanced styling for item input section */
+    .po-item-section {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .po-item-section h5 {
+        color: #096b73;
+        margin-bottom: 20px;
+        font-weight: 600;
+        border-bottom: 2px solid #096b73;
+        padding-bottom: 8px;
+    }
+
+    /* Highlight total amount field */
+    .total-amount-highlight {
+        background-color: #e8f5e8 !important;
+        border: 2px solid #28a745 !important;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .total-amount-highlight:focus {
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    }
+
+    /* Enhanced form group spacing */
+    .item-input-grid .form-group {
+        margin-bottom: 15px;
+    }
+
+    .item-input-grid .form-group label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+    /* Required field indicator */
+    .item-input-grid .form-group label:contains("(*)") {
+        color: #dc3545;
+    }
+
+    /* Button styling in grid */
+    .grid-row-4col .btn {
+        height: 38px;
+        font-weight: 500;
+    }
+
+    /* Button row styling */
+    .grid-row-button {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .grid-row-button .btn {
+        /* Match the size of form action buttons (Lưu/Hủy) */
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+        font-weight: 400;
+        transition: all 0.2s ease;
+    }
+
+    .grid-row-button .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive adjustments for item input */
+    @@media (max-width: 1200px) {
+        .grid-row-4col {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+        }
+
+        .grid-col-4-1,
+        .grid-col-4-2 {
+            grid-column: span 1 !important;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .grid-row-4col {
+            grid-template-columns: 1fr !important;
+        }
+
+        .po-item-section {
+            padding: 15px;
+        }
     }
 </style>

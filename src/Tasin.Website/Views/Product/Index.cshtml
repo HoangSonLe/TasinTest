@@ -65,6 +65,7 @@
             formData: formData,
             type: "group",
             items: [
+                // ===== NHÓM 1: THÔNG TIN CỞ BẢN =====
                 {
                     field: "name",
                     title: "Hàng hoá",
@@ -157,6 +158,8 @@
                         },
                     },
                 },
+
+                // ===== NHÓM 2: PHÂN LOẠI VÀ THUẾ =====
                 {
                     field: "processingType_ID",
                     title: "Phân loại hàng hoá",
@@ -266,41 +269,29 @@
                         },
                     },
                 },
+
+                // ===== NHÓM 3: GIÁ VÀ CHI PHÍ =====
                 {
-                    field: "lossRate",
-                    title: "Hao hụt",
-                    label: "Hao hụt:",
+                    field: "defaultPrice",
+                    title: "Giá mặc định",
+                    label: "Giá mặc định:",
                     colSpan: 1,
                     attributes: {
                         type: "number",
                         step: "0.01",
                         min: "0"
                     }
-                },
-                {
-                    field: "isMaterial",
-                    title: "Là nguyên liệu",
-                    label: "Là nguyên liệu:",
-                    colSpan: 1,
-                    editor: "CheckBox",
                 },
                 {
                     field: "profitMargin",
-                    title: "Lợi nhuận",
-                    label: "Lợi nhuận:",
+                    title: "Lợi nhuận (%)",
+                    label: "Lợi nhuận (%):",
                     colSpan: 1,
                     attributes: {
                         type: "number",
                         step: "0.01",
                         min: "0"
                     }
-                },
-                {
-                    field: "isDiscontinued",
-                    title: "Ngừng sử dụng",
-                    label: "Ngừng sử dụng:",
-                    colSpan: 1,
-                    editor: "CheckBox",
                 },
                 {
                     field: "processingFee",
@@ -312,6 +303,33 @@
                         step: "0.01",
                         min: "0"
                     }
+                },
+                {
+                    field: "lossRate",
+                    title: "Hao hụt (%)",
+                    label: "Hao hụt (%):",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+
+                // ===== NHÓM 4: THUỘC TÍNH SẢN PHẨM =====
+                {
+                    field: "isMaterial",
+                    title: "Là nguyên liệu",
+                    label: "Là nguyên liệu:",
+                    colSpan: 1,
+                    editor: "CheckBox",
+                },
+                {
+                    field: "isDiscontinued",
+                    title: "Ngừng sử dụng",
+                    label: "Ngừng sử dụng:",
+                    colSpan: 1,
+                    editor: "CheckBox",
                 },
                 {
                     field: "note",
