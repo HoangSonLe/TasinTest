@@ -15,5 +15,18 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement<CustomerViewModel>> GetCustomerById(int userId);
         Task<Acknowledgement> CreateOrUpdateCustomer(CustomerViewModel postData);
         Task<Acknowledgement> DeleteCustomerById(int userId);
+
+        /// <summary>
+        /// Import customers from Excel file
+        /// </summary>
+        /// <param name="file">Excel file</param>
+        /// <returns>Import result</returns>
+        Task<Acknowledgement<CustomerExcelImportResult>> ImportCustomersFromExcel(IFormFile file);
+
+        /// <summary>
+        /// Generate Excel template for customer import
+        /// </summary>
+        /// <returns>Excel file as byte array</returns>
+        Task<byte[]> GenerateCustomerExcelTemplate();
     }
 }

@@ -95,5 +95,57 @@ namespace Tasin.Website.Controllers
             var ack = await _customerService.GetCustomerById(userId);
             return ack;
         }
+
+        /// <summary>
+        /// Import customers from Excel file
+        /// </summary>
+        /// <param name="file">Excel file to import</param>
+        /// <returns>Import result</returns>
+        [HttpPost]
+        [Route("Customer/ImportExcel")]
+        [ProducesResponseType(typeof(Acknowledgement<CustomerExcelImportResult>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.CREATE_CUSTOMER])]
+        public async Task<IActionResult> ImportExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _customerService.ImportCustomersFromExcel(file);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"ImportExcel: {ex.Message}");
+                return Json(new Acknowledgement<CustomerExcelImportResult>
+                {
+                    IsSuccess = false,
+                    ErrorMessageList = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Download Excel template for customer import
+        /// </summary>
+        /// <returns>Excel template file</returns>
+        [HttpGet]
+        [Route("Customer/DownloadTemplate")]
+        public async Task<IActionResult> DownloadTemplate()
+        {
+            try
+            {
+                var templateBytes = await _customerService.GenerateCustomerExcelTemplate();
+                var fileName = $"Customer_Import_Template_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                // Set proper content type and encoding for Excel files with UTF-8 support
+                Response.Headers.Add("Content-Disposition", ExcelHelper.GetContentDispositionHeader(fileName));
+
+                return File(templateBytes, ExcelHelper.GetExcelContentType(), fileName);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"DownloadTemplate: {ex.Message}");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

@@ -68,7 +68,7 @@ namespace Tasin.Website.Models.ViewModels
         /// Name of the user who last updated this record
         /// </summary>
         [Display(Name = "Updated By")]
-        public string? UpdatedByName { get; set; }
+        public new string? UpdatedByName { get; set; }
 
         /// <summary>
         /// Status of the customer
@@ -81,5 +81,40 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Display(Name = "Status Name")]
         public string StatusName => EnumHelper.GetEnumDescriptionByEnum(Status);
+    }
+
+    /// <summary>
+    /// Model for Excel import of customers
+    /// </summary>
+    public class CustomerExcelImportModel
+    {
+        public int RowNumber { get; set; }
+        public string Name { get; set; } = "";
+        public string TypeText { get; set; } = "";
+        public string? PhoneContact { get; set; }
+        public string? Email { get; set; }
+        public string? TaxCode { get; set; }
+        public string? Address { get; set; }
+    }
+
+    /// <summary>
+    /// Result of customer Excel import operation
+    /// </summary>
+    public class CustomerExcelImportResult
+    {
+        public int TotalRows { get; set; }
+        public int SuccessfulRows { get; set; }
+        public int FailedRows { get; set; }
+        public List<CustomerExcelImportError> Errors { get; set; } = new List<CustomerExcelImportError>();
+    }
+
+    /// <summary>
+    /// Error information for failed customer import rows
+    /// </summary>
+    public class CustomerExcelImportError
+    {
+        public int RowNumber { get; set; }
+        public string CustomerName { get; set; } = "";
+        public List<string> ErrorMessages { get; set; } = new List<string>();
     }
 }
