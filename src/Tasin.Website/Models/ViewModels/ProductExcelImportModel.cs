@@ -69,6 +69,11 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? ProcessingFee { get; set; }
 
         /// <summary>
+        /// Default price
+        /// </summary>
+        public decimal? DefaultPrice { get; set; }
+
+        /// <summary>
         /// Company tax rate (%)
         /// </summary>
         public decimal CompanyTaxRate { get; set; }

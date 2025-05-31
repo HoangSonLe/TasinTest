@@ -1,3 +1,3 @@
-Tên sản phẩm (*),Tên tiếng Anh,Mã đơn vị,Mã danh mục,Mã loại chế biến,Mã nguyên liệu,Mã thuế suất đặc biệt,Thuế suất (%),Tỷ lệ hao hụt (%),Tỷ lệ lợi nhuận (%),Phí chế biến,Thuế suất công ty (%),Thuế suất người tiêu dùng (%),Ghi chú,Ngừng sản xuất (Y/N)
-Sản phẩm mẫu 1,Sample Product 1,KG,CAT001,PT001,MAT001,SPTR001,10,5,15,1000,8,10,Ghi chú mẫu,N
-Sản phẩm mẫu 2,Sample Product 2,THUNG,CAT002,PT002,MAT002,,8,3,20,2000,10,12,,Y
+Tên sản phẩm (*),Tên tiếng Anh,Mã đơn vị,Mã danh mục,Mã loại chế biến,Là nguyên liệu (Y/N),Mã thuế suất đặc biệt,Thuế suất (%),Tỷ lệ hao hụt (%),Tỷ lệ lợi nhuận (%),Phí chế biến,Đơn giá mặc định,Thuế suất công ty (%),Thuế suất người tiêu dùng (%),Ghi chú,Ngừng sản xuất (Y/N)
+Sản phẩm mẫu 1,Sample Product 1,KG,CAT001,PT001,Y,SPTR001,10,5,15,1000,50000,8,10,Ghi chú mẫu,N
+Sản phẩm mẫu 2,Sample Product 2,THUNG,CAT002,PT002,N,,8,3,20,2000,75000,10,12,,Y

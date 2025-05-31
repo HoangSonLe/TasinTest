@@ -434,10 +434,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 LossRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(9))),
                                 ProfitMargin = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(10))),
                                 ProcessingFee = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(11))),
-                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))) ?? 0,
-                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(13))) ?? 0,
-                                Note = ExcelHelper.GetCellStringValue(row.Cell(14)),
-                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(15))
+                                DefaultPrice = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))),
+                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(13))) ?? 0,
+                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(14))) ?? 0,
+                                Note = ExcelHelper.GetCellStringValue(row.Cell(15)),
+                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(16))
                             };
 
                             // Validate required fields
@@ -551,6 +552,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             LossRate = importModel.LossRate,
                             ProfitMargin = importModel.ProfitMargin,
                             ProcessingFee = importModel.ProcessingFee,
+                            DefaultPrice = importModel.DefaultPrice,
                             CompanyTaxRate = importModel.CompanyTaxRate,
                             ConsumerTaxRate = importModel.ConsumerTaxRate,
                             Note = string.IsNullOrEmpty(importModel.Note) ? null : importModel.Note,
@@ -619,6 +621,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "Tỷ lệ hao hụt (%)",
                         "Tỷ lệ lợi nhuận (%)",
                         "Phí chế biến",
+                        "Đơn giá mặc định",
                         "Thuế suất công ty (%)",
                         "Thuế suất người tiêu dùng (%)",
                         "Ghi chú",
@@ -646,10 +649,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                     worksheet.Cell(2, 9).Value = 5;
                     worksheet.Cell(2, 10).Value = 15;
                     worksheet.Cell(2, 11).Value = 1000;
-                    worksheet.Cell(2, 12).Value = 8;
-                    worksheet.Cell(2, 13).Value = 10;
-                    worksheet.Cell(2, 14).Value = "Ghi chú mẫu";
-                    worksheet.Cell(2, 15).Value = "N";
+                    worksheet.Cell(2, 12).Value = 50000;
+                    worksheet.Cell(2, 13).Value = 8;
+                    worksheet.Cell(2, 14).Value = 10;
+                    worksheet.Cell(2, 15).Value = "Ghi chú mẫu";
+                    worksheet.Cell(2, 16).Value = "N";
 
                     // Auto-fit columns
                     worksheet.Columns().AdjustToContents();
@@ -677,6 +681,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
                         "   - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)",
                         "   - Phí chế biến: Nhập số",
+                        "   - Đơn giá mặc định: Nhập số (ví dụ: 50000)",
                         "   - Ghi chú: Có thể để trống",
                         "   - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0",
                         "",

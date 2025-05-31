@@ -10,10 +10,11 @@ HƯỚNG DẪN IMPORT SẢN PHẨM
    - Mã đơn vị: Phải tồn tại trong hệ thống (ví dụ: KG, THUNG, CAI)
    - Mã danh mục: Phải tồn tại trong hệ thống
    - Mã loại chế biến: Phải tồn tại trong hệ thống
-   - Mã nguyên liệu: Phải tồn tại trong hệ thống
+   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0
    - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống
    - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)
    - Phí chế biến: Nhập số
+   - Đơn giá mặc định: Nhập số (ví dụ: 50000)
    - Ghi chú: Có thể để trống
    - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0
 
