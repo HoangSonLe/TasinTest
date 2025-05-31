@@ -243,6 +243,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                     predicate = predicate.And(i => i.ProcessingType_ID == searchModel.ProcessingType_ID);
                 }
 
+                if (searchModel.IsMaterial.HasValue)
+                {
+                    predicate = predicate.And(i => i.IsMaterial == searchModel.IsMaterial.Value);
+                }
+
                 // Add author predicate if needed
                 predicate = ProductAuthorPredicate.GetProductAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
 

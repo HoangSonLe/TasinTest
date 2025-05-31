@@ -5,7 +5,7 @@
 @section Styles {
     <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
     <link href="~/css/toolbar-common.css" rel="stylesheet" />
-@* <link href="~/css/vendor-form.css" rel="stylesheet" /> *@
+    @* <link href="~/css/vendor-form.css" rel="stylesheet" /> *@
 }
 
 <div>
@@ -85,14 +85,18 @@
                     createAt: "top"
                 },
                 toolbar: [
-                    { name: "create", text: "Thêm sản phẩm", iconClass: "k-icon k-i-plus",
+                    {
+                        name: "create", text: "Thêm sản phẩm", iconClass: "k-icon k-i-plus",
                         className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-success"
                     },
-                    { name: "save", text: "Lưu tất cả", iconClass: "k-icon k-i-save",
+                    {
+                        name: "save", text: "Lưu tất cả", iconClass: "k-icon k-i-save",
                         className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary"
                     },
-                    { name: "cancel", text: "Hủy", iconClass: "k-icon k-i-cancel",
-                        className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"}
+                    {
+                        name: "cancel", text: "Hủy", iconClass: "k-icon k-i-cancel",
+                        className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"
+                    }
                 ],
                 columns: [
                     {
@@ -118,7 +122,8 @@
                                                 if (type == "read") {
                                                     return {
                                                         pageSize: 100,
-                                                        pageNumber: 1
+                                                        pageNumber: 1,
+                                                        isMaterial: true
                                                     }
                                                 }
                                             },
@@ -207,9 +212,9 @@
                     },
                     {
                         command: [
-                            { name: "destroy", text: "Xoá",className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"}
+                            { name: "destroy", text: "Xoá", className: "k-button k-button-md k-rounded-md k-button-solid k-button-solid-error" }
                         ],
-                        
+
                         title: "Thao tác",
                         width: 120,
                         headerAttributes: { style: "text-align: center; font-weight: 600;" },
@@ -237,35 +242,35 @@
                 $("#searchResultCount").addClass('search-loading');
 
                 searchTimeout = setTimeout(() => {
-                var searchValue = $(this).val().trim();
-                var grid = $("#productVendorGrid").data("kendoGrid");
+                    var searchValue = $(this).val().trim();
+                    var grid = $("#productVendorGrid").data("kendoGrid");
 
-                if (searchValue === "") {
-                    grid.dataSource.filter({});
-                } else {
-                    // Search in multiple fields: ProductName and Description (case-insensitive)
-                    grid.dataSource.filter({
-                        logic: "or",
-                        filters: [
-                            {
-                                field: "ProductName",
-                                operator: filterCustom,
-                                value: searchValue,
-                                ignoreCase: true
-                            },
-                            {
-                                field: "Description",
-                                operator: filterCustom,
-                                value: searchValue,
-                                ignoreCase: true
-                            }
-                        ]
-                    });
-                }
+                    if (searchValue === "") {
+                        grid.dataSource.filter({});
+                    } else {
+                        // Search in multiple fields: ProductName and Description (case-insensitive)
+                        grid.dataSource.filter({
+                            logic: "or",
+                            filters: [
+                                {
+                                    field: "ProductName",
+                                    operator: filterCustom,
+                                    value: searchValue,
+                                    ignoreCase: true
+                                },
+                                {
+                                    field: "Description",
+                                    operator: filterCustom,
+                                    value: searchValue,
+                                    ignoreCase: true
+                                }
+                            ]
+                        });
+                    }
                 }, 300); // 300ms debounce
             });
 
-             // Handle Enter key for search
+            // Handle Enter key for search
             $("#productSearchInput").on("keypress", function (e) {
                 if (e.which === 13) { // Enter key
                     e.preventDefault();
@@ -764,7 +769,7 @@
         color: white;
     }
 
-        .btn-add:hover {
-            background: #218838;
-        }
+    .btn-add:hover {
+        background: #218838;
+    }
 </style>

@@ -33,5 +33,11 @@ namespace Tasin.Website.Models.SearchModels
         /// </summary>
         [Display(Name = "IncludeDiscontinued")]
         public bool IncludeDiscontinued { get; set; } = false;
+
+        /// <summary>
+        /// Filter by IsMaterial property
+        /// </summary>
+        [Display(Name = "IsMaterial")]
+        public bool? IsMaterial { get; set; }
     }
 }
