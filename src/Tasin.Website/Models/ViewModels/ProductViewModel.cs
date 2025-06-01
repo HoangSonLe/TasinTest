@@ -98,6 +98,12 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? ProfitMargin { get; set; }
 
         /// <summary>
+        /// Default Price
+        /// </summary>
+        [Display(Name = "DefaultPrice")]
+        public decimal? DefaultPrice { get; set; }
+
+        /// <summary>
         /// Note
         /// </summary>
         [Display(Name = "Note")]
@@ -119,13 +125,13 @@ namespace Tasin.Website.Models.ViewModels
         /// Company Tax Rate
         /// </summary>
         [Display(Name = "CompanyTaxRate")]
-        public decimal CompanyTaxRate { get; set; }
+        public decimal? CompanyTaxRate { get; set; }
 
         /// <summary>
         /// Consumer Tax Rate
         /// </summary>
         [Display(Name = "ConsumerTaxRate")]
-        public decimal ConsumerTaxRate { get; set; }
+        public decimal? ConsumerTaxRate { get; set; }
 
         /// <summary>
         /// Special Product Tax Rate ID
@@ -137,6 +143,17 @@ namespace Tasin.Website.Models.ViewModels
         /// Special Product Tax Rate name
         /// </summary>
         public string? SpecialProductTaxRateName { get; set; }
+
+        /// <summary>
+        /// Parent Product ID
+        /// </summary>
+        [Display(Name = "ParentID")]
+        public int? ParentID { get; set; }
+
+        /// <summary>
+        /// Parent Product name
+        /// </summary>
+        public string? ParentName { get; set; }
 
         /// <summary>
         /// Status of the product

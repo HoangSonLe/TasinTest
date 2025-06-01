@@ -65,6 +65,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var categoryIds = products.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
             var processingTypeIds = products.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
             var specialProductTaxRateIds = products.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
+            var parentIds = products.Where(p => p.ParentID.HasValue).Select(p => p.ParentID.Value).Distinct().ToList();
 
             // Load related entities sequentially to avoid DbContext threading issues
             IEnumerable<Unit> units = new List<Unit>();
@@ -91,11 +92,18 @@ namespace Tasin.Website.DAL.Services.WebServices
                 specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(i => specialProductTaxRateIds.Contains(i.ID));
             }
 
+            IEnumerable<Product> parentProducts = new List<Product>();
+            if (parentIds.Count > 0)
+            {
+                parentProducts = await _productRepository.ReadOnlyRespository.GetAsync(i => parentIds.Contains(i.ID));
+            }
+
             // Create lookup dictionaries for O(1) access
             var unitLookup = units.ToDictionary(u => u.ID, u => u.Name);
             var categoryLookup = categories.ToDictionary(c => c.ID, c => c.Name);
             var processingTypeLookup = processingTypes.ToDictionary(p => p.ID, p => p.Name);
             var specialProductTaxRateLookup = specialProductTaxRates.ToDictionary(s => s.ID, s => s.Name);
+            var parentProductLookup = parentProducts.ToDictionary(p => p.ID, p => p.Name);
 
             // Assign names using lookups
             foreach (var product in products)
@@ -111,6 +119,9 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 if (product.SpecialProductTaxRate_ID.HasValue && specialProductTaxRateLookup.TryGetValue(product.SpecialProductTaxRate_ID.Value, out var specialProductTaxRateName))
                     product.SpecialProductTaxRateName = specialProductTaxRateName;
+
+                if (product.ParentID.HasValue && parentProductLookup.TryGetValue(product.ParentID.Value, out var parentName))
+                    product.ParentName = parentName;
             }
         }
 
@@ -194,6 +205,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             existingProduct.CompanyTaxRate = productData.CompanyTaxRate;
             existingProduct.ConsumerTaxRate = productData.ConsumerTaxRate;
             existingProduct.SpecialProductTaxRate_ID = productData.SpecialProductTaxRate_ID;
+            existingProduct.ParentID = productData.ParentID;
             existingProduct.UpdatedDate = DateTime.Now;
             existingProduct.UpdatedBy = currentUserId;
         }
@@ -204,10 +216,10 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel)
         {
-            return await GetProductList(searchModel, null);
+            return await GetProductList(searchModel, null, null);
         }
 
-        public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null)
+        public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null, int? excludeProductId = null)
         {
             var response = new Acknowledgement<JsonResultPaging<List<ProductViewModel>>>();
             try
@@ -217,6 +229,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (!searchModel.IncludeDiscontinued)
                 {
                     predicate = predicate.And(i => !i.IsDiscontinued);
+                }
+
+                // Exclude specific product ID if provided (for parent dropdown)
+                if (excludeProductId.HasValue)
+                {
+                    predicate = predicate.And(i => i.ID != excludeProductId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
@@ -241,6 +259,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (searchModel.ProcessingType_ID.HasValue)
                 {
                     predicate = predicate.And(i => i.ProcessingType_ID == searchModel.ProcessingType_ID);
+                }
+
+                if (searchModel.IsMaterial.HasValue)
+                {
+                    predicate = predicate.And(i => i.IsMaterial == searchModel.IsMaterial.Value);
                 }
 
                 // Add author predicate if needed
@@ -346,6 +369,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
+                // Check if trying to discontinue a product that has active child products
+                if (postData.IsDiscontinued && !existingProduct.IsDiscontinued)
+                {
+                    var activeChildProducts = await _productRepository.ReadOnlyRespository.GetAsync(p => p.ParentID == postData.Id && p.IsActive && !p.IsDiscontinued);
+                    if (activeChildProducts.Count > 0)
+                    {
+                        ack.AddMessage("Không thể ngừng sử dụng sản phẩm này vì có sản phẩm con đang hoạt động.");
+                        return ack;
+                    }
+                }
+
                 UpdateProductEntity(existingProduct, postData, CurrentUserId);
                 await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingProduct), _productRepository.Repository);
                 return ack;
@@ -367,6 +401,14 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (product == null)
                 {
                     ack.AddMessage("Không tìm thấy sản phẩm.");
+                    return ack;
+                }
+
+                // Check if product has child products
+                var childProducts = await _productRepository.ReadOnlyRespository.GetAsync(p => p.ParentID == productId && p.IsActive);
+                if (childProducts.Count > 0)
+                {
+                    ack.AddMessage("Không thể xóa sản phẩm này vì có sản phẩm con đang sử dụng.");
                     return ack;
                 }
 
@@ -434,10 +476,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 LossRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(9))),
                                 ProfitMargin = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(10))),
                                 ProcessingFee = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(11))),
-                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))) ?? 0,
-                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(13))) ?? 0,
-                                Note = ExcelHelper.GetCellStringValue(row.Cell(14)),
-                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(15))
+                                DefaultPrice = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))),
+                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(13))),
+                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(14))),
+                                Note = ExcelHelper.GetCellStringValue(row.Cell(15)),
+                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(16))
                             };
 
                             // Validate required fields
@@ -551,6 +594,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             LossRate = importModel.LossRate,
                             ProfitMargin = importModel.ProfitMargin,
                             ProcessingFee = importModel.ProcessingFee,
+                            DefaultPrice = importModel.DefaultPrice,
                             CompanyTaxRate = importModel.CompanyTaxRate,
                             ConsumerTaxRate = importModel.ConsumerTaxRate,
                             Note = string.IsNullOrEmpty(importModel.Note) ? null : importModel.Note,
@@ -611,16 +655,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "Tên sản phẩm (*)",
                         "Tên tiếng Anh",
                         "Mã đơn vị",
-                        "Mã danh mục",
-                        "Mã loại chế biến",
+                        "Mã quy cách",
+                        "Mã phân loại",
                         "Là nguyên liệu (Y/N)",
                         "Mã thuế suất đặc biệt",
                         "Thuế suất (%)",
                         "Tỷ lệ hao hụt (%)",
                         "Tỷ lệ lợi nhuận (%)",
                         "Phí chế biến",
-                        "Thuế suất công ty (%)",
-                        "Thuế suất người tiêu dùng (%)",
+                        "Đơn giá mặc định",
+                        "Thuế suất công ty (%) - Tùy chọn",
+                        "Thuế suất người tiêu dùng (%) - Tùy chọn",
                         "Ghi chú",
                         "Ngừng sản xuất (Y/N)"
                     };
@@ -646,10 +691,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                     worksheet.Cell(2, 9).Value = 5;
                     worksheet.Cell(2, 10).Value = 15;
                     worksheet.Cell(2, 11).Value = 1000;
-                    worksheet.Cell(2, 12).Value = 8;
-                    worksheet.Cell(2, 13).Value = 10;
-                    worksheet.Cell(2, 14).Value = "Ghi chú mẫu";
-                    worksheet.Cell(2, 15).Value = "N";
+                    worksheet.Cell(2, 12).Value = 50000;
+                    worksheet.Cell(2, 13).Value = 8;
+                    worksheet.Cell(2, 14).Value = 10;
+                    worksheet.Cell(2, 15).Value = "Ghi chú mẫu";
+                    worksheet.Cell(2, 16).Value = "N";
 
                     // Auto-fit columns
                     worksheet.Columns().AdjustToContents();
@@ -665,18 +711,19 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "",
                         "1. Các cột bắt buộc:",
                         "   - Tên sản phẩm (*): Không được để trống",
-                        "   - Thuế suất công ty (%): Bắt buộc nhập số",
-                        "   - Thuế suất người tiêu dùng (%): Bắt buộc nhập số",
                         "",
                         "2. Các cột tùy chọn:",
                         "   - Tên tiếng Anh: Có thể để trống",
                         "   - Mã đơn vị: Phải tồn tại trong hệ thống",
-                        "   - Mã danh mục: Phải tồn tại trong hệ thống",
-                        "   - Mã loại chế biến: Phải tồn tại trong hệ thống",
+                        "   - Mã quy cách: Phải tồn tại trong hệ thống",
+                        "   - Mã phân loại: Phải tồn tại trong hệ thống",
                         "   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0",
                         "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
-                        "   - Các tỷ lệ %: Nhập số thập phân (ví dụ: 10.5)",
+                        "   - Thuế suất công ty (%): Nhập số thập phân (ví dụ: 10.5) hoặc để trống",
+                        "   - Thuế suất người tiêu dùng (%): Nhập số thập phân (ví dụ: 8.0) hoặc để trống",
+                        "   - Các tỷ lệ % khác: Nhập số thập phân (ví dụ: 10.5)",
                         "   - Phí chế biến: Nhập số",
+                        "   - Đơn giá mặc định: Nhập số (ví dụ: 50000)",
                         "   - Ghi chú: Có thể để trống",
                         "   - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0",
                         "",
@@ -703,6 +750,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                 throw;
             }
         }
+
+
 
         private static decimal? ParseDecimal(string value)
         {

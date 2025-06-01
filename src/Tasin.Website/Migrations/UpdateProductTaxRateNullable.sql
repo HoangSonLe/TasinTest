@@ -1,0 +1,2 @@
+ALTER TABLE "Product" ALTER COLUMN "CompanyTaxRate" DROP NOT NULL;
+ALTER TABLE "Product" ALTER COLUMN "ConsumerTaxRate" DROP NOT NULL;

@@ -42,16 +42,17 @@ namespace Tasin.Website.Controllers
         /// Get list of products with paging
         /// </summary>
         /// <param name="searchModel">Search parameters</param>
+        /// <param name="excludeProductId">Product ID to exclude from results (optional)</param>
         /// <returns>List of products</returns>
         [HttpGet]
         [Route("Product/GetProductList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<ProductViewModel>>>), 200)]
         [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
-        public async Task<IActionResult> GetProductList([FromQuery] ProductSearchModel searchModel)
+        public async Task<IActionResult> GetProductList([FromQuery] ProductSearchModel searchModel, [FromQuery] int? excludeProductId = null)
         {
             try
             {
-                var result = await _productService.GetProductList(searchModel);
+                var result = await _productService.GetProductList(searchModel, null, excludeProductId);
                 return Json(result);
             }
             catch (Exception ex)
@@ -143,6 +144,8 @@ namespace Tasin.Website.Controllers
                 };
             }
         }
+
+
 
         /// <summary>
         /// Delete a product by ID

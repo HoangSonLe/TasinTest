@@ -46,9 +46,28 @@
             note: null,
             isDiscontinued: false,
             processingFee: null,
+            parentID: null,
             // status: "",
             ...dataProduct
         };
+
+        // Ensure all dropdown IDs are always numbers or null, not objects
+        if (formData.parentID && typeof formData.parentID === 'object') {
+            formData.parentID = formData.parentID.id || formData.parentID.Id || formData.parentID.ID || null;
+        }
+        if (formData.unit_ID && typeof formData.unit_ID === 'object') {
+            formData.unit_ID = formData.unit_ID.id || formData.unit_ID.Id || formData.unit_ID.ID || null;
+        }
+        if (formData.category_ID && typeof formData.category_ID === 'object') {
+            formData.category_ID = formData.category_ID.id || formData.category_ID.Id || formData.category_ID.ID || null;
+        }
+        if (formData.processingType_ID && typeof formData.processingType_ID === 'object') {
+            formData.processingType_ID = formData.processingType_ID.id || formData.processingType_ID.Id || formData.processingType_ID.ID || null;
+        }
+        if (formData.specialProductTaxRate_ID && typeof formData.specialProductTaxRate_ID === 'object') {
+            formData.specialProductTaxRate_ID = formData.specialProductTaxRate_ID.id || formData.specialProductTaxRate_ID.Id || formData.specialProductTaxRate_ID.ID || null;
+        }
+
         let strSubmit = "Thêm";
         let title = "THÊM MỚI"
         let element;
@@ -65,6 +84,18 @@
             formData: formData,
             type: "group",
             items: [
+                // ===== NHÓM 1: THÔNG TIN CỞ BẢN =====
+                {
+                    field: "code",
+                    title: "Mã hàng hoá",
+                    label: "Mã hàng hoá:",
+                    colSpan: 1,
+                    attributes: {
+                        placeholder: "Mã sẽ được sinh tự động...",
+                        disabled: true,
+                        readonly: true
+                    }
+                },
                 {
                     field: "name",
                     title: "Hàng hoá",
@@ -84,13 +115,18 @@
                 {
                     field: "unit_ID",
                     title: "Đơn vị",
-                    label: "Đơn vị:",
+                    label: "Đơn vị (*):",
                     colSpan: 1,
                     editor: "DropDownList",
+                    validation: {
+                        validationMessage: "Vui lòng chọn đơn vị",
+                        required: true
+                    },
                     editorOptions: {
                         optionLabel: "Chọn đơn vị",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -100,7 +136,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -117,6 +152,9 @@
                                 total: "data.total"
                             },
                         },
+                        change: function (e) {
+                            formData.unit_ID = this.value();
+                        }
                     },
                 },
                 {
@@ -129,6 +167,7 @@
                         optionLabel: "Chọn quy cách",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -138,7 +177,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -155,8 +193,70 @@
                                 total: "data.total"
                             },
                         },
+                        change: function (e) {
+                            formData.category_ID = this.value();
+                        }
                     },
                 },
+                {
+                    field: "parentID",
+                    title: "Hàng hoá cha",
+                    label: "Hàng hoá cha:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn hàng hoá cha",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        valuePrimitive: true, // 🔑 Bắt buộc để giá trị là ID thay vì object
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Product/GetProductList",
+                                    datatype: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+                                        return {
+                                            pageSize: 100,
+                                            pageNumber: 1,
+                                            includeDiscontinued: false,
+                                            excludeProductId: formData.id > 0 ? formData.id : null
+                                        };
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering: true,
+                            pageSize: 100,
+                            schema: {
+                                type: 'json',
+                                parse: function (response) {
+                                    if (response.isSuccess === false) {
+                                        showErrorMessages(response.errorMessageList);
+                                        return { data: [], total: 0 };
+                                    }
+                                    return response.data;
+                                },
+                                model: {
+                                    id: "id",
+                                    fields: {
+                                        name: { type: "string" },
+                                        code: { type: "string" }
+                                    }
+                                },
+                                data: "data",
+                                total: "total"
+                            },
+                        },
+                        change: function (e) {
+                            formData.parentID = this.value(); // đơn giản chỉ cần ID
+                        }
+                    }
+                },
+
+                // ===== NHÓM 2: PHÂN LOẠI VÀ THUẾ =====
                 {
                     field: "processingType_ID",
                     title: "Phân loại hàng hoá",
@@ -167,6 +267,7 @@
                         optionLabel: "Chọn phân loại hàng hoá",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -176,7 +277,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -193,6 +293,9 @@
                                 total: "data.total"
                             },
                         },
+                        change: function (e) {
+                            formData.processingType_ID = this.value();
+                        }
                     },
                 },
                 {
@@ -238,6 +341,7 @@
                         optionLabel: "Chọn loại mặt hàng",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -247,7 +351,6 @@
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
-
                                         return {
                                             pageSize: data.pageSize,
                                             pageNumber: data.page,
@@ -261,28 +364,33 @@
                             pageSize: 9999,
                             schema: {
                                 data: "data.data",
-                                total: "data.total"
+                                total: "data.total",
+                                model: {
+                                    id: "id",
+                                    fields: {
+                                        id: { type: "number" },
+                                        name: { type: "string" }
+                                    }
+                                }
                             },
                         },
+                        change: function (e) {
+                            formData.specialProductTaxRate_ID = this.value();
+                        }
                     },
                 },
+
+                // ===== NHÓM 3: GIÁ VÀ CHI PHÍ =====
                 {
-                    field: "lossRate",
-                    title: "Hao hụt",
-                    label: "Hao hụt:",
+                    field: "defaultPrice",
+                    title: "Giá mặc định",
+                    label: "Giá mặc định:",
                     colSpan: 1,
                     attributes: {
                         type: "number",
                         step: "0.01",
                         min: "0"
                     }
-                },
-                {
-                    field: "isMaterial",
-                    title: "Là nguyên liệu",
-                    label: "Là nguyên liệu:",
-                    colSpan: 1,
-                    editor: "CheckBox",
                 },
                 {
                     field: "profitMargin",
@@ -300,13 +408,6 @@
                     },
                 },
                 {
-                    field: "isDiscontinued",
-                    title: "Ngừng sử dụng",
-                    label: "Ngừng sử dụng:",
-                    colSpan: 1,
-                    editor: "CheckBox",
-                },
-                {
                     field: "processingFee",
                     title: "Mức phí gia công",
                     label: "Mức phí gia công:",
@@ -316,6 +417,33 @@
                         step: "0.01",
                         min: "0"
                     }
+                },
+                {
+                    field: "lossRate",
+                    title: "Hao hụt (%)",
+                    label: "Hao hụt (%):",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+
+                // ===== NHÓM 4: THUỘC TÍNH SẢN PHẨM =====
+                {
+                    field: "isMaterial",
+                    title: "Là nguyên liệu",
+                    label: "Là nguyên liệu:",
+                    colSpan: 1,
+                    editor: "CheckBox",
+                },
+                {
+                    field: "isDiscontinued",
+                    title: "Ngừng sử dụng",
+                    label: "Ngừng sử dụng:",
+                    colSpan: 1,
+                    editor: "CheckBox",
                 },
                 {
                     field: "note",
@@ -334,6 +462,14 @@
             },
             submit: function (e) {
                 e.preventDefault();
+
+                // Validate form before submitting
+                var form = $("#formCreateAndEdit").data("kendoForm");
+                if (!form.validate()) {
+                    kendo.alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+                    return;
+                }
+
                 let dataItem = {
                     ...formData,
                     ...e.model,
@@ -427,7 +563,7 @@
                     { value: "Mã hàng hoá", textAlign: "center", background: "#428dd8" },
                     { value: "Hàng hoá", textAlign: "center", background: "#428dd8" },
                     { value: "Hàng hoá tiếng anh", textAlign: "center", background: "#428dd8" },
-                    { value: "Mô tả", textAlign: "center", background: "#428dd8" },
+                    { value: "Ghi chú", textAlign: "center", background: "#428dd8" },
                     { value: "Ngày cập nhật", textAlign: "center", background: "#428dd8" },
                     { value: "Người cập nhật", textAlign: "center", background: "#428dd8" },
                 ]
@@ -451,7 +587,7 @@
                     { value: dataSourceProduct[index].code },
                     { value: dataSourceProduct[index].name },
                     { value: dataSourceProduct[index].name_EN },
-                    { value: dataSourceProduct[index].description },
+                    { value: dataSourceProduct[index].note },
                     { value: kendo.toString(kendo.parseDate(dataSourceProduct[index].updatedDate), "dd/MM/yyyy") },
                     { value: dataSourceProduct[index].updatedByName },
                 ]
@@ -497,6 +633,8 @@
                                 <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
                                     <button id='create' title="Thêm" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id="downloadTemplate" title="Tải mẫu Excel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-info"><span class="k-icon k-i-download k-button-icon"></span><span class="k-button-text">Tải mẫu</span></button>
+                                    <button id="importExcel" title="Import Excel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-warning"><span class="k-icon k-i-upload k-button-icon"></span><span class="k-button-text">Import Excel</span></button>
                                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
@@ -593,8 +731,8 @@
                     width: 200,
                 },
                 {
-                    field: "description",
-                    title: "Mô tả",
+                    field: "note",
+                    title: "Ghi chú",
                     width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
@@ -648,6 +786,15 @@
         $("#exportExcel").click(async function (e) {
             ExportExcel();
         });
+
+        $("#downloadTemplate").click(async function (e) {
+            downloadTemplate();
+        });
+
+        $("#importExcel").click(async function (e) {
+            showImportDialog();
+        });
+
         $("#searchString").kendoTextBox({
             icon: {
                 type: "search",
@@ -670,6 +817,219 @@
         });
 
     };
+
+    // Download Excel template function
+    async function downloadTemplate() {
+        try {
+            const response = await fetch('/Product/DownloadTemplate');
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Product_Import_Template_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                kendo.ui.progress($(document.body), false);
+                notification.show({
+                    title: "Thành công!",
+                    message: "Đã tải xuống file mẫu thành công!"
+                }, "success");
+            } else {
+                throw new Error('Không thể tải xuống file mẫu');
+            }
+        } catch (error) {
+            console.error('Error downloading template:', error);
+            notification.show({
+                title: "Lỗi!",
+                message: "Lỗi khi tải xuống file mẫu: " + error.message
+            }, "error");
+        }
+    }
+
+    // Show import dialog function
+    function showImportDialog() {
+        const dialogHtml = `
+            <div id="importDialog">
+                <div class="k-form-layout" style="grid-template-columns: 1fr;">
+                    <div class="k-form-field">
+                        <label class="k-label k-form-label">Chọn file Excel để import:</label>
+                        <div class="k-form-field-wrap">
+                            <input type="file" id="importFile" accept=".xlsx,.xls,.xlsm,.csv" class="k-textbox" />
+                            <div class="k-form-hint">Chỉ chấp nhận file Excel (.xlsx, .xls, .xlsm) hoặc CSV</div>
+                        </div>
+                    </div>
+                    <div class="k-form-field">
+                        <div class="k-form-field-wrap">
+                            <div id="importProgress" style="display: none;">
+                                <div class="k-progressbar">
+                                    <div class="k-progress-status-wrap">
+                                        <span class="k-progress-status">Đang xử lý...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const dialog = $(dialogHtml).kendoDialog({
+            width: "500px",
+            title: "Import sản phẩm từ Excel",
+            closable: true,
+            modal: true,
+            actions: [
+                {
+                    text: "Hủy",
+                    action: function (e) {
+                        return true; // Close dialog
+                    }
+                },
+                {
+                    text: "Import",
+                    primary: true,
+                    action: function (e) {
+                        const fileInput = document.getElementById('importFile');
+                        if (fileInput.files.length === 0) {
+                            notification.show({
+                                title: "Cảnh báo!",
+                                message: "Vui lòng chọn file để import!"
+                            }, "info");
+                            return false; // Don't close dialog
+                        }
+
+                        importExcelFile(fileInput.files[0]);
+                        return false; // Don't close dialog yet
+                    }
+                }
+            ]
+        }).data("kendoDialog");
+
+        dialog.open();
+    }
+
+    // Import Excel file function
+    async function importExcelFile(file) {
+        try {
+            $("#importProgress").show();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/Product/ImportExcel', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            $("#importProgress").hide();
+
+            if (result.isSuccess && result.data) {
+                showImportResult(result.data);
+
+                // Refresh grid if there were successful imports
+                if (result.data.successfulRows > 0) {
+                    $(gridId).data("kendoGrid").dataSource.read();
+                }
+            } else {
+                const errorMessage = result.errorMessageList && result.errorMessageList.length > 0
+                    ? result.errorMessageList.join('<br/>')
+                    : 'Có lỗi xảy ra khi import file';
+                notification.show({
+                    title: "Lỗi!",
+                    message: errorMessage
+                }, "error");
+            }
+
+            // Close import dialog
+            $(".k-dialog").each(function () {
+                const dialog = $(this).data("kendoDialog");
+                if (dialog) {
+                    dialog.close();
+                }
+            });
+
+        } catch (error) {
+            $("#importProgress").hide();
+            console.error('Error importing file:', error);
+            notification.show({
+                title: "Lỗi!",
+                message: "Lỗi khi import file: " + error.message
+            }, "error");
+        }
+    }
+
+    // Show import result function
+    function showImportResult(importResult) {
+        let resultHtml = `
+            <div class="import-result">
+                <h4>Kết quả Import</h4>
+                <div class="result-summary">
+                    <p><strong>Tổng số dòng xử lý:</strong> ${importResult.totalRows}</p>
+                    <p><strong>Thành công:</strong> <span class="text-success">${importResult.successfulRows}</span></p>
+                    <p><strong>Thất bại:</strong> <span class="text-danger">${importResult.failedRows}</span></p>
+                </div>
+        `;
+
+        if (importResult.errors && importResult.errors.length > 0) {
+            resultHtml += `
+                <div class="error-details">
+                    <h5>Chi tiết lỗi:</h5>
+                    <div class="error-list" style="max-height: 300px; overflow-y: auto;">
+            `;
+
+            importResult.errors.forEach(error => {
+                resultHtml += `
+                    <div class="error-item" style="margin-bottom: 10px; padding: 10px; border-left: 3px solid #dc3545; background-color: #f8f9fa;">
+                        <strong>Dòng ${error.rowNumber}:</strong> ${error.productName || 'N/A'}<br/>
+                        <span class="text-danger">${error.errorMessages.join(', ')}</span>
+                    </div>
+                `;
+            });
+
+            resultHtml += `
+                    </div>
+                </div>
+            `;
+        }
+
+        resultHtml += `</div>`;
+
+        const resultDialog = $(resultHtml).kendoDialog({
+            width: "600px",
+            title: "Kết quả Import Excel",
+            closable: true,
+            modal: true,
+            actions: [
+                {
+                    text: "Đóng",
+                    primary: true,
+                    action: function (e) {
+                        return true; // Close dialog
+                    }
+                }
+            ]
+        }).data("kendoDialog");
+
+        resultDialog.open();
+
+        // Show notification
+        if (importResult.failedRows === 0) {
+            notification.show({
+                title: "Thành công!",
+                message: `Import thành công ${importResult.successfulRows} sản phẩm!`
+            }, "success");
+        } else {
+            notification.show({
+                title: "Hoàn tất!",
+                message: `Import hoàn tất với ${importResult.successfulRows} thành công và ${importResult.failedRows} lỗi`
+            }, "info");
+        }
+    }
 
 </script>
 <script type="text/javascript">
@@ -709,5 +1069,74 @@
 
     #formCreateAndEdit .k-form-field {
         margin-bottom: 0;
+    }
+
+    /* Import dialog styles */
+    .import-result {
+        padding: 15px;
+    }
+
+    .result-summary {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .result-summary p {
+        margin: 5px 0;
+    }
+
+    .error-details {
+        margin-top: 15px;
+    }
+
+    .error-list {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .error-item {
+        border-left: 3px solid #dc3545 !important;
+        background-color: #f8f9fa !important;
+        margin-bottom: 10px !important;
+        padding: 10px !important;
+        border-radius: 3px;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    /* Import progress styles */
+    #importProgress {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .k-progressbar {
+        width: 100%;
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .k-progress-status-wrap {
+        padding: 10px 0;
+    }
+
+    .k-progress-status {
+        font-weight: 500;
+        color: #495057;
     }
 </style>

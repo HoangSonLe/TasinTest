@@ -304,6 +304,44 @@ namespace Tasin.Website.DAL.Services.WebServices
         public async Task<Acknowledgement> CreateOrUpdatePurchaseOrder(PurchaseOrderViewModel postData)
         {
             var ack = new Acknowledgement();
+
+            // Input validation
+            if (postData == null)
+            {
+                ack.AddMessage("Dữ liệu đơn hàng không hợp lệ.");
+                return ack;
+            }
+
+            if (postData.Customer_ID <= 0)
+            {
+                ack.AddMessage("Vui lòng chọn khách hàng.");
+                return ack;
+            }
+
+            if (postData.PurchaseOrderItems == null || !postData.PurchaseOrderItems.Any())
+            {
+                ack.AddMessage("Đơn hàng phải có ít nhất một sản phẩm.");
+                return ack;
+            }
+
+            // Validate purchase order items
+            foreach (var item in postData.PurchaseOrderItems)
+            {
+                if (item.Product_ID <= 0)
+                {
+                    ack.AddMessage("Sản phẩm không hợp lệ.");
+                    return ack;
+                }
+
+                if (item.Quantity <= 0)
+                {
+                    ack.AddMessage("Số lượng sản phẩm phải lớn hơn 0.");
+                    return ack;
+                }
+            }
+
+            // Use transaction to ensure data consistency
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 if (postData.Id == 0)
@@ -319,13 +357,16 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // Calculate totals
                     CalculateTotals(newPurchaseOrder, postData.PurchaseOrderItems);
 
-                    await ack.TrySaveChangesAsync(res => res.AddAsync(newPurchaseOrder), _purchaseOrderRepository.Repository);
+                    await _purchaseOrderRepository.Repository.AddWithoutSaveAsync(newPurchaseOrder);
+                    await DbContext.SaveChangesAsync();
 
-                    if (ack.IsSuccess && postData.PurchaseOrderItems.Any())
+                    if (postData.PurchaseOrderItems.Count > 0)
                     {
-                        // Save purchase order items
-                        await SavePurchaseOrderItems(newPurchaseOrder.ID, postData.PurchaseOrderItems);
+                        await SavePurchaseOrderItemsInTransaction(newPurchaseOrder.ID, postData.PurchaseOrderItems);
+                        await DbContext.SaveChangesAsync();
                     }
+
+                    ack.IsSuccess = true;
                 }
                 else
                 {
@@ -334,6 +375,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     if (existingPurchaseOrder == null)
                     {
                         ack.AddMessage("Không tìm thấy đơn hàng.");
+                        await transaction.RollbackAsync();
                         return ack;
                     }
 
@@ -349,6 +391,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     if (authorizedPurchaseOrders.Count == 0)
                     {
                         ack.AddMessage("Bạn không có quyền cập nhật đơn hàng này.");
+                        await transaction.RollbackAsync();
                         return ack;
                     }
 
@@ -367,6 +410,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         {
                             ack.AddMessage("Đơn hàng không thể chỉnh sửa (Chỉ có thể chỉnh sửa đơn hàng ở trạng thái: Mới).");
                         }
+                        await transaction.RollbackAsync();
                         return ack;
                     }
 
@@ -378,28 +422,44 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // Calculate totals
                     CalculateTotals(existingPurchaseOrder, postData.PurchaseOrderItems);
 
-                    await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingPurchaseOrder), _purchaseOrderRepository.Repository);
+                    // Update purchase order (without saving)
+                    _purchaseOrderRepository.Repository.UpdateWithoutSave(existingPurchaseOrder);
 
-                    if (ack.IsSuccess && postData.PurchaseOrderItems.Any())
+                    if (postData.PurchaseOrderItems.Count > 0)
                     {
-                        // Delete existing items
-                        await _purchaseOrderItemRepository.DeleteByPurchaseOrderIdAsync(postData.Id);
-
-                        // Save new items
-                        await SavePurchaseOrderItems(existingPurchaseOrder.ID, postData.PurchaseOrderItems);
+                        await DeletePurchaseOrderItemsInTransaction(postData.Id);
+                        await SavePurchaseOrderItemsInTransaction(existingPurchaseOrder.ID, postData.PurchaseOrderItems);
                     }
+
+                    // Save all changes within transaction
+                    await DbContext.SaveChangesAsync();
+                    ack.IsSuccess = true;
                 }
+
+                // Commit transaction if everything succeeded
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CreateOrUpdatePurchaseOrder: {ex.Message}");
+                _logger.LogError("CreateOrUpdatePurchaseOrder failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
+                ack.IsSuccess = false;
+
+                // Rollback transaction on error
+                try
+                {
+                    await transaction.RollbackAsync();
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError("Transaction rollback failed: {ErrorMessage}", rollbackEx.Message);
+                }
             }
 
             return ack;
         }
 
-        private void CalculateTotals(Purchase_Order purchaseOrder, List<PurchaseOrderItemViewModel> items)
+        private static void CalculateTotals(Purchase_Order purchaseOrder, List<PurchaseOrderItemViewModel> items)
         {
             decimal totalPrice = 0;
             decimal totalPriceNoTax = 0;
@@ -408,18 +468,15 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 if (item.Price.HasValue)
                 {
-                    decimal itemTotal = item.Quantity * item.Price.Value;
-                    totalPriceNoTax += itemTotal;
+                    decimal baseAmount = item.Quantity * item.Price.Value;
+                    decimal lossAmount = baseAmount * ((item.LossRate ?? 0) / 100);
+                    decimal totalBeforeTax = baseAmount + lossAmount + (item.ProcessingFee ?? 0);
+                    decimal profitAmount = totalBeforeTax * ((item.ProfitMargin ?? 0) / 100);
+                    decimal totalAfterProfit = totalBeforeTax + profitAmount;
+                    decimal taxAmount = totalAfterProfit * ((item.TaxRate ?? 0) / 100);
 
-                    if (item.TaxRate.HasValue)
-                    {
-                        decimal taxAmount = itemTotal * (item.TaxRate.Value / 100);
-                        totalPrice += itemTotal + taxAmount;
-                    }
-                    else
-                    {
-                        totalPrice += itemTotal;
-                    }
+                    totalPriceNoTax += totalAfterProfit;
+                    totalPrice += totalAfterProfit + taxAmount;
                 }
             }
 
@@ -427,17 +484,53 @@ namespace Tasin.Website.DAL.Services.WebServices
             purchaseOrder.TotalPriceNoTax = totalPriceNoTax;
         }
 
-        private async Task SavePurchaseOrderItems(int purchaseOrderId, List<PurchaseOrderItemViewModel> items)
+        /// <summary>
+        /// Save purchase order items within a transaction (does not call SaveChanges)
+        /// </summary>
+        private async Task SavePurchaseOrderItemsInTransaction(int purchaseOrderId, List<PurchaseOrderItemViewModel> items)
         {
+            if (items == null || items.Count == 0)
+                return;
+
+            var purchaseOrderItems = new List<Purchase_Order_Item>();
+
             foreach (var item in items)
             {
-                var purchaseOrderItem = _mapper.Map<Purchase_Order_Item>(item);
-                purchaseOrderItem.PO_ID = purchaseOrderId;
+                var purchaseOrderItem = new Purchase_Order_Item
+                {
+                    PO_ID = purchaseOrderId,
+                    Product_ID = item.Product_ID,
+                    Quantity = item.Quantity,
+                    Unit_ID = item.Unit_ID,
+                    Price = item.Price,
+                    TaxRate = item.TaxRate,
+                    ProcessingType_ID = item.ProcessingType_ID,
+                    LossRate = item.LossRate,
+                    ProcessingFee = item.ProcessingFee,
+                    Note = item.Note,
+                    ProfitMargin = item.ProfitMargin
+                };
 
-                await _purchaseOrderItemRepository.Repository.AddAsync(purchaseOrderItem);
+                purchaseOrderItems.Add(purchaseOrderItem);
             }
 
-            await DbContext.SaveChangesAsync();
+            // Add items to context without saving (transaction will handle the save)
+            await _purchaseOrderItemRepository.Repository.AddRangeWithoutSaveAsync(purchaseOrderItems);
+        }
+
+        /// <summary>
+        /// Delete purchase order items within a transaction (does not call SaveChanges)
+        /// </summary>
+        private async Task DeletePurchaseOrderItemsInTransaction(int purchaseOrderId)
+        {
+            var existingItems = await _purchaseOrderItemRepository.ReadOnlyRespository.GetAsync(
+                filter: item => item.PO_ID == purchaseOrderId
+            );
+
+            if (existingItems.Count > 0)
+            {
+                _purchaseOrderItemRepository.Repository.DeleteRangeWithoutSave(existingItems);
+            }
         }
 
         public async Task<Acknowledgement> DeletePurchaseOrderById(int purchaseOrderId)
@@ -494,7 +587,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             catch (Exception ex)
             {
-                _logger.LogError($"DeletePurchaseOrderById: {ex.Message}");
+                _logger.LogError("DeletePurchaseOrderById failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
             }
 
@@ -560,7 +653,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CancelPurchaseOrderById: {ex.Message}");
+                _logger.LogError("CancelPurchaseOrderById failed: {ErrorMessage}", ex.Message);
                 ack.AddMessage(ex.Message);
             }
 
@@ -569,10 +662,8 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public new void Dispose()
         {
-            // Call base class Dispose which handles common resources
             base.Dispose();
-
-            // No need to dispose repositories as they are managed by DI container
+            GC.SuppressFinalize(this);
         }
     }
 }
