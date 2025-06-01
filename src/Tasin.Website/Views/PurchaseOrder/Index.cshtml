@@ -230,13 +230,21 @@
                 { field: "unitName", title: "Đơn vị", width: 100 },
                 { field: "price", title: "Đơn giá", width: 120, format: "{0:n0}" },
                 { field: "lossRate", title: "Hao hụt (%)", width: 100, format: "{0:n1}" },
-                { field: "profitMargin", title: "Lợi nhuận (%)", width: 110, format: "{0:n1}" },
+                { field: "additionalCost", title: "Chi phí thêm", width: 110, format: "{0:n0}" },
                 { field: "taxRate", title: "Thuế suất (%)", width: 100, format: "{0:n1}" },
                 { field: "processingFee", title: "Phí gia công", width: 120, format: "{0:n0}" },
                 {
                     title: "Thành tiền",
                     width: 150,
-                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ"
+                    template: function(dataItem) {
+                        var baseAmount = (dataItem.quantity || 0) * (dataItem.price || 0);
+                        var lossAmount = baseAmount * ((dataItem.lossRate || 0) / 100);
+                        var totalProcessingFee = (dataItem.quantity || 0) * (dataItem.processingFee || 0);
+                        var totalBeforeTax = baseAmount + lossAmount + (dataItem.additionalCost || 0) + totalProcessingFee;
+                        var taxAmount = totalBeforeTax * ((dataItem.taxRate || 0) / 100);
+                        var finalAmount = totalBeforeTax + taxAmount;
+                        return kendo.toString(finalAmount, 'n0') + ' VNĐ';
+                    }
                 }
             ],
             pageable: false,
@@ -484,8 +492,8 @@
                             </div>
                             <div class="grid-col-4-1">
                                 <div class="form-group">
-                                    <label>Lợi nhuận (%)</label>
-                                    <input type="number" id="item-profitMargin" class="form-control" step="0.01" min="0" value="0"/>
+                                    <label>Chi phí thêm</label>
+                                    <input type="number" id="item-additionalCost" class="form-control" step="0.01" min="0" value="0"/>
                                 </div>
                             </div>
                             <div class="grid-col-4-1">
@@ -500,17 +508,11 @@
                         <div class="grid-row-4col">
                             <div class="grid-col-4-1">
                                 <div class="form-group">
-                                    <label>Loại gia công</label>
-                                    <select id="item-processingType" class="form-control"></select>
-                                </div>
-                            </div>
-                            <div class="grid-col-4-1">
-                                <div class="form-group">
                                     <label>Thành tiền</label>
                                     <input type="text" id="item-totalAmount" class="form-control total-amount-highlight" readonly/>
                                 </div>
                             </div>
-                            <div class="grid-col-4-2">
+                            <div class="grid-col-4-3">
                                 <div class="form-group">
                                     <label>Ghi chú</label>
                                     <input type="text" id="item-note" class="form-control"/>
@@ -705,18 +707,12 @@
                 } else {
                     // Clear product details if no valid selection
                     $("#item-unitName").val('').removeData("unitId");
-                    $("#item-profitMargin").val("0");
+                    $("#item-additionalCost").val("0");
                     $("#item-price").val('');
                     $("#item-taxRate").val('');
                     $("#item-lossRate").val('');
                     $("#item-processingFee").val('');
                     $("#item-totalAmount").val('');
-
-                    // Clear processing type dropdown
-                    var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
-                    if (processingTypeDropdown) {
-                        processingTypeDropdown.value('');
-                    }
                 }
             },
             select: function (e) {
@@ -769,42 +765,7 @@
             }
         });
 
-        // Initialize Processing Type Dropdown
-        $("#item-processingType").kendoDropDownList({
-            dataTextField: "text",
-            dataValueField: "value",
-            optionLabel: "-- Chọn loại gia công --",
-            template: function (dataItem) {
-                if (!dataItem || !dataItem.text) {
-                    return "N/A";
-                }
-                return dataItem.text;
-            },
-            valueTemplate: function (dataItem) {
-                if (!dataItem || !dataItem.text) {
-                    return "-- Chọn loại gia công --";
-                }
-                return dataItem.text;
-            },
-            dataSource: {
-                transport: {
-                    read: {
-                        url: "/Common/GetDataOptionsDropdown",
-                        data: { type: 3 } // ECategoryType.ProcessingType
-                    }
-                },
-                schema: {
-                    parse: function (response) {
-                        if (response && response.isSuccess && response.data) {
-                            return response.data.filter(function (item) {
-                                return item && item.text && item.value !== undefined;
-                            });
-                        }
-                        return [];
-                    }
-                }
-            }
-        });
+
 
         // Initialize Items Grid
         $("#itemsGrid").kendoGrid({
@@ -821,12 +782,10 @@
                             unitName: { type: "string" },
                             price: { type: "number" },
                             lossRate: { type: "number" },
-                            profitMargin: { type: "number" },
+                            additionalCost: { type: "number" },
                             taxRate: { type: "number" },
                             processingFee: { type: "number" },
                             totalAmount: { type: "number" },
-                            processingTypeId: { type: "number" },
-                            processingTypeName: { type: "string" },
                             note: { type: "string" }
                         }
                     }
@@ -838,11 +797,10 @@
                 { field: "unitName", title: "Đơn vị", width: "80px" },
                 { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
                 { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
-                { field: "profitMargin", title: "Lợi nhuận (%)", width: "90px", template: "#= profitMargin ? kendo.toString(profitMargin, 'n1') + '%' : '' #" },
+                { field: "additionalCost", title: "Chi phí thêm", width: "100px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n0') + ' VNĐ' : '' #" },
                 { field: "taxRate", title: "Thuế (%)", width: "80px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
                 { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
-                { field: "processingTypeName", title: "Loại gia công", width: "120px" },
                 { field: "note", title: "Ghi chú", width: "150px" },
                 {
                     title: "Thao tác",
@@ -1138,8 +1096,8 @@
                             price: { type: "number" },
                             taxRate: { type: "number" },
                             lossRate: { type: "number" },
-                            processingFee: { type: "number" },
-                            profitMargin: { type: "number" }
+                            additionalCost: { type: "number" },
+                            processingFee: { type: "number" }
                         }
                     }
                 }
@@ -1154,12 +1112,20 @@
                 { field: "price", title: "Đơn giá", width: "120px", template: "#= price ? '<span class=\"currency\">' + kendo.toString(price, 'n0') + ' VNĐ</span>' : '' #" },
                 { field: "taxRate", title: "Thuế suất (%)", width: "100px", template: "#= taxRate ? '<span class=\"number\">' + kendo.toString(taxRate, 'n1') + '%</span>' : '' #" },
                 { field: "lossRate", title: "Tỷ lệ hao hụt (%)", width: "120px", template: "#= lossRate ? '<span class=\"number\">' + kendo.toString(lossRate, 'n1') + '%</span>' : '' #" },
+                { field: "additionalCost", title: "Chi phí thêm", width: "120px", template: "#= additionalCost ? '<span class=\"currency\">' + kendo.toString(additionalCost, 'n0') + ' VNĐ</span>' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "120px", template: "#= processingFee ? '<span class=\"currency\">' + kendo.toString(processingFee, 'n0') + ' VNĐ</span>' : '' #" },
-                { field: "profitMargin", title: "Tỷ lệ lợi nhuận (%)", width: "130px", template: "#= profitMargin ? '<span class=\"number\">' + kendo.toString(profitMargin, 'n1') + '%</span>' : '' #" },
                 {
                     title: "Thành tiền",
                     width: "150px",
-                    template: "#= '<span class=\"currency\">' + kendo.toString((quantity || 0) * (price || 0), 'n0') + ' VNĐ</span>' #"
+                    template: function(dataItem) {
+                        var baseAmount = (dataItem.quantity || 0) * (dataItem.price || 0);
+                        var lossAmount = baseAmount * ((dataItem.lossRate || 0) / 100);
+                        var totalProcessingFee = (dataItem.quantity || 0) * (dataItem.processingFee || 0);
+                        var totalBeforeTax = baseAmount + lossAmount + (dataItem.additionalCost || 0) + totalProcessingFee;
+                        var taxAmount = totalBeforeTax * ((dataItem.taxRate || 0) / 100);
+                        var finalAmount = totalBeforeTax + taxAmount;
+                        return '<span class="currency">' + kendo.toString(finalAmount, 'n0') + ' VNĐ</span>';
+                    }
                 },
                 { field: "note", title: "Ghi chú", width: "200px" }
             ]
@@ -1296,25 +1262,15 @@
                 $("#item-unitName").val(product.unitName || '');
                 $("#item-unitName").data("unitId", product.unit_ID || null); // Store unit_ID for later use
                 $("#item-price").val(product.defaultPrice || 0); // Đơn giá = defaultPrice
-                $("#item-taxRate").val(product.taxRate || 0);
+                $("#item-taxRate").val(0); // Default tax rate since removed from Product
 
                 // Auto-fill the requested fields
                 $("#item-lossRate").val(product.lossRate || 0);
                 $("#item-processingFee").val(product.processingFee || 0);
-
-                // Store profitMargin for calculation
-                $("#item-profitMargin").val(product.profitMargin || 0);
+                $("#item-additionalCost").val(product.additionalCost || 0);
 
                 // Calculate total amount when product is loaded
                 calculateTotalAmount();
-
-                // Auto-fill processing type dropdown
-                if (product.processingType) {
-                    var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
-                    if (processingTypeDropdown) {
-                        processingTypeDropdown.value(product.processingType);
-                    }
-                }
             } else {
                 // Show error notification
                 showErrorMessages(response.errorMessageList || ["Không thể tải thông tin sản phẩm"]);
@@ -1325,13 +1281,13 @@
         }, false);
     }
 
-    // Function to calculate total amount with full formula including profit margin and tax
+    // Function to calculate total amount with new formula
     function calculateTotalAmount() {
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var price = parseFloat($("#item-price").val()) || 0;
         var lossRate = parseFloat($("#item-lossRate").val()) || 0;
+        var additionalCost = parseFloat($("#item-additionalCost").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
-        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0;
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
 
         // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
@@ -1340,41 +1296,35 @@
         // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
         var lossAmount = baseAmount * (lossRate / 100);
 
-        // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
-        var totalBeforeTax = baseAmount + lossAmount + processingFee;
+        // Bước 3: Tính phí gia công (Số lượng × Phí gia công đơn vị)
+        var totalProcessingFee = quantity * processingFee;
 
-        // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
-        var profitAmount = totalBeforeTax * (profitMargin / 100);
+        // Bước 4: Tính tổng trước thuế (tiền cơ bản + hao hụt + chi phí thêm + phí gia công)
+        var totalBeforeTax = baseAmount + lossAmount + additionalCost + totalProcessingFee;
 
-        // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
-        var totalAfterProfit = totalBeforeTax + profitAmount;
+        // Bước 5: Tính tiền thuế (% thuế × tổng trước thuế)
+        var taxAmount = totalBeforeTax * (taxRate / 100);
 
-        // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
-        var taxAmount = totalAfterProfit * (taxRate / 100);
-
-        // Bước 7: Tổng cuối cùng (tổng sau lợi nhuận + thuế)
-        var finalAmount = totalAfterProfit + taxAmount;
+        // Bước 6: Tổng cuối cùng (tổng trước thuế + thuế)
+        var finalAmount = totalBeforeTax + taxAmount;
 
         $("#item-totalAmount").val(finalAmount.toFixed(2));
     }
 
     function addItemToGrid() {
         var productDropdown = $("#item-productId").data("kendoComboBox");
-        var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
 
         var productId = productDropdown ? productDropdown.value() : "";
         var productName = productDropdown ? productDropdown.text() : "";
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var unitName = $("#item-unitName").val();
         var unitId = $("#item-unitName").data("unitId"); // Get stored unit_ID
-        var profitMargin = parseFloat($("#item-profitMargin").val()) || 0; // Get stored profitMargin
+        var additionalCost = parseFloat($("#item-additionalCost").val()) || 0;
         var price = parseFloat($("#item-price").val()) || 0;
         var lossRate = parseFloat($("#item-lossRate").val()) || 0;
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
         var totalAmount = parseFloat($("#item-totalAmount").val()) || 0;
-        var processingType = processingTypeDropdown.value();
-        var processingTypeName = processingTypeDropdown.text();
         var note = $("#item-note").val();
 
         // Validation
@@ -1400,12 +1350,10 @@
             price: price,
             lossRate: lossRate,
             taxRate: taxRate,
+            additionalCost: additionalCost,
             processingFee: processingFee,
             totalAmount: calculatedTotalAmount,
-            processingType: processingType || null,
-            processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName,
-            note: note,
-            profitMargin: profitMargin // Include profitMargin for calculation
+            note: note
         };
 
         var grid = $("#itemsGrid").data("kendoGrid");
@@ -1434,16 +1382,12 @@
         }
         $("#item-quantity").val("");
         $("#item-unitName").val("").removeData("unitId");
-        $("#item-profitMargin").val("0");
+        $("#item-additionalCost").val("0");
         $("#item-price").val("");
         $("#item-lossRate").val("");
         $("#item-taxRate").val("");
         $("#item-processingFee").val("");
         $("#item-totalAmount").val("");
-        var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
-        if (processingTypeDropdown) {
-            processingTypeDropdown.value("");
-        }
         $("#item-note").val("");
     }
 
@@ -1461,21 +1405,18 @@
             // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
             var lossAmount = baseAmount * (item.lossRate / 100);
 
-            // Bước 3: Tính tổng trước lợi nhuận (tiền cơ bản + hao hụt + phí gia công)
-            var totalBeforeTax = baseAmount + lossAmount + (item.processingFee || 0);
+            // Bước 3: Tính phí gia công (Số lượng × Phí gia công đơn vị)
+            var totalProcessingFee = item.quantity * (item.processingFee || 0);
 
-            // Bước 4: Tính tiền lợi nhuận (% lợi nhuận × tổng trước lợi nhuận)
-            var profitAmount = totalBeforeTax * ((item.profitMargin || 0) / 100);
+            // Bước 4: Tính tổng trước thuế (tiền cơ bản + hao hụt + chi phí thêm + phí gia công)
+            var totalBeforeTax = baseAmount + lossAmount + (item.additionalCost || 0) + totalProcessingFee;
 
-            // Bước 5: Tính tổng sau lợi nhuận (tổng trước lợi nhuận + lợi nhuận)
-            var totalAfterProfit = totalBeforeTax + profitAmount;
-
-            // Bước 6: Tính tiền thuế (% thuế × tổng sau lợi nhuận)
-            var taxAmount = totalAfterProfit * ((item.taxRate || 0) / 100);
+            // Bước 5: Tính tiền thuế (% thuế × tổng trước thuế)
+            var taxAmount = totalBeforeTax * ((item.taxRate || 0) / 100);
 
             // Cộng dồn vào tổng
-            totalPriceNoTax += totalAfterProfit;
-            totalPrice += totalAfterProfit + taxAmount;
+            totalPriceNoTax += totalBeforeTax;
+            totalPrice += totalBeforeTax + taxAmount;
         }
 
         $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n0") + " VNĐ");
@@ -1484,6 +1425,15 @@
 
     function generateTempId() {
         return 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function calculateItemTotal(item) {
+        var baseAmount = (item.quantity || 0) * (item.price || 0);
+        var lossAmount = baseAmount * ((item.lossRate || 0) / 100);
+        var totalProcessingFee = (item.quantity || 0) * (item.processingFee || 0);
+        var totalBeforeTax = baseAmount + lossAmount + (item.additionalCost || 0) + totalProcessingFee;
+        var taxAmount = totalBeforeTax * ((item.taxRate || 0) / 100);
+        return totalBeforeTax + taxAmount;
     }
 
     function loadPurchaseOrderData(data) {
@@ -1526,12 +1476,10 @@
                             price: item.price,
                             lossRate: item.lossRate,
                             taxRate: item.taxRate,
+                            additionalCost: item.additionalCost || 0,
                             processingFee: item.processingFee,
-                            processingType: item.processingType || item.processingTypeId,
-                            processingTypeName: item.processingTypeName,
                             note: item.note,
-                            profitMargin: item.profitMargin || 0, // Thêm profitMargin
-                            totalAmount: (item.quantity || 0) * (item.price || 0)
+                            totalAmount: calculateItemTotal(item)
                         };
                         grid.dataSource.add(gridItem);
                     }
@@ -1590,11 +1538,10 @@
                     unit_ID: item.unitId, // Use captured unit_ID from product
                     price: item.price,
                     taxRate: item.taxRate,
-                    processingType: item.processingType,
                     lossRate: item.lossRate,
+                    additionalCost: item.additionalCost || 0,
                     processingFee: item.processingFee,
-                    note: item.note,
-                    profitMargin: item.profitMargin || 0
+                    note: item.note
                 };
             })
         };
@@ -1621,7 +1568,7 @@
         $(window).trigger("resize");
 
         // Add event listeners for automatic total amount calculation
-        $(document).on('input', '#item-quantity, #item-price, #item-processingFee, #item-profitMargin, #item-lossRate, #item-taxRate', function () {
+        $(document).on('input', '#item-quantity, #item-price, #item-processingFee, #item-additionalCost, #item-lossRate, #item-taxRate', function () {
             calculateTotalAmount();
         });
 
@@ -1697,6 +1644,10 @@
 
     .grid-col-4-2 {
         grid-column: span 2 !important;
+    }
+
+    .grid-col-4-3 {
+        grid-column: span 3 !important;
     }
 
     .grid-row-button {

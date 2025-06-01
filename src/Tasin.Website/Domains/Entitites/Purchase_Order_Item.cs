@@ -1,6 +1,5 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Tasin.Website.Common.Enums;
 
 namespace Tasin.Website.Domains.Entitites
 {
@@ -13,11 +12,10 @@ namespace Tasin.Website.Domains.Entitites
         public int? Unit_ID { get; set; }
         public decimal? Price { get; set; }
         public decimal? TaxRate { get; set; }
-        public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
         public decimal? LossRate { get; set; }
+        public decimal? AdditionalCost { get; set; }
         public decimal? ProcessingFee { get; set; }
         public string? Note { get; set; }
-        public decimal? ProfitMargin { get; set; }
 
         // Navigation properties
         [ForeignKey("PO_ID")]

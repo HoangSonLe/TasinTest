@@ -19,13 +19,10 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.Unit_ID).HasColumnName("Unit_ID");
             builder.Property(p => p.Price).HasColumnName("Price").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.TaxRate).HasColumnName("TaxRate").HasColumnType("NUMERIC(5, 2)");
-            builder.Property(p => p.ProcessingType)
-                .HasColumnName("ProcessingType")
-                .HasConversion<string>();
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.AdditionalCost).HasColumnName("AdditionalCost").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.ProcessingFee).HasColumnName("ProcessingFee").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.Note).HasColumnName("Note").HasColumnType("TEXT");
-            builder.Property(p => p.ProfitMargin).HasColumnName("ProfitMargin").HasColumnType("NUMERIC(5, 2)");
 
             // Relationships
             builder.HasOne(p => p.PurchaseOrder)
@@ -40,8 +37,6 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.HasOne(p => p.Unit)
                 .WithMany(p => p.PurchaseOrderItems)
                 .HasForeignKey(p => p.Unit_ID);
-
-            // ProcessingType is now an enum, no foreign key relationship needed
 
             // Indexes
             builder.HasIndex(p => new { p.PO_ID, p.Product_ID })

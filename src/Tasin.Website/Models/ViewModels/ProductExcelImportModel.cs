@@ -40,19 +40,9 @@ namespace Tasin.Website.Models.ViewModels
         public string? ProcessingTypeText { get; set; }
 
         /// <summary>
-        /// Is Material text (Y/N, Yes/No, True/False, 1/0)
-        /// </summary>
-        public string? IsMaterialText { get; set; }
-
-        /// <summary>
         /// Special product tax rate code (will be mapped to SpecialProductTaxRate_ID)
         /// </summary>
         public string? SpecialProductTaxRateCode { get; set; }
-
-        /// <summary>
-        /// Tax rate (%)
-        /// </summary>
-        public decimal? TaxRate { get; set; }
 
         /// <summary>
         /// Loss rate (%)
@@ -60,9 +50,9 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? LossRate { get; set; }
 
         /// <summary>
-        /// Profit margin (%)
+        /// Additional cost
         /// </summary>
-        public decimal? ProfitMargin { get; set; }
+        public decimal? AdditionalCost { get; set; }
 
         /// <summary>
         /// Processing fee
@@ -103,16 +93,6 @@ namespace Tasin.Website.Models.ViewModels
              IsDiscontinuedText.Trim().ToUpper() == "YES" ||
              IsDiscontinuedText.Trim().ToUpper() == "TRUE" ||
              IsDiscontinuedText.Trim() == "1");
-
-        /// <summary>
-        /// Parsed IsMaterial value
-        /// </summary>
-        public bool IsMaterial =>
-            !string.IsNullOrEmpty(IsMaterialText) &&
-            (IsMaterialText.Trim().ToUpper() == "Y" ||
-             IsMaterialText.Trim().ToUpper() == "YES" ||
-             IsMaterialText.Trim().ToUpper() == "TRUE" ||
-             IsMaterialText.Trim() == "1");
 
         /// <summary>
         /// Parsed ProcessingType value as enum
