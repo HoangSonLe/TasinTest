@@ -86,12 +86,6 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? LossRate { get; set; }
 
         /// <summary>
-        /// Is Material
-        /// </summary>
-        [Display(Name = "IsMaterial")]
-        public bool IsMaterial { get; set; } = false;
-
-        /// <summary>
         /// Profit Margin
         /// </summary>
         [Display(Name = "ProfitMargin")]

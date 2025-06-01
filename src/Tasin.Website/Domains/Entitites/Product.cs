@@ -18,7 +18,6 @@ namespace Tasin.Website.Domains.Entitites
         public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
         public decimal? TaxRate { get; set; }
         public decimal? LossRate { get; set; }
-        public bool IsMaterial { get; set; } = false;
         public decimal? ProfitMargin { get; set; }
         public decimal? DefaultPrice { get; set; }
         public string? Note { get; set; }

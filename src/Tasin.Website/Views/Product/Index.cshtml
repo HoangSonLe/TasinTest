@@ -41,7 +41,7 @@
             consumerTaxRate: null,
             specialProductTaxRate_ID: null,
             lossRate: null,
-            isMaterial: true,
+            processingType: "Material",
             profitMargin: null,
             note: null,
             isDiscontinued: false,
@@ -200,12 +200,12 @@
                 },
                 {
                     field: "parentID",
-                    title: "Hàng hoá cha",
-                    label: "Hàng hoá cha:",
+                    title: "Nguyên liệu chính",
+                    label: "Nguyên liệu chính:",
                     colSpan: 1,
                     editor: "DropDownList",
                     editorOptions: {
-                        optionLabel: "Chọn hàng hoá cha",
+                        optionLabel: "Chọn nguyên liệu chính",
                         dataTextField: "name",
                         dataValueField: "id",
                         valuePrimitive: true, // 🔑 Bắt buộc để giá trị là ID thay vì object
@@ -427,13 +427,6 @@
                 },
 
                 // ===== NHÓM 4: THUỘC TÍNH SẢN PHẨM =====
-                {
-                    field: "isMaterial",
-                    title: "Là nguyên liệu",
-                    label: "Là nguyên liệu:",
-                    colSpan: 1,
-                    editor: "CheckBox",
-                },
                 {
                     field: "isDiscontinued",
                     title: "Ngừng sử dụng",
