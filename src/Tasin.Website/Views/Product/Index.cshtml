@@ -41,7 +41,7 @@
             consumerTaxRate: null,
             specialProductTaxRate_ID: null,
             lossRate: null,
-            isMaterial: false,
+            isMaterial: true,
             profitMargin: null,
             note: null,
             isDiscontinued: false,
@@ -286,14 +286,18 @@
                 },
                 {
                     field: "profitMargin",
-                    title: "Lợi nhuận",
-                    label: "Lợi nhuận:",
+                    title: "Đơn giá",
+                    label: "Đơn giá (*):",
                     colSpan: 1,
                     attributes: {
                         type: "number",
                         step: "0.01",
                         min: "0"
-                    }
+                    },
+                    validation: {
+                        validationMessage: "Vui lòng nhập đơn giá",
+                        required: true
+                    },
                 },
                 {
                     field: "isDiscontinued",
@@ -304,8 +308,8 @@
                 },
                 {
                     field: "processingFee",
-                    title: "Mức phí",
-                    label: "Mức phí:",
+                    title: "Mức phí gia công",
+                    label: "Mức phí gia công:",
                     colSpan: 1,
                     attributes: {
                         type: "number",
