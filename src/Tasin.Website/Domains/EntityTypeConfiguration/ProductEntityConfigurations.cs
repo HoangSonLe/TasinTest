@@ -21,9 +21,8 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.ProcessingType)
                 .HasColumnName("ProcessingType")
                 .HasConversion<string>();
-            builder.Property(p => p.TaxRate).HasColumnName("TaxRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
-            builder.Property(p => p.ProfitMargin).HasColumnName("ProfitMargin").HasColumnType("NUMERIC(5, 2)");
+            builder.Property(p => p.AdditionalCost).HasColumnName("AdditionalCost").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.DefaultPrice).HasColumnName("DefaultPrice").HasColumnType("NUMERIC(18, 2)");
             builder.Property(p => p.Note).HasColumnName("Note").HasColumnType("TEXT");
             builder.Property(p => p.IsDiscontinued).HasColumnName("IsDiscontinued").HasDefaultValue(false);

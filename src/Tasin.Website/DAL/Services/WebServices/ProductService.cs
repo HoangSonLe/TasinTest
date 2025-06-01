@@ -226,9 +226,8 @@ namespace Tasin.Website.DAL.Services.WebServices
             existingProduct.Unit_ID = productData.Unit_ID;
             existingProduct.Category_ID = productData.Category_ID;
             existingProduct.ProcessingType = productData.ProcessingType;
-            existingProduct.TaxRate = productData.TaxRate;
             existingProduct.LossRate = productData.LossRate;
-            existingProduct.ProfitMargin = productData.ProfitMargin;
+            existingProduct.AdditionalCost = productData.AdditionalCost;
             existingProduct.Note = productData.Note;
             existingProduct.IsDiscontinued = productData.IsDiscontinued;
             existingProduct.ProcessingFee = productData.ProcessingFee;
@@ -507,15 +506,14 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 CategoryCode = ExcelHelper.GetCellStringValue(row.Cell(4)),
                                 ProcessingTypeText = ExcelHelper.GetCellStringValue(row.Cell(5)),
                                 SpecialProductTaxRateCode = ExcelHelper.GetCellStringValue(row.Cell(6)),
-                                TaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(7))),
-                                LossRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(8))),
-                                ProfitMargin = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(9))),
-                                ProcessingFee = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(10))),
-                                DefaultPrice = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(11))),
-                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))),
-                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(13))),
-                                Note = ExcelHelper.GetCellStringValue(row.Cell(14)),
-                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(15))
+                                LossRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(7))),
+                                AdditionalCost = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(8))),
+                                ProcessingFee = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(9))),
+                                DefaultPrice = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(10))),
+                                CompanyTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(11))),
+                                ConsumerTaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(12))),
+                                Note = ExcelHelper.GetCellStringValue(row.Cell(13)),
+                                IsDiscontinuedText = ExcelHelper.GetCellStringValue(row.Cell(14))
                             };
 
                             // Validate required fields
@@ -619,9 +617,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                             ProcessingType = importModel.ProcessingType,
                             ParentID = null, // Excel import only supports root products
                             SpecialProductTaxRate_ID = specialProductTaxRateId,
-                            TaxRate = importModel.TaxRate,
                             LossRate = importModel.LossRate,
-                            ProfitMargin = importModel.ProfitMargin,
+                            AdditionalCost = importModel.AdditionalCost,
                             ProcessingFee = importModel.ProcessingFee,
                             DefaultPrice = importModel.DefaultPrice,
                             CompanyTaxRate = importModel.CompanyTaxRate,
@@ -687,9 +684,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "Mã quy cách",
                         "Loại chế biến (*)",
                         "Mã thuế suất đặc biệt",
-                        "Thuế suất (%)",
                         "Tỷ lệ hao hụt (%)",
-                        "Tỷ lệ lợi nhuận (%)",
+                        "Chi phí thêm",
                         "Phí chế biến",
                         "Đơn giá mặc định",
                         "Thuế suất công ty (%) - Tùy chọn",
@@ -714,15 +710,14 @@ namespace Tasin.Website.DAL.Services.WebServices
                     worksheet.Cell(2, 4).Value = "CAT001";
                     worksheet.Cell(2, 5).Value = "Material";
                     worksheet.Cell(2, 6).Value = "SPTR001";
-                    worksheet.Cell(2, 7).Value = 10;
-                    worksheet.Cell(2, 8).Value = 5;
-                    worksheet.Cell(2, 9).Value = 15;
-                    worksheet.Cell(2, 10).Value = 1000;
-                    worksheet.Cell(2, 11).Value = 50000;
-                    worksheet.Cell(2, 12).Value = 8;
-                    worksheet.Cell(2, 13).Value = 10;
-                    worksheet.Cell(2, 14).Value = "Ghi chú mẫu";
-                    worksheet.Cell(2, 15).Value = "N";
+                    worksheet.Cell(2, 7).Value = 5;
+                    worksheet.Cell(2, 8).Value = 2000;
+                    worksheet.Cell(2, 9).Value = 1000;
+                    worksheet.Cell(2, 10).Value = 50000;
+                    worksheet.Cell(2, 11).Value = 8;
+                    worksheet.Cell(2, 12).Value = 10;
+                    worksheet.Cell(2, 13).Value = "Ghi chú mẫu";
+                    worksheet.Cell(2, 14).Value = "N";
 
                     // Auto-fit columns
                     worksheet.Columns().AdjustToContents();
@@ -745,11 +740,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "   - Mã quy cách: Phải tồn tại trong hệ thống",
                         "   - Loại chế biến (*): Nhập 'Material', 'SemiProcessed', hoặc 'FinishedProduct' (BẮT BUỘC phải là 'Material' cho sản phẩm gốc)",
                         "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
+                        "   - Tỷ lệ hao hụt (%): Nhập số thập phân (ví dụ: 5.5)",
+                        "   - Chi phí thêm: Nhập số (ví dụ: 2000)",
+                        "   - Phí chế biến: Nhập số (ví dụ: 1000)",
+                        "   - Đơn giá mặc định: Nhập số (ví dụ: 50000)",
                         "   - Thuế suất công ty (%): Nhập số thập phân (ví dụ: 10.5) hoặc để trống",
                         "   - Thuế suất người tiêu dùng (%): Nhập số thập phân (ví dụ: 8.0) hoặc để trống",
-                        "   - Các tỷ lệ % khác: Nhập số thập phân (ví dụ: 10.5)",
-                        "   - Phí chế biến: Nhập số",
-                        "   - Đơn giá mặc định: Nhập số (ví dụ: 50000)",
                         "   - Ghi chú: Có thể để trống",
                         "   - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0",
                         "",

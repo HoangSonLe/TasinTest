@@ -45,19 +45,14 @@ namespace Tasin.Website.Models.ViewModels
         public string? SpecialProductTaxRateCode { get; set; }
 
         /// <summary>
-        /// Tax rate (%)
-        /// </summary>
-        public decimal? TaxRate { get; set; }
-
-        /// <summary>
         /// Loss rate (%)
         /// </summary>
         public decimal? LossRate { get; set; }
 
         /// <summary>
-        /// Profit margin (%)
+        /// Additional cost
         /// </summary>
-        public decimal? ProfitMargin { get; set; }
+        public decimal? AdditionalCost { get; set; }
 
         /// <summary>
         /// Processing fee

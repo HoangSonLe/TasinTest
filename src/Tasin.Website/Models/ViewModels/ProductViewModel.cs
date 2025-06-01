@@ -74,22 +74,16 @@ namespace Tasin.Website.Models.ViewModels
         public string ProcessingTypeName => EnumHelper.GetEnumDescriptionByEnum(ProcessingType);
 
         /// <summary>
-        /// Tax Rate
-        /// </summary>
-        [Display(Name = "TaxRate")]
-        public decimal? TaxRate { get; set; }
-
-        /// <summary>
         /// Loss Rate
         /// </summary>
         [Display(Name = "LossRate")]
         public decimal? LossRate { get; set; }
 
         /// <summary>
-        /// Profit Margin
+        /// Additional Cost
         /// </summary>
-        [Display(Name = "ProfitMargin")]
-        public decimal? ProfitMargin { get; set; }
+        [Display(Name = "AdditionalCost")]
+        public decimal? AdditionalCost { get; set; }
 
         /// <summary>
         /// Default Price

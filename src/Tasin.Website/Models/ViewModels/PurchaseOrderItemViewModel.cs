@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Tasin.Website.Common.Enums;
-using Tasin.Website.Common.Helper;
-using Tasin.Website.Domains.Entitites;
 
 namespace Tasin.Website.Models.ViewModels
 {
@@ -69,22 +66,16 @@ namespace Tasin.Website.Models.ViewModels
         public decimal? TaxRate { get; set; }
 
         /// <summary>
-        /// Processing Type
-        /// </summary>
-        [Display(Name = "ProcessingType")]
-        public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
-
-        /// <summary>
-        /// Processing Type Name for display
-        /// </summary>
-        [Display(Name = "ProcessingTypeName")]
-        public string ProcessingTypeName => EnumHelper.GetEnumDescriptionByEnum(ProcessingType);
-
-        /// <summary>
         /// Loss Rate
         /// </summary>
         [Display(Name = "LossRate")]
         public decimal? LossRate { get; set; }
+
+        /// <summary>
+        /// Additional Cost
+        /// </summary>
+        [Display(Name = "AdditionalCost")]
+        public decimal? AdditionalCost { get; set; }
 
         /// <summary>
         /// Processing Fee
@@ -97,11 +88,5 @@ namespace Tasin.Website.Models.ViewModels
         /// </summary>
         [Display(Name = "Note")]
         public string? Note { get; set; }
-
-        /// <summary>
-        /// Profit Margin
-        /// </summary>
-        [Display(Name = "ProfitMargin")]
-        public decimal? ProfitMargin { get; set; }
     }
 }

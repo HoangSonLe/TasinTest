@@ -439,13 +439,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                 {
                     decimal baseAmount = item.Quantity * item.Price.Value;
                     decimal lossAmount = baseAmount * ((item.LossRate ?? 0) / 100);
-                    decimal totalBeforeTax = baseAmount + lossAmount + (item.ProcessingFee ?? 0);
-                    decimal profitAmount = totalBeforeTax * ((item.ProfitMargin ?? 0) / 100);
-                    decimal totalAfterProfit = totalBeforeTax + profitAmount;
-                    decimal taxAmount = totalAfterProfit * ((item.TaxRate ?? 0) / 100);
+                    decimal totalProcessingFee = item.Quantity * (item.ProcessingFee ?? 0);
+                    decimal totalBeforeTax = baseAmount + lossAmount + (item.AdditionalCost ?? 0) + totalProcessingFee;
+                    decimal taxAmount = totalBeforeTax * ((item.TaxRate ?? 0) / 100);
 
-                    totalPriceNoTax += totalAfterProfit;
-                    totalPrice += totalAfterProfit + taxAmount;
+                    totalPriceNoTax += totalBeforeTax;
+                    totalPrice += totalBeforeTax + taxAmount;
                 }
             }
 
@@ -473,11 +472,10 @@ namespace Tasin.Website.DAL.Services.WebServices
                     Unit_ID = item.Unit_ID,
                     Price = item.Price,
                     TaxRate = item.TaxRate,
-                    ProcessingType = item.ProcessingType,
                     LossRate = item.LossRate,
+                    AdditionalCost = item.AdditionalCost,
                     ProcessingFee = item.ProcessingFee,
-                    Note = item.Note,
-                    ProfitMargin = item.ProfitMargin
+                    Note = item.Note
                 };
 
                 purchaseOrderItems.Add(purchaseOrderItem);
