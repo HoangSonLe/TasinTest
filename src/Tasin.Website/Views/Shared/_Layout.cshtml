@@ -334,9 +334,7 @@
                 // if (EnumRoleList.find(e => e == 33)) {
                 //     html += `<a class="nav-link _permission_" data-enum="33" href="/Material/Index"><i class="fa-solid fa-cubes submenu-icon"></i>Nguyên liệu</a>`;
                 // }
-                if (EnumRoleList.find(e => e == 37)) {
-                    html += `<a class="nav-link _permission_" data-enum="37" href="/ProcessingType/Index"><i class="fa-solid fa-sitemap submenu-icon"></i>Phân loại</a>`;
-                }
+
                 html += `</nav>
                                             </div>`;
             }
@@ -388,7 +386,7 @@
 
             let pathname = window.location.pathname;
             let element_ = $("a[href='" + pathname + "']");
-            let listUrl = ["/User/Index", "/Vendor/Index", "/Customer/Index", "/Product/Index", "/Unit/Index", "/Category/Index", "/TaxRateConfig/Index", "/SpecialProductTaxRate/Index", "/ProcessingType/Index"];
+            let listUrl = ["/User/Index", "/Vendor/Index", "/Customer/Index", "/Product/Index", "/Unit/Index", "/Category/Index", "/TaxRateConfig/Index", "/SpecialProductTaxRate/Index"];
             let listReportUrl = ["/ProductOrderStatistics/Index", "/ProductOrderStatistics/CustomerIndex"];
 
             if (listUrl.includes(pathname)) {
