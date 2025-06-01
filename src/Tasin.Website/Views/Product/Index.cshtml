@@ -5,6 +5,7 @@
 @section Styles {
     <link href="~/css/kendo-grid-common.css" rel="stylesheet" />
     <link href="~/css/toolbar-common.css" rel="stylesheet" />
+    <link href="~/css/disabled-fields-common.css" rel="stylesheet" />
 }
 
 <div>
@@ -290,6 +291,59 @@
                         },
                         change: function (e) {
                             formData.processingType = this.value();
+
+                            // Handle field enabling/disabling based on ProcessingType
+                            var isMaterial = this.value() === "Material";
+
+                            // Get form instance
+                            var form = $("#formCreateAndEdit").data("kendoForm");
+                            if (form) {
+                                // Disable/enable and reset fields when Material is selected
+                                if (isMaterial) {
+                                    // Reset values to null/empty
+                                    formData.processingFee = null;
+                                    formData.lossRate = null;
+                                    formData.parentID = null;
+                                    formData.additionalCost = null;
+
+                                    // Update form fields
+                                    form.editable.options.model.set("processingFee", null);
+                                    form.editable.options.model.set("lossRate", null);
+                                    form.editable.options.model.set("parentID", null);
+                                    form.editable.options.model.set("additionalCost", null);
+                                }
+
+                                // Enable/disable form fields
+                                var processingFeeField = form.element.find("[name='processingFee']");
+                                var lossRateField = form.element.find("[name='lossRate']");
+                                var parentIDField = form.element.find("[name='parentID']");
+                                var additionalCostField = form.element.find("[name='additionalCost']");
+
+                                if (isMaterial) {
+                                    processingFeeField.prop("disabled", true).addClass("k-disabled field-disabled");
+                                    lossRateField.prop("disabled", true).addClass("k-disabled field-disabled");
+                                    additionalCostField.prop("disabled", true).addClass("k-disabled field-disabled");
+
+                                    // Handle dropdown for parentID
+                                    var parentDropdown = parentIDField.data("kendoDropDownList");
+                                    if (parentDropdown) {
+                                        parentDropdown.enable(false);
+                                        parentDropdown.wrapper.addClass("field-disabled");
+                                        parentDropdown.value("");
+                                    }
+                                } else {
+                                    processingFeeField.prop("disabled", false).removeClass("k-disabled field-disabled");
+                                    lossRateField.prop("disabled", false).removeClass("k-disabled field-disabled");
+                                    additionalCostField.prop("disabled", false).removeClass("k-disabled field-disabled");
+
+                                    // Handle dropdown for parentID
+                                    var parentDropdown = parentIDField.data("kendoDropDownList");
+                                    if (parentDropdown) {
+                                        parentDropdown.enable(true);
+                                        parentDropdown.wrapper.removeClass("field-disabled");
+                                    }
+                                }
+                            }
                         }
                     },
                 },
@@ -437,6 +491,50 @@
             messages: {
                 submit: strSubmit, clear: "Đặt lại"
             },
+            formData: formData,
+            // Initialize field states after form is rendered
+            init: function (e) {
+                // Apply initial field state based on ProcessingType
+                setTimeout(function () {
+                    var isMaterial = formData.processingType === "Material";
+                    var form = $("#formCreateAndEdit").data("kendoForm");
+
+                    if (form) {
+                        // Get all the fields
+                        var processingFeeField = form.element.find("[name='processingFee']");
+                        var lossRateField = form.element.find("[name='lossRate']");
+                        var parentIDField = form.element.find("[name='parentID']");
+                        var additionalCostField = form.element.find("[name='additionalCost']");
+
+                        if (isMaterial) {
+                            // Disable fields for Material type
+                            processingFeeField.prop("disabled", true).addClass("k-disabled field-disabled");
+                            lossRateField.prop("disabled", true).addClass("k-disabled field-disabled");
+                            additionalCostField.prop("disabled", true).addClass("k-disabled field-disabled");
+
+                            // Handle dropdown for parentID
+                            var parentDropdown = parentIDField.data("kendoDropDownList");
+                            if (parentDropdown) {
+                                parentDropdown.enable(false);
+                                parentDropdown.wrapper.addClass("field-disabled");
+                            }
+
+                        } else {
+                            // Ensure fields are enabled for non-Material types
+                            processingFeeField.prop("disabled", false).removeClass("k-disabled field-disabled");
+                            lossRateField.prop("disabled", false).removeClass("k-disabled field-disabled");
+                            additionalCostField.prop("disabled", false).removeClass("k-disabled field-disabled");
+
+                            // Handle dropdown for parentID
+                            var parentDropdown = parentIDField.data("kendoDropDownList");
+                            if (parentDropdown) {
+                                parentDropdown.enable(true);
+                                parentDropdown.wrapper.removeClass("field-disabled");
+                            }
+                        }
+                    }
+                }, 300); // Increased delay to ensure form is fully rendered
+            },
             submit: function (e) {
                 e.preventDefault();
 
@@ -479,6 +577,30 @@
 
         setTimeout(() => {
             $("input[title='name']").focus();
+
+            // Additional check to ensure fields are disabled if ProcessingType is Material
+            if (formData.processingType === "Material") {
+                var form = $("#formCreateAndEdit").data("kendoForm");
+                if (form) {
+                    var processingFeeField = form.element.find("[name='processingFee']");
+                    var lossRateField = form.element.find("[name='lossRate']");
+                    var parentIDField = form.element.find("[name='parentID']");
+                    var additionalCostField = form.element.find("[name='additionalCost']");
+
+                    processingFeeField.prop("disabled", true).addClass("k-disabled field-disabled");
+                    lossRateField.prop("disabled", true).addClass("k-disabled field-disabled");
+                    additionalCostField.prop("disabled", true).addClass("k-disabled field-disabled");
+
+                    // Handle dropdown for parentID
+                    var parentDropdown = parentIDField.data("kendoDropDownList");
+                    if (parentDropdown) {
+                        parentDropdown.enable(false);
+                        parentDropdown.wrapper.addClass("field-disabled");
+                    }
+
+
+                }
+            }
         }, 500);
 
         function remove() {

@@ -1,0 +1,161 @@
+/* 
+ * Common Disabled Fields Styling
+ * Provides enhanced visual indication for disabled form fields
+ * Can be reused across different pages and components
+ */
+
+/* Base styling for disabled fields */
+.field-disabled {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    position: relative;
+}
+
+/* For regular input fields */
+.field-disabled input,
+.field-disabled input[type="text"],
+.field-disabled input[type="number"],
+.field-disabled input[type="email"],
+.field-disabled input[type="password"] {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed !important;
+}
+
+/* For Kendo UI input fields */
+.field-disabled.k-textbox,
+.field-disabled .k-textbox {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+}
+
+/* For Kendo UI dropdown wrapper */
+.field-disabled.k-dropdown,
+.field-disabled .k-dropdown {
+    background-color: #f5f5f5 !important;
+    border-color: #ddd !important;
+    opacity: 0.6 !important;
+}
+
+.field-disabled .k-dropdown-wrap {
+    background-color: #f5f5f5 !important;
+    border-color: #ddd !important;
+}
+
+.field-disabled .k-input {
+    color: #999 !important;
+    background-color: transparent !important;
+}
+
+/* For textarea fields */
+.field-disabled textarea,
+.field-disabled .k-textarea {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+    resize: none !important;
+}
+
+/* Add a subtle strikethrough effect for better visual indication */
+.field-disabled::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #ccc;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Ensure the strikethrough doesn't interfere with dropdown arrows */
+.field-disabled .k-select {
+    z-index: 2;
+    position: relative;
+}
+
+/* Add a subtle red tint to indicate disabled state */
+.field-disabled {
+    box-shadow: inset 0 0 3px rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Hover state - maintain disabled appearance */
+.field-disabled:hover,
+.field-disabled input:hover,
+.field-disabled .k-textbox:hover,
+.field-disabled .k-dropdown:hover {
+    background-color: #f5f5f5 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed !important;
+}
+
+/* Focus state - prevent focus styling on disabled fields */
+.field-disabled:focus,
+.field-disabled input:focus,
+.field-disabled .k-textbox:focus,
+.field-disabled .k-dropdown:focus {
+    outline: none !important;
+    box-shadow: inset 0 0 3px rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Placeholder text styling for disabled fields */
+.field-disabled::placeholder,
+.field-disabled input::placeholder,
+.field-disabled textarea::placeholder {
+    color: #bbb !important;
+    opacity: 0.8 !important;
+}
+
+/* Animation for smooth transition when enabling/disabling */
+.field-disabled {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Remove any selection highlighting on disabled fields */
+.field-disabled {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* For form labels when fields are disabled */
+.field-disabled-label {
+    color: #999 !important;
+    opacity: 0.7;
+}
+
+/* Specific styling for checkboxes and radio buttons */
+.field-disabled input[type="checkbox"],
+.field-disabled input[type="radio"] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* For select elements */
+.field-disabled select {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed !important;
+}
+
+/* Bootstrap form control compatibility */
+.field-disabled.form-control {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+}
+
+/* For input groups */
+.field-disabled .input-group-text {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+}
