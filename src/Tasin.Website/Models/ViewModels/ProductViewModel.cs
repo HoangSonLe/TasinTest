@@ -145,6 +145,17 @@ namespace Tasin.Website.Models.ViewModels
         public string? SpecialProductTaxRateName { get; set; }
 
         /// <summary>
+        /// Parent Product ID
+        /// </summary>
+        [Display(Name = "ParentID")]
+        public int? ParentID { get; set; }
+
+        /// <summary>
+        /// Parent Product name
+        /// </summary>
+        public string? ParentName { get; set; }
+
+        /// <summary>
         /// Status of the product
         /// </summary>
         [Display(Name = "Status")]

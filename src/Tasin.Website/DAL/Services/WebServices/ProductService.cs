@@ -65,6 +65,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             var categoryIds = products.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
             var processingTypeIds = products.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
             var specialProductTaxRateIds = products.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
+            var parentIds = products.Where(p => p.ParentID.HasValue).Select(p => p.ParentID.Value).Distinct().ToList();
 
             // Load related entities sequentially to avoid DbContext threading issues
             IEnumerable<Unit> units = new List<Unit>();
@@ -91,11 +92,18 @@ namespace Tasin.Website.DAL.Services.WebServices
                 specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(i => specialProductTaxRateIds.Contains(i.ID));
             }
 
+            IEnumerable<Product> parentProducts = new List<Product>();
+            if (parentIds.Count > 0)
+            {
+                parentProducts = await _productRepository.ReadOnlyRespository.GetAsync(i => parentIds.Contains(i.ID));
+            }
+
             // Create lookup dictionaries for O(1) access
             var unitLookup = units.ToDictionary(u => u.ID, u => u.Name);
             var categoryLookup = categories.ToDictionary(c => c.ID, c => c.Name);
             var processingTypeLookup = processingTypes.ToDictionary(p => p.ID, p => p.Name);
             var specialProductTaxRateLookup = specialProductTaxRates.ToDictionary(s => s.ID, s => s.Name);
+            var parentProductLookup = parentProducts.ToDictionary(p => p.ID, p => p.Name);
 
             // Assign names using lookups
             foreach (var product in products)
@@ -111,6 +119,9 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 if (product.SpecialProductTaxRate_ID.HasValue && specialProductTaxRateLookup.TryGetValue(product.SpecialProductTaxRate_ID.Value, out var specialProductTaxRateName))
                     product.SpecialProductTaxRateName = specialProductTaxRateName;
+
+                if (product.ParentID.HasValue && parentProductLookup.TryGetValue(product.ParentID.Value, out var parentName))
+                    product.ParentName = parentName;
             }
         }
 
@@ -194,6 +205,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             existingProduct.CompanyTaxRate = productData.CompanyTaxRate;
             existingProduct.ConsumerTaxRate = productData.ConsumerTaxRate;
             existingProduct.SpecialProductTaxRate_ID = productData.SpecialProductTaxRate_ID;
+            existingProduct.ParentID = productData.ParentID;
             existingProduct.UpdatedDate = DateTime.Now;
             existingProduct.UpdatedBy = currentUserId;
         }
@@ -204,10 +216,10 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel)
         {
-            return await GetProductList(searchModel, null);
+            return await GetProductList(searchModel, null, null);
         }
 
-        public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null)
+        public async Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null, int? excludeProductId = null)
         {
             var response = new Acknowledgement<JsonResultPaging<List<ProductViewModel>>>();
             try
@@ -217,6 +229,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (!searchModel.IncludeDiscontinued)
                 {
                     predicate = predicate.And(i => !i.IsDiscontinued);
+                }
+
+                // Exclude specific product ID if provided (for parent dropdown)
+                if (excludeProductId.HasValue)
+                {
+                    predicate = predicate.And(i => i.ID != excludeProductId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(searchModel.SearchString))
@@ -351,6 +369,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
+                // Check if trying to discontinue a product that has active child products
+                if (postData.IsDiscontinued && !existingProduct.IsDiscontinued)
+                {
+                    var activeChildProducts = await _productRepository.ReadOnlyRespository.GetAsync(p => p.ParentID == postData.Id && p.IsActive && !p.IsDiscontinued);
+                    if (activeChildProducts.Count > 0)
+                    {
+                        ack.AddMessage("Không thể ngừng sử dụng sản phẩm này vì có sản phẩm con đang hoạt động.");
+                        return ack;
+                    }
+                }
+
                 UpdateProductEntity(existingProduct, postData, CurrentUserId);
                 await ack.TrySaveChangesAsync(res => res.UpdateAsync(existingProduct), _productRepository.Repository);
                 return ack;
@@ -372,6 +401,14 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (product == null)
                 {
                     ack.AddMessage("Không tìm thấy sản phẩm.");
+                    return ack;
+                }
+
+                // Check if product has child products
+                var childProducts = await _productRepository.ReadOnlyRespository.GetAsync(p => p.ParentID == productId && p.IsActive);
+                if (childProducts.Count > 0)
+                {
+                    ack.AddMessage("Không thể xóa sản phẩm này vì có sản phẩm con đang sử dụng.");
                     return ack;
                 }
 
@@ -713,6 +750,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                 throw;
             }
         }
+
+
 
         private static decimal? ParseDecimal(string value)
         {

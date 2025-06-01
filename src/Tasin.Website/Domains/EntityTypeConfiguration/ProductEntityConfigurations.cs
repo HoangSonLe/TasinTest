@@ -56,6 +56,12 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.SpecialProductTaxRate_ID);
 
+            // Self-referencing relationship for parent-child hierarchy
+            builder.HasOne(p => p.Parent)
+                .WithMany(p => p.Children)
+                .HasForeignKey(p => p.ParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Indexes
             builder.HasIndex(p => p.Code).IsUnique();
 

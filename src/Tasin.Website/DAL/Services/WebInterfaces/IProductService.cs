@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
 using Tasin.Website.Domains.Entitites;
@@ -10,6 +11,7 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
     public interface IProductService : IBaseService, IDisposable
     {
         Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel postData);
+        Task<Acknowledgement<JsonResultPaging<List<ProductViewModel>>>> GetProductList(ProductSearchModel searchModel, Expression<Func<Product, object>>? selector = null, int? excludeProductId = null);
         Task<Acknowledgement<ProductViewModel>> GetProductById(int productId);
         Task<Acknowledgement> CreateOrUpdateProduct(ProductViewModel postData);
         Task<Acknowledgement> CreateProduct(ProductViewModel postData);

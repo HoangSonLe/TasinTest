@@ -46,9 +46,27 @@
             note: null,
             isDiscontinued: false,
             processingFee: null,
+            parentID: null,
             // status: "",
             ...dataProduct
         };
+
+        // Ensure all dropdown IDs are always numbers or null, not objects
+        if (formData.parentID && typeof formData.parentID === 'object') {
+            formData.parentID = formData.parentID.id || formData.parentID.Id || formData.parentID.ID || null;
+        }
+        if (formData.unit_ID && typeof formData.unit_ID === 'object') {
+            formData.unit_ID = formData.unit_ID.id || formData.unit_ID.Id || formData.unit_ID.ID || null;
+        }
+        if (formData.category_ID && typeof formData.category_ID === 'object') {
+            formData.category_ID = formData.category_ID.id || formData.category_ID.Id || formData.category_ID.ID || null;
+        }
+        if (formData.processingType_ID && typeof formData.processingType_ID === 'object') {
+            formData.processingType_ID = formData.processingType_ID.id || formData.processingType_ID.Id || formData.processingType_ID.ID || null;
+        }
+        if (formData.specialProductTaxRate_ID && typeof formData.specialProductTaxRate_ID === 'object') {
+            formData.specialProductTaxRate_ID = formData.specialProductTaxRate_ID.id || formData.specialProductTaxRate_ID.Id || formData.specialProductTaxRate_ID.ID || null;
+        }
 
         let strSubmit = "Thêm";
         let title = "THÊM MỚI"
@@ -108,6 +126,7 @@
                         optionLabel: "Chọn đơn vị",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -133,15 +152,8 @@
                                 total: "data.total"
                             },
                         },
-                        select: function (e) {
-                            // Ensure only ID is set, not the whole object
-                            var dataItem = e.dataItem;
-                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
-                                // Force set the value to ID only after selection
-                                setTimeout(() => {
-                                    this.value(dataItem.id);
-                                }, 0);
-                            }
+                        change: function (e) {
+                            formData.unit_ID = this.value();
                         }
                     },
                 },
@@ -155,6 +167,7 @@
                         optionLabel: "Chọn quy cách",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -180,17 +193,67 @@
                                 total: "data.total"
                             },
                         },
-                        select: function (e) {
-                            // Ensure only ID is set, not the whole object
-                            var dataItem = e.dataItem;
-                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
-                                // Force set the value to ID only after selection
-                                setTimeout(() => {
-                                    this.value(dataItem.id);
-                                }, 0);
-                            }
+                        change: function (e) {
+                            formData.category_ID = this.value();
                         }
                     },
+                },
+                {
+                    field: "parentID",
+                    title: "Hàng hoá cha",
+                    label: "Hàng hoá cha:",
+                    colSpan: 1,
+                    editor: "DropDownList",
+                    editorOptions: {
+                        optionLabel: "Chọn hàng hoá cha",
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        valuePrimitive: true, // 🔑 Bắt buộc để giá trị là ID thay vì object
+                        filter: filterCustom,
+                        dataSource: {
+                            transport: {
+                                read: {
+                                    url: "/Product/GetProductList",
+                                    datatype: "json",
+                                },
+                                parameterMap: function (data, type) {
+                                    if (type == "read") {
+                                        return {
+                                            pageSize: 100,
+                                            pageNumber: 1,
+                                            includeDiscontinued: false,
+                                            excludeProductId: formData.id > 0 ? formData.id : null
+                                        };
+                                    }
+                                },
+                            },
+                            serverPaging: true,
+                            serverFiltering: true,
+                            pageSize: 100,
+                            schema: {
+                                type: 'json',
+                                parse: function (response) {
+                                    if (response.isSuccess === false) {
+                                        showErrorMessages(response.errorMessageList);
+                                        return { data: [], total: 0 };
+                                    }
+                                    return response.data;
+                                },
+                                model: {
+                                    id: "id",
+                                    fields: {
+                                        name: { type: "string" },
+                                        code: { type: "string" }
+                                    }
+                                },
+                                data: "data",
+                                total: "total"
+                            },
+                        },
+                        change: function (e) {
+                            formData.parentID = this.value(); // đơn giản chỉ cần ID
+                        }
+                    }
                 },
 
                 // ===== NHÓM 2: PHÂN LOẠI VÀ THUẾ =====
@@ -204,6 +267,7 @@
                         optionLabel: "Chọn phân loại hàng hoá",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -229,15 +293,8 @@
                                 total: "data.total"
                             },
                         },
-                        select: function (e) {
-                            // Ensure only ID is set, not the whole object
-                            var dataItem = e.dataItem;
-                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
-                                // Force set the value to ID only after selection
-                                setTimeout(() => {
-                                    this.value(dataItem.id);
-                                }, 0);
-                            }
+                        change: function (e) {
+                            formData.processingType_ID = this.value();
                         }
                     },
                 },
@@ -284,6 +341,7 @@
                         optionLabel: "Chọn loại mặt hàng",
                         dataTextField: "name",
                         dataValueField: "id",
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
@@ -316,22 +374,8 @@
                                 }
                             },
                         },
-                        select: function (e) {
-                            // Ensure only ID is set, not the whole object
-                            var dataItem = e.dataItem;
-                            if (dataItem && typeof dataItem === 'object' && dataItem.id) {
-                                // Force set the value to ID only after selection
-                                setTimeout(() => {
-                                    this.value(dataItem.id);
-                                }, 0);
-                            }
-                        },
                         change: function (e) {
-                            // Double check to ensure only ID is set
-                            var value = this.value();
-                            if (value && typeof value === 'object' && value.id) {
-                                this.value(value.id);
-                            }
+                            formData.specialProductTaxRate_ID = this.value();
                         }
                     },
                 },
@@ -515,7 +559,7 @@
                     { value: "Mã hàng hoá", textAlign: "center", background: "#428dd8" },
                     { value: "Hàng hoá", textAlign: "center", background: "#428dd8" },
                     { value: "Hàng hoá tiếng anh", textAlign: "center", background: "#428dd8" },
-                    { value: "Mô tả", textAlign: "center", background: "#428dd8" },
+                    { value: "Ghi chú", textAlign: "center", background: "#428dd8" },
                     { value: "Ngày cập nhật", textAlign: "center", background: "#428dd8" },
                     { value: "Người cập nhật", textAlign: "center", background: "#428dd8" },
                 ]
@@ -539,7 +583,7 @@
                     { value: dataSourceProduct[index].code },
                     { value: dataSourceProduct[index].name },
                     { value: dataSourceProduct[index].name_EN },
-                    { value: dataSourceProduct[index].description },
+                    { value: dataSourceProduct[index].note },
                     { value: kendo.toString(kendo.parseDate(dataSourceProduct[index].updatedDate), "dd/MM/yyyy") },
                     { value: dataSourceProduct[index].updatedByName },
                 ]
@@ -683,8 +727,8 @@
                     width: 200,
                 },
                 {
-                    field: "description",
-                    title: "Mô tả",
+                    field: "note",
+                    title: "Ghi chú",
                     width: 200,
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },

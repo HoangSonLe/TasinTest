@@ -26,6 +26,7 @@ namespace Tasin.Website.Domains.Entitites
         public decimal? CompanyTaxRate { get; set; }
         public decimal? ConsumerTaxRate { get; set; }
         public int? SpecialProductTaxRate_ID { get; set; }
+        public int? ParentID { get; set; }
 
         // Navigation properties
         [ForeignKey("Unit_ID")]
@@ -43,6 +44,13 @@ namespace Tasin.Website.Domains.Entitites
         [ForeignKey("SpecialProductTaxRate_ID")]
         [NotMapped]
         public virtual SpecialProductTaxRate? SpecialProductTaxRate { get; set; }
+
+        [ForeignKey("ParentID")]
+        [NotMapped]
+        public virtual Product? Parent { get; set; }
+
+        [NotMapped]
+        public virtual ICollection<Product>? Children { get; set; }
 
         [NotMapped]
         public virtual ICollection<Product_Vendor>? ProductVendors { get; set; }
