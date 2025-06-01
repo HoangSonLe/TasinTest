@@ -543,7 +543,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Loại gia công</label>
-                                <select id="itemProcessingTypeId" class="form-control"></select>
+                                <select id="itemProcessingType" class="form-control"></select>
                             </div>
                             <div class="form-group">
                                 <label>Thành tiền</label>
@@ -690,7 +690,7 @@
                     $("#itemTotalAmount").val("");
 
                     // Clear processing type dropdown if it exists
-                    var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
+                    var processingTypeDropdown = $("#itemProcessingType").data("kendoDropDownList");
                     if (processingTypeDropdown) {
                         processingTypeDropdown.value('');
                     }
@@ -699,22 +699,22 @@
         });
 
         // Initialize processing type dropdown
-        $("#itemProcessingTypeId").kendoDropDownList({
+        $("#itemProcessingType").kendoDropDownList({
             dataTextField: "text",
-            dataValueField: "dataRaw",
+            dataValueField: "value",
             optionLabel: "-- Chọn loại gia công --",
             dataSource: {
                 transport: {
                     read: {
                         url: "/Common/GetDataOptionsDropdown",
-                        data: { type: "ProcessingType" }
+                        data: { type: 3 } // ECategoryType.ProcessingType
                     }
                 },
                 schema: {
                     parse: function (response) {
                         if (response && response.isSuccess && response.data) {
                             return response.data.filter(function (item) {
-                                return item && item.text && item.dataRaw !== undefined;
+                                return item && item.text && item.value !== undefined;
                             });
                         }
                         return [];
@@ -746,7 +746,7 @@
                             lossRate: { type: "number" },
                             processingFee: { type: "number" },
                             totalAmount: { type: "number" },
-                            processingTypeId: { type: "number" },
+                            processingType: { type: "string" },
                             processingTypeName: { type: "string" }
                         }
                     }
@@ -790,8 +790,8 @@
             var lossRate = parseFloat($("#itemLossRate").val()) || 0;
             var processingFee = parseFloat($("#itemProcessingFee").val()) || 0;
             var totalAmount = parseFloat($("#itemTotalAmount").val()) || 0;
-            var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
-            var processingTypeId = processingTypeDropdown ? processingTypeDropdown.value() : null;
+            var processingTypeDropdown = $("#itemProcessingType").data("kendoDropDownList");
+            var processingType = processingTypeDropdown ? processingTypeDropdown.value() : null;
             var processingTypeName = processingTypeDropdown ? processingTypeDropdown.text() : "";
 
             if (!productId || quantity <= 0 || price < 0) {
@@ -822,7 +822,7 @@
                 lossRate: lossRate,
                 processingFee: processingFee,
                 totalAmount: calculatedTotalAmount,
-                processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
+                processingType: processingType || null,
                 processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName
             };
 
@@ -880,10 +880,10 @@
                     $("#itemProcessingFee").val(product.processingFee || 0);
 
                     // Auto-fill processing type dropdown if it exists
-                    if (product.processingType_ID) {
-                        var processingTypeDropdown = $("#itemProcessingTypeId").data("kendoDropDownList");
+                    if (product.processingType) {
+                        var processingTypeDropdown = $("#itemProcessingType").data("kendoDropDownList");
                         if (processingTypeDropdown) {
-                            processingTypeDropdown.value(product.processingType_ID);
+                            processingTypeDropdown.value(product.processingType);
                         }
                     }
 

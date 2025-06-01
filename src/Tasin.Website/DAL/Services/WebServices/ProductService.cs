@@ -24,7 +24,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         private readonly IProductRepository _productRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IProcessingTypeRepository _processingTypeRepository;
         private readonly ISpecialProductTaxRateRepository _specialProductTaxRateRepository;
 
         public ProductService(
@@ -33,7 +32,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             IProductRepository productRepository,
             IUnitRepository unitRepository,
             ICategoryRepository categoryRepository,
-            IProcessingTypeRepository processingTypeRepository,
             ISpecialProductTaxRateRepository specialProductTaxRateRepository,
             IRoleRepository roleRepository,
             IHttpContextAccessor httpContextAccessor,
@@ -47,7 +45,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             _productRepository = productRepository;
             _unitRepository = unitRepository;
             _categoryRepository = categoryRepository;
-            _processingTypeRepository = processingTypeRepository;
             _specialProductTaxRateRepository = specialProductTaxRateRepository;
         }
 
@@ -63,7 +60,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             // Get distinct IDs for batch loading
             var unitIds = products.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
             var categoryIds = products.Where(p => p.Category_ID.HasValue).Select(p => p.Category_ID.Value).Distinct().ToList();
-            var processingTypeIds = products.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
             var specialProductTaxRateIds = products.Where(p => p.SpecialProductTaxRate_ID.HasValue).Select(p => p.SpecialProductTaxRate_ID.Value).Distinct().ToList();
             var parentIds = products.Where(p => p.ParentID.HasValue).Select(p => p.ParentID.Value).Distinct().ToList();
 
@@ -78,12 +74,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             if (categoryIds.Count > 0)
             {
                 categories = await _categoryRepository.ReadOnlyRespository.GetAsync(i => categoryIds.Contains(i.ID));
-            }
-
-            IEnumerable<ProcessingType> processingTypes = new List<ProcessingType>();
-            if (processingTypeIds.Count > 0)
-            {
-                processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(i => processingTypeIds.Contains(i.ID));
             }
 
             IEnumerable<SpecialProductTaxRate> specialProductTaxRates = new List<SpecialProductTaxRate>();
@@ -101,7 +91,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             // Create lookup dictionaries for O(1) access
             var unitLookup = units.ToDictionary(u => u.ID, u => u.Name);
             var categoryLookup = categories.ToDictionary(c => c.ID, c => c.Name);
-            var processingTypeLookup = processingTypes.ToDictionary(p => p.ID, p => p.Name);
             var specialProductTaxRateLookup = specialProductTaxRates.ToDictionary(s => s.ID, s => s.Name);
             var parentProductLookup = parentProducts.ToDictionary(p => p.ID, p => p.Name);
 
@@ -114,8 +103,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (product.Category_ID.HasValue && categoryLookup.TryGetValue(product.Category_ID.Value, out var categoryName))
                     product.CategoryName = categoryName;
 
-                if (product.ProcessingType_ID.HasValue && processingTypeLookup.TryGetValue(product.ProcessingType_ID.Value, out var processingTypeName))
-                    product.ProcessingTypeName = processingTypeName;
+                // ProcessingTypeName is now computed from enum in ProductViewModel
 
                 if (product.SpecialProductTaxRate_ID.HasValue && specialProductTaxRateLookup.TryGetValue(product.SpecialProductTaxRate_ID.Value, out var specialProductTaxRateName))
                     product.SpecialProductTaxRateName = specialProductTaxRateName;
@@ -154,7 +142,7 @@ namespace Tasin.Website.DAL.Services.WebServices
         /// <summary>
         /// Validates product data
         /// </summary>
-        private static Acknowledgement ValidateProductData(ProductViewModel productData)
+        private async Task<Acknowledgement> ValidateProductDataAsync(ProductViewModel productData)
         {
             var ack = new Acknowledgement { IsSuccess = true };
 
@@ -162,6 +150,49 @@ namespace Tasin.Website.DAL.Services.WebServices
             {
                 ack.AddMessage("Tên sản phẩm không được để trống.");
                 ack.IsSuccess = false;
+            }
+
+            // Business rule: If ParentID is null, then IsMaterial must be true
+            // If ParentID has value, then IsMaterial must be false (child products cannot be materials)
+            if (!productData.ParentID.HasValue && !productData.IsMaterial)
+            {
+                ack.AddMessage("Sản phẩm gốc (không có sản phẩm cha) phải là nguyên liệu.");
+                ack.IsSuccess = false;
+            }
+            else if (productData.ParentID.HasValue && productData.IsMaterial)
+            {
+                ack.AddMessage("Sản phẩm con (có sản phẩm cha) không thể là nguyên liệu.");
+                ack.IsSuccess = false;
+            }
+
+            // If ParentID is specified, validate that the parent product exists and is a material
+            if (productData.ParentID.HasValue)
+            {
+                // Prevent circular reference
+                if (productData.Id != 0 && productData.Id == productData.ParentID)
+                {
+                    ack.AddMessage("Sản phẩm không thể là sản phẩm cha của chính nó.");
+                    ack.IsSuccess = false;
+                }
+                else
+                {
+                    var parentProduct = await _productRepository.ReadOnlyRespository.FindAsync(productData.ParentID.Value);
+                    if (parentProduct == null)
+                    {
+                        ack.AddMessage("Sản phẩm cha không tồn tại.");
+                        ack.IsSuccess = false;
+                    }
+                    else if (!parentProduct.IsMaterial)
+                    {
+                        ack.AddMessage("Sản phẩm cha phải là nguyên liệu.");
+                        ack.IsSuccess = false;
+                    }
+                    else if (!parentProduct.IsActive)
+                    {
+                        ack.AddMessage("Sản phẩm cha đã bị vô hiệu hóa.");
+                        ack.IsSuccess = false;
+                    }
+                }
             }
 
             return ack;
@@ -194,7 +225,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             existingProduct.Name_EN = productData.Name_EN;
             existingProduct.Unit_ID = productData.Unit_ID;
             existingProduct.Category_ID = productData.Category_ID;
-            existingProduct.ProcessingType_ID = productData.ProcessingType_ID;
+            existingProduct.ProcessingType = productData.ProcessingType;
             existingProduct.TaxRate = productData.TaxRate;
             existingProduct.LossRate = productData.LossRate;
             existingProduct.IsMaterial = productData.IsMaterial;
@@ -256,9 +287,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     predicate = predicate.And(i => i.Category_ID == searchModel.Category_ID);
                 }
 
-                if (searchModel.ProcessingType_ID.HasValue)
+                if (searchModel.ProcessingType.HasValue)
                 {
-                    predicate = predicate.And(i => i.ProcessingType_ID == searchModel.ProcessingType_ID);
+                    predicate = predicate.And(i => i.ProcessingType == searchModel.ProcessingType);
                 }
 
                 if (searchModel.IsMaterial.HasValue)
@@ -338,7 +369,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement> CreateProduct(ProductViewModel postData)
         {
-            var ack = ValidateProductData(postData);
+            var ack = await ValidateProductDataAsync(postData);
             if (!ack.IsSuccess) return ack;
 
             try
@@ -357,7 +388,7 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement> UpdateProduct(ProductViewModel postData)
         {
-            var ack = ValidateProductData(postData);
+            var ack = await ValidateProductDataAsync(postData);
             if (!ack.IsSuccess) return ack;
 
             try
@@ -376,6 +407,17 @@ namespace Tasin.Website.DAL.Services.WebServices
                     if (activeChildProducts.Count > 0)
                     {
                         ack.AddMessage("Không thể ngừng sử dụng sản phẩm này vì có sản phẩm con đang hoạt động.");
+                        return ack;
+                    }
+                }
+
+                // Check if trying to change ParentID when product has child products
+                if (existingProduct.ParentID != postData.ParentID)
+                {
+                    var childProducts = await _productRepository.ReadOnlyRespository.GetAsync(p => p.ParentID == postData.Id && p.IsActive);
+                    if (childProducts.Count > 0)
+                    {
+                        ack.AddMessage("Không thể thay đổi sản phẩm cha khi sản phẩm này đã có sản phẩm con.");
                         return ack;
                     }
                 }
@@ -469,7 +511,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 Name_EN = ExcelHelper.GetCellStringValue(row.Cell(2)),
                                 UnitCode = ExcelHelper.GetCellStringValue(row.Cell(3)),
                                 CategoryCode = ExcelHelper.GetCellStringValue(row.Cell(4)),
-                                ProcessingTypeCode = ExcelHelper.GetCellStringValue(row.Cell(5)),
+                                ProcessingTypeText = ExcelHelper.GetCellStringValue(row.Cell(5)),
                                 IsMaterialText = ExcelHelper.GetCellStringValue(row.Cell(6)),
                                 SpecialProductTaxRateCode = ExcelHelper.GetCellStringValue(row.Cell(7)),
                                 TaxRate = ParseDecimal(ExcelHelper.GetCellStringValue(row.Cell(8))),
@@ -489,6 +531,13 @@ namespace Tasin.Website.DAL.Services.WebServices
                                 importModel.ValidationErrors.Add("Tên sản phẩm không được để trống");
                             }
 
+                            // Business rule validation: Since Excel import doesn't support ParentID,
+                            // all imported products are root products and must be materials
+                            if (!importModel.IsMaterial)
+                            {
+                                importModel.ValidationErrors.Add("Sản phẩm gốc (không có sản phẩm cha) phải là nguyên liệu");
+                            }
+
                             importModels.Add(importModel);
                             rowNumber++;
                         }
@@ -500,7 +549,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                 // Get lookup data
                 var units = await _unitRepository.ReadOnlyRespository.GetAsync(u => u.IsActive);
                 var categories = await _categoryRepository.ReadOnlyRespository.GetAsync(c => c.IsActive);
-                var processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(p => p.IsActive);
                 var specialProductTaxRates = await _specialProductTaxRateRepository.ReadOnlyRespository.GetAsync(s => s.IsActive);
 
                 // Process each row
@@ -537,19 +585,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             }
                         }
 
-                        int? processingTypeId = null;
-                        if (!string.IsNullOrEmpty(importModel.ProcessingTypeCode))
-                        {
-                            var processingType = processingTypes.FirstOrDefault(p => p.Code.Equals(importModel.ProcessingTypeCode, StringComparison.OrdinalIgnoreCase));
-                            if (processingType == null)
-                            {
-                                importModel.ValidationErrors.Add($"Không tìm thấy loại chế biến với mã: {importModel.ProcessingTypeCode}");
-                            }
-                            else
-                            {
-                                processingTypeId = processingType.ID;
-                            }
-                        }
+                        // ProcessingType is now parsed from text in the model
 
                         int? specialProductTaxRateId = null;
                         if (!string.IsNullOrEmpty(importModel.SpecialProductTaxRateCode))
@@ -587,8 +623,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                             Name_EN = string.IsNullOrEmpty(importModel.Name_EN) ? null : importModel.Name_EN,
                             Unit_ID = unitId,
                             Category_ID = categoryId,
-                            ProcessingType_ID = processingTypeId,
+                            ProcessingType = importModel.ProcessingType,
                             IsMaterial = importModel.IsMaterial,
+                            ParentID = null, // Excel import only supports root products
                             SpecialProductTaxRate_ID = specialProductTaxRateId,
                             TaxRate = importModel.TaxRate,
                             LossRate = importModel.LossRate,
@@ -656,7 +693,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "Tên tiếng Anh",
                         "Mã đơn vị",
                         "Mã quy cách",
-                        "Mã phân loại",
+                        "Loại chế biến",
                         "Là nguyên liệu (Y/N)",
                         "Mã thuế suất đặc biệt",
                         "Thuế suất (%)",
@@ -684,7 +721,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     ExcelHelper.SetCellValue(worksheet.Cell(2, 2), "Sample Product 1");
                     worksheet.Cell(2, 3).Value = "KG";
                     worksheet.Cell(2, 4).Value = "CAT001";
-                    worksheet.Cell(2, 5).Value = "PT001";
+                    worksheet.Cell(2, 5).Value = "Material";
                     worksheet.Cell(2, 6).Value = "Y";
                     worksheet.Cell(2, 7).Value = "SPTR001";
                     worksheet.Cell(2, 8).Value = 10;
@@ -716,8 +753,8 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "   - Tên tiếng Anh: Có thể để trống",
                         "   - Mã đơn vị: Phải tồn tại trong hệ thống",
                         "   - Mã quy cách: Phải tồn tại trong hệ thống",
-                        "   - Mã phân loại: Phải tồn tại trong hệ thống",
-                        "   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0",
+                        "   - Loại chế biến: Nhập 'Material', 'SemiProcessed', hoặc 'FinishedProduct'",
+                        "   - Là nguyên liệu: Nhập Y/N, Yes/No, True/False, 1/0 (BẮT BUỘC phải là Y cho sản phẩm gốc)",
                         "   - Mã thuế suất đặc biệt: Phải tồn tại trong hệ thống",
                         "   - Thuế suất công ty (%): Nhập số thập phân (ví dụ: 10.5) hoặc để trống",
                         "   - Thuế suất người tiêu dùng (%): Nhập số thập phân (ví dụ: 8.0) hoặc để trống",
@@ -727,7 +764,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                         "   - Ghi chú: Có thể để trống",
                         "   - Ngừng sản xuất: Nhập Y/N, Yes/No, True/False, 1/0",
                         "",
-                        "3. Lưu ý:",
+                        "3. Quy tắc nghiệp vụ:",
+                        "   - Tất cả sản phẩm import từ Excel đều là sản phẩm gốc (không có sản phẩm cha)",
+                        "   - Sản phẩm gốc BẮT BUỘC phải là nguyên liệu (Là nguyên liệu = Y)",
+                        "",
+                        "4. Lưu ý:",
                         "   - Không được xóa dòng tiêu đề",
                         "   - Dữ liệu bắt đầu từ dòng 2",
                         "   - File phải có định dạng Excel (.xlsx, .xls, .xlsm) hoặc CSV",

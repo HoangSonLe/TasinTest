@@ -1,5 +1,6 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Tasin.Website.Common.Enums;
 
 namespace Tasin.Website.Domains.Entitites
 {
@@ -14,7 +15,7 @@ namespace Tasin.Website.Domains.Entitites
         public string? Name_EN { get; set; }
         public int? Unit_ID { get; set; }
         public int? Category_ID { get; set; }
-        public int? ProcessingType_ID { get; set; }
+        public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
         public decimal? TaxRate { get; set; }
         public decimal? LossRate { get; set; }
         public bool IsMaterial { get; set; } = false;
@@ -36,10 +37,6 @@ namespace Tasin.Website.Domains.Entitites
         [ForeignKey("Category_ID")]
         [NotMapped]
         public virtual Category? Category { get; set; }
-
-        [ForeignKey("ProcessingType_ID")]
-        [NotMapped]
-        public virtual ProcessingType? ProcessingType { get; set; }
 
         [ForeignKey("SpecialProductTaxRate_ID")]
         [NotMapped]

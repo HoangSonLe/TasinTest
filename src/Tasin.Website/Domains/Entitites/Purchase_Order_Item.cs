@@ -1,5 +1,6 @@
 ﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Tasin.Website.Common.Enums;
 
 namespace Tasin.Website.Domains.Entitites
 {
@@ -12,7 +13,7 @@ namespace Tasin.Website.Domains.Entitites
         public int? Unit_ID { get; set; }
         public decimal? Price { get; set; }
         public decimal? TaxRate { get; set; }
-        public int? ProcessingType_ID { get; set; }
+        public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
         public decimal? LossRate { get; set; }
         public decimal? ProcessingFee { get; set; }
         public string? Note { get; set; }
@@ -22,17 +23,13 @@ namespace Tasin.Website.Domains.Entitites
         [ForeignKey("PO_ID")]
         [NotMapped]
         public virtual Purchase_Order? PurchaseOrder { get; set; }
-        
+
         [ForeignKey("Product_ID")]
         [NotMapped]
         public virtual Product? Product { get; set; }
-        
+
         [ForeignKey("Unit_ID")]
         [NotMapped]
         public virtual Unit? Unit { get; set; }
-        
-        [ForeignKey("ProcessingType_ID")]
-        [NotMapped]
-        public virtual ProcessingType? ProcessingType { get; set; }
     }
 }

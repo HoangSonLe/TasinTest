@@ -41,11 +41,7 @@ namespace Tasin.Website.Common.AutoMapper
             CreateMap<CategoryViewModel, Category>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
 
-            // ProcessingType mapping
-            CreateMap<ProcessingType, ProcessingTypeViewModel>()
-                .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.ID));
-            CreateMap<ProcessingTypeViewModel, ProcessingType>()
-                .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.Id));
+            // ProcessingType mapping removed - now using enum
 
             // Material mapping
             CreateMap<Material, MaterialViewModel>()
@@ -79,14 +75,12 @@ namespace Tasin.Website.Common.AutoMapper
             // PurchaseOrderItem mapping
             CreateMap<Purchase_Order_Item, PurchaseOrderItemViewModel>()
                 .ForMember(dest => dest.ProductName, opts => opts.Ignore())
-                .ForMember(dest => dest.UnitName, opts => opts.Ignore())
-                .ForMember(dest => dest.ProcessingTypeName, opts => opts.Ignore());
+                .ForMember(dest => dest.UnitName, opts => opts.Ignore());
             CreateMap<PurchaseOrderItemViewModel, Purchase_Order_Item>()
                 .ForMember(dest => dest.ID, opts => opts.MapFrom(src => src.ID == 0 ? 0 : src.ID)) // Handle new items
                 .ForMember(dest => dest.PurchaseOrder, opts => opts.Ignore())
                 .ForMember(dest => dest.Product, opts => opts.Ignore())
-                .ForMember(dest => dest.Unit, opts => opts.Ignore())
-                .ForMember(dest => dest.ProcessingType, opts => opts.Ignore());
+                .ForMember(dest => dest.Unit, opts => opts.Ignore());
 
             // PurchaseAgreement mapping
             CreateMap<Purchase_Agreement, PurchaseAgreementViewModel>()

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Tasin.Website.Common.Enums;
 
 namespace Tasin.Website.Models.ViewModels
 {
@@ -34,9 +35,9 @@ namespace Tasin.Website.Models.ViewModels
         public string? CategoryCode { get; set; }
 
         /// <summary>
-        /// Processing type code (will be mapped to ProcessingType_ID)
+        /// Processing type text (Nguyên liệu/Sơ chế/Thành phẩm)
         /// </summary>
-        public string? ProcessingTypeCode { get; set; }
+        public string? ProcessingTypeText { get; set; }
 
         /// <summary>
         /// Is Material text (Y/N, Yes/No, True/False, 1/0)
@@ -112,6 +113,36 @@ namespace Tasin.Website.Models.ViewModels
              IsMaterialText.Trim().ToUpper() == "YES" ||
              IsMaterialText.Trim().ToUpper() == "TRUE" ||
              IsMaterialText.Trim() == "1");
+
+        /// <summary>
+        /// Parsed ProcessingType value as enum
+        /// </summary>
+        public EProcessingType ProcessingType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ProcessingTypeText))
+                    return EProcessingType.Material;
+
+                var text = ProcessingTypeText.Trim();
+
+                // First try to parse as enum name (case-insensitive)
+                if (Enum.TryParse<EProcessingType>(text, true, out var enumResult))
+                {
+                    return enumResult;
+                }
+
+                // Fallback to description matching for backward compatibility
+                var textLower = text.ToLower();
+                return textLower switch
+                {
+                    "nguyên liệu" or "nguyen lieu" or "material" => EProcessingType.Material,
+                    "sơ chế" or "so che" or "semiprocessed" or "semi-processed" => EProcessingType.SemiProcessed,
+                    "thành phẩm" or "thanh pham" or "finished" or "finishedproduct" or "finished-product" => EProcessingType.FinishedProduct,
+                    _ => EProcessingType.Material
+                };
+            }
+        }
 
         /// <summary>
         /// Validation errors for this row

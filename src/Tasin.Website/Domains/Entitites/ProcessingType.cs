@@ -14,10 +14,6 @@ namespace Tasin.Website.Domains.Entitites
         public string? Name_EN { get; set; }
         public string? Description { get; set; }
 
-        // Navigation properties
-        [NotMapped]
-        public virtual ICollection<Product>? Products { get; set; }
-        [NotMapped]
-        public virtual ICollection<Purchase_Order_Item>? PurchaseOrderItems { get; set; }
+        // Navigation properties removed - ProcessingType is now an enum in Product and Purchase_Order_Item
     }
 }

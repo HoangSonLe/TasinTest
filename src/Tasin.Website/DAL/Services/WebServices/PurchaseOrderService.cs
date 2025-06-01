@@ -26,7 +26,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         private ICustomerRepository _customerRepository;
         private IProductRepository _productRepository;
         private IUnitRepository _unitRepository;
-        private IProcessingTypeRepository _processingTypeRepository;
 
         public PurchaseOrderService(
             ILogger<PurchaseOrderService> logger,
@@ -41,8 +40,7 @@ namespace Tasin.Website.DAL.Services.WebServices
             IPurchaseOrderItemRepository purchaseOrderItemRepository,
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
-            IUnitRepository unitRepository,
-            IProcessingTypeRepository processingTypeRepository) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
+            IUnitRepository unitRepository) : base(logger, configuration, userRepository, roleRepository, httpContextAccessor, currentUserContext, dbContext)
         {
             _mapper = mapper;
             _purchaseOrderRepository = purchaseOrderRepository;
@@ -50,7 +48,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             _customerRepository = customerRepository;
             _productRepository = productRepository;
             _unitRepository = unitRepository;
-            _processingTypeRepository = processingTypeRepository;
         }
 
         public async Task<Acknowledgement<JsonResultPaging<List<PurchaseOrderViewModel>>>> GetPurchaseOrderList(PurchaseOrderSearchModel searchModel)
@@ -105,16 +102,14 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var purchaseOrderItemViewModels = _mapper.Map<List<PurchaseOrderItemViewModel>>(allPurchaseOrderItems);
 
-                // Get product, unit, and processing type names for all items (only if there are items)
+                // Get product and unit names for all items (only if there are items)
                 List<Product> products = new List<Product>();
                 List<Unit> units = new List<Unit>();
-                List<ProcessingType> processingTypes = new List<ProcessingType>();
 
                 if (purchaseOrderItemViewModels.Any())
                 {
                     var productIds = purchaseOrderItemViewModels.Select(p => p.Product_ID).Distinct().ToList();
                     var unitIds = purchaseOrderItemViewModels.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
-                    var processingTypeIds = purchaseOrderItemViewModels.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
 
                     if (productIds.Any())
                     {
@@ -127,13 +122,6 @@ namespace Tasin.Website.DAL.Services.WebServices
                     {
                         units = await _unitRepository.ReadOnlyRespository.GetAsync(
                             filter: u => unitIds.Contains(u.ID)
-                        );
-                    }
-
-                    if (processingTypeIds.Any())
-                    {
-                        processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(
-                            filter: pt => processingTypeIds.Contains(pt.ID)
                         );
                     }
                 }
@@ -156,14 +144,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         }
                     }
 
-                    if (item.ProcessingType_ID.HasValue)
-                    {
-                        var processingType = processingTypes.FirstOrDefault(pt => pt.ID == item.ProcessingType_ID.Value);
-                        if (processingType != null)
-                        {
-                            item.ProcessingTypeName = processingType.Name;
-                        }
-                    }
+                    // ProcessingTypeName is now computed from enum in ViewModel
                 }
 
                 // Populate customer names and purchase order items
@@ -242,10 +223,9 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var purchaseOrderItemViewModels = _mapper.Map<List<PurchaseOrderItemViewModel>>(purchaseOrderItems);
 
-                // Get product, unit, and processing type names
+                // Get product and unit names
                 var productIds = purchaseOrderItemViewModels.Select(p => p.Product_ID).Distinct().ToList();
                 var unitIds = purchaseOrderItemViewModels.Where(p => p.Unit_ID.HasValue).Select(p => p.Unit_ID.Value).Distinct().ToList();
-                var processingTypeIds = purchaseOrderItemViewModels.Where(p => p.ProcessingType_ID.HasValue).Select(p => p.ProcessingType_ID.Value).Distinct().ToList();
 
                 var products = await _productRepository.ReadOnlyRespository.GetAsync(
                     filter: p => productIds.Contains(p.ID)
@@ -253,10 +233,6 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 var units = await _unitRepository.ReadOnlyRespository.GetAsync(
                     filter: u => unitIds.Contains(u.ID)
-                );
-
-                var processingTypes = await _processingTypeRepository.ReadOnlyRespository.GetAsync(
-                    filter: pt => processingTypeIds.Contains(pt.ID)
                 );
 
                 // Populate names
@@ -277,14 +253,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         }
                     }
 
-                    if (item.ProcessingType_ID.HasValue)
-                    {
-                        var processingType = processingTypes.FirstOrDefault(pt => pt.ID == item.ProcessingType_ID.Value);
-                        if (processingType != null)
-                        {
-                            item.ProcessingTypeName = processingType.Name;
-                        }
-                    }
+                    // ProcessingTypeName is now computed from enum in ViewModel
                 }
 
                 purchaseOrderViewModel.PurchaseOrderItems = purchaseOrderItemViewModels;
@@ -504,7 +473,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     Unit_ID = item.Unit_ID,
                     Price = item.Price,
                     TaxRate = item.TaxRate,
-                    ProcessingType_ID = item.ProcessingType_ID,
+                    ProcessingType = item.ProcessingType,
                     LossRate = item.LossRate,
                     ProcessingFee = item.ProcessingFee,
                     Note = item.Note,

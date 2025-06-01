@@ -19,7 +19,6 @@ namespace Tasin.Website.DAL.Services.WebServices
     {
         ICustomerRepository _customerRepository;
         IUnitRepository _unitRepository;
-        IProcessingTypeRepository _processingTypeRepository;
         IMaterialRepository _materialRepository;
         IVendorRepository _vendorRepository;
         IProductRepository _productRepository;
@@ -30,7 +29,6 @@ namespace Tasin.Website.DAL.Services.WebServices
             IUserRepository userRepository,
             ICustomerRepository customerRepository,
             IUnitRepository unitRepository,
-            IProcessingTypeRepository processingTypeRepository,
             IMaterialRepository materialRepository,
             IVendorRepository vendorRepository,
             IProductRepository productRepository,
@@ -42,7 +40,6 @@ namespace Tasin.Website.DAL.Services.WebServices
         {
             _customerRepository = customerRepository;
             _unitRepository = unitRepository;
-            _processingTypeRepository = processingTypeRepository;
             _materialRepository = materialRepository;
             _vendorRepository = vendorRepository;
             _productRepository = productRepository;
@@ -127,25 +124,21 @@ namespace Tasin.Website.DAL.Services.WebServices
 
         public async Task<Acknowledgement<List<KendoDropdownListModel<string>>>> GetProcessingTypeDataDropdownList(string searchString)
         {
-            var predicate = PredicateBuilder.New<ProcessingType>(i => i.IsActive == true);
-            predicate = ProcessingTypeAuthorPredicate.GetProcessingTypeAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
-            if (!string.IsNullOrEmpty(searchString))
+            // ProcessingType is now an enum, return enum names as strings
+            var options = EnumHelper.ToDropdownListStr<EProcessingType>();
+
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
                 var searchStringNonUnicode = Utils.NonUnicode(searchString.Trim().ToLower());
-                predicate = predicate.And(i => i.NameNonUnicode.Trim().ToLower().Contains(searchStringNonUnicode) ||
-                                               i.Code.Trim().ToLower().Contains(searchStringNonUnicode));
+                options = options.Where(i =>
+                    Utils.NonUnicode(i.Text.ToLower()).Contains(searchStringNonUnicode)
+                ).ToList();
             }
-            var processingTypeDBList = await _processingTypeRepository.ReadOnlyRespository.GetWithPagingAsync(new PagingParameters(1, 50), predicate, i => i.OrderBy(p => p.Name));
-            var data = processingTypeDBList.Data.Select(i => new KendoDropdownListModel<string>()
-            {
-                Value = i.ID.ToString(),
-                Text = $"{i.Name} ({i.Code})",
-                DataRaw = i
-            }).ToList();
+
             return new Acknowledgement<List<KendoDropdownListModel<string>>>()
             {
                 IsSuccess = true,
-                Data = data
+                Data = options
             };
         }
 

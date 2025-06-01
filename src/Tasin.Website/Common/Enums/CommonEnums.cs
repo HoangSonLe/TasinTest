@@ -52,6 +52,19 @@ namespace Tasin.Website.Common.Enums
         [Description("Cá nhân")]
         Individual,
     }
+
+    /// <summary>
+    /// Processing type enum for products
+    /// </summary>
+    public enum EProcessingType
+    {
+        [Description("Nguyên liệu")]
+        Material = 1,
+        [Description("Sơ chế")]
+        SemiProcessed = 2,
+        [Description("Thành phẩm")]
+        FinishedProduct = 3
+    }
     public enum EPOStatus
     {
         [Description("Mới")]

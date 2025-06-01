@@ -258,43 +258,39 @@
 
                 // ===== NHÓM 2: PHÂN LOẠI VÀ THUẾ =====
                 {
-                    field: "processingType_ID",
+                    field: "processingType",
                     title: "Phân loại hàng hoá",
                     label: "Phân loại hàng hoá:",
                     colSpan: 1,
                     editor: "DropDownList",
                     editorOptions: {
                         optionLabel: "Chọn phân loại hàng hoá",
-                        dataTextField: "name",
-                        dataValueField: "id",
+                        dataTextField: "text",
+                        dataValueField: "value",
                         valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
                                 read: {
-                                    url: "/ProcessingType/GetProcessingTypeList",
+                                    url: "/Common/GetDataOptionsDropdown",
                                     dataType: "json",
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
                                         return {
-                                            pageSize: data.pageSize,
-                                            pageNumber: data.page,
+                                            searchString: data.filter?.filters?.[0]?.value || "",
+                                            type: "ProcessingType" // ECategoryType.ProcessingType
                                         }
                                     }
                                 },
                             },
-                            serverPaging: true,
                             serverFiltering: true,
-                            page: 1,
-                            pageSize: 9999,
                             schema: {
-                                data: "data.data",
-                                total: "data.total"
+                                data: "data"
                             },
                         },
                         change: function (e) {
-                            formData.processingType_ID = this.value();
+                            formData.processingType = this.value();
                         }
                     },
                 },
@@ -725,6 +721,13 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     width: 200,
+                },
+                {
+                    field: "processingTypeName",
+                    title: "Phân loại hàng hoá",
+                    headerAttributes: { style: "text-align: center; justify-content: center" },
+                    attributes: { style: "text-align:center;" },
+                    width: 150,
                 },
                 {
                     field: "note",

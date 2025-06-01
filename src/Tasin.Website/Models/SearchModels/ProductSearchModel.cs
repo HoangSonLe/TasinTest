@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Tasin.Website.Common.CommonModels;
+using Tasin.Website.Common.Enums;
 using Tasin.Website.Models.ViewModels;
 
 namespace Tasin.Website.Models.SearchModels
@@ -22,10 +23,10 @@ namespace Tasin.Website.Models.SearchModels
         public int? Category_ID { get; set; }
 
         /// <summary>
-        /// Processing Type ID to filter by
+        /// Processing Type to filter by
         /// </summary>
-        [Display(Name = "ProcessingType_ID")]
-        public int? ProcessingType_ID { get; set; }
+        [Display(Name = "ProcessingType")]
+        public EProcessingType? ProcessingType { get; set; }
 
 
         /// <summary>

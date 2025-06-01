@@ -18,7 +18,9 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
             builder.Property(p => p.Name_EN).HasColumnName("Name_EN").HasMaxLength(255);
             builder.Property(p => p.Unit_ID).HasColumnName("Unit_ID");
             builder.Property(p => p.Category_ID).HasColumnName("Category_ID");
-            builder.Property(p => p.ProcessingType_ID).HasColumnName("ProcessingType_ID");
+            builder.Property(p => p.ProcessingType)
+                .HasColumnName("ProcessingType")
+                .HasConversion<string>();
             builder.Property(p => p.TaxRate).HasColumnName("TaxRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.LossRate).HasColumnName("LossRate").HasColumnType("NUMERIC(5, 2)");
             builder.Property(p => p.IsMaterial).HasColumnName("IsMaterial").HasDefaultValue(false);
@@ -48,9 +50,7 @@ namespace Tasin.Website.Domains.EntityTypeConfiguration
                 .WithMany(p => p.Products)
                 .HasForeignKey(p => p.Category_ID);
 
-            builder.HasOne(p => p.ProcessingType)
-                .WithMany(p => p.Products)
-                .HasForeignKey(p => p.ProcessingType_ID);
+            // ProcessingType is now an enum, no foreign key relationship needed
 
             builder.HasOne(p => p.SpecialProductTaxRate)
                 .WithMany(p => p.Products)

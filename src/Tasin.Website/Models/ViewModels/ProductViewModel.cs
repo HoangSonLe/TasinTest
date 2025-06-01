@@ -63,15 +63,15 @@ namespace Tasin.Website.Models.ViewModels
         public string? CategoryName { get; set; }
 
         /// <summary>
-        /// Processing Type ID
+        /// Processing Type
         /// </summary>
-        [Display(Name = "ProcessingType_ID")]
-        public int? ProcessingType_ID { get; set; }
+        [Display(Name = "ProcessingType")]
+        public EProcessingType ProcessingType { get; set; } = EProcessingType.Material;
 
         /// <summary>
-        /// Processing Type name
+        /// Processing Type name for display
         /// </summary>
-        public string? ProcessingTypeName { get; set; }
+        public string ProcessingTypeName => EnumHelper.GetEnumDescriptionByEnum(ProcessingType);
 
         /// <summary>
         /// Tax Rate

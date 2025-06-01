@@ -501,7 +501,7 @@
                             <div class="grid-col-4-1">
                                 <div class="form-group">
                                     <label>Loại gia công</label>
-                                    <select id="item-processingTypeId" class="form-control"></select>
+                                    <select id="item-processingType" class="form-control"></select>
                                 </div>
                             </div>
                             <div class="grid-col-4-1">
@@ -713,7 +713,7 @@
                     $("#item-totalAmount").val('');
 
                     // Clear processing type dropdown
-                    var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+                    var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
                     if (processingTypeDropdown) {
                         processingTypeDropdown.value('');
                     }
@@ -770,7 +770,7 @@
         });
 
         // Initialize Processing Type Dropdown
-        $("#item-processingTypeId").kendoDropDownList({
+        $("#item-processingType").kendoDropDownList({
             dataTextField: "text",
             dataValueField: "value",
             optionLabel: "-- Chọn loại gia công --",
@@ -790,7 +790,7 @@
                 transport: {
                     read: {
                         url: "/Common/GetDataOptionsDropdown",
-                        data: { type: "ProcessingType" }
+                        data: { type: 3 } // ECategoryType.ProcessingType
                     }
                 },
                 schema: {
@@ -1309,10 +1309,10 @@
                 calculateTotalAmount();
 
                 // Auto-fill processing type dropdown
-                if (product.processingType_ID) {
-                    var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+                if (product.processingType) {
+                    var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
                     if (processingTypeDropdown) {
-                        processingTypeDropdown.value(product.processingType_ID);
+                        processingTypeDropdown.value(product.processingType);
                     }
                 }
             } else {
@@ -1360,7 +1360,7 @@
 
     function addItemToGrid() {
         var productDropdown = $("#item-productId").data("kendoComboBox");
-        var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+        var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
 
         var productId = productDropdown ? productDropdown.value() : "";
         var productName = productDropdown ? productDropdown.text() : "";
@@ -1373,7 +1373,7 @@
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
         var totalAmount = parseFloat($("#item-totalAmount").val()) || 0;
-        var processingTypeId = processingTypeDropdown.value();
+        var processingType = processingTypeDropdown.value();
         var processingTypeName = processingTypeDropdown.text();
         var note = $("#item-note").val();
 
@@ -1402,7 +1402,7 @@
             taxRate: taxRate,
             processingFee: processingFee,
             totalAmount: calculatedTotalAmount,
-            processingTypeId: processingTypeId ? parseInt(processingTypeId) : null,
+            processingType: processingType || null,
             processingTypeName: processingTypeName === "-- Chọn loại gia công --" ? "" : processingTypeName,
             note: note,
             profitMargin: profitMargin // Include profitMargin for calculation
@@ -1440,7 +1440,7 @@
         $("#item-taxRate").val("");
         $("#item-processingFee").val("");
         $("#item-totalAmount").val("");
-        var processingTypeDropdown = $("#item-processingTypeId").data("kendoDropDownList");
+        var processingTypeDropdown = $("#item-processingType").data("kendoDropDownList");
         if (processingTypeDropdown) {
             processingTypeDropdown.value("");
         }
@@ -1527,7 +1527,7 @@
                             lossRate: item.lossRate,
                             taxRate: item.taxRate,
                             processingFee: item.processingFee,
-                            processingTypeId: item.processingType_ID || item.processingTypeId,
+                            processingType: item.processingType || item.processingTypeId,
                             processingTypeName: item.processingTypeName,
                             note: item.note,
                             profitMargin: item.profitMargin || 0, // Thêm profitMargin
@@ -1590,7 +1590,7 @@
                     unit_ID: item.unitId, // Use captured unit_ID from product
                     price: item.price,
                     taxRate: item.taxRate,
-                    processingType_ID: item.processingTypeId,
+                    processingType: item.processingType,
                     lossRate: item.lossRate,
                     processingFee: item.processingFee,
                     note: item.note,
