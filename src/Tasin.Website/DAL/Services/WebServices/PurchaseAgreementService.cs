@@ -1125,11 +1125,11 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                 // Get product-vendor relationships for all products (all vendors, not just highest priority)
                 var allProductVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
-                var productVendorLookup = allProductVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                var productVendorLookup = allProductVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);//.OrderBy(e => e.Priority).ThenBy(e => e.UnitPrice)
 
                 // Also get highest priority vendors for default selection
                 var highestPriorityProductVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
-                var defaultVendorLookup = highestPriorityProductVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
+                var defaultVendorLookup = highestPriorityProductVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);//.OrderBy(e => e.Priority).ThenBy(e => e.UnitPrice)
 
                 // Get all available vendors using common service
                 var allVendorsResponse = await _commonService.GetDataOptionsDropdown("", ECategoryType.Vendor);
@@ -1166,6 +1166,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                             .Where(vendor => vendor != null && !string.IsNullOrEmpty(vendor.Value) &&
                                            int.TryParse(vendor.Value, out var vendorId) &&
                                            availableVendorIds.Contains(vendorId))
+                            //.OrderBy(vendor => availableVendorIds.IndexOf(int.Parse(vendor.Value)))
                             .Select(vendor => new VendorOptionViewModel
                             {
                                 ID = int.Parse(vendor.Value),

@@ -39,7 +39,7 @@ namespace Tasin.Website.DAL.Repository
             // Group by Product_ID and take the vendor with highest priority (lowest priority number) for each product
             return allProductVendors
                 .GroupBy(pv => pv.Product_ID)
-                .Select(g => g.OrderBy(pv => pv.Priority ?? int.MaxValue).First())
+                .Select(g => g.OrderBy(pv => pv.Priority ?? int.MaxValue).ThenBy(e=>e.UnitPrice).First())
                 .ToList();
         }
     }
