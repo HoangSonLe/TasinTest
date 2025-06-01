@@ -21,6 +21,13 @@
 <script type="text/javascript">
     let gridId = "#gridId";
 
+    // Common function to calculate total estimated material
+    function calculateTotalEstimatedMaterial(quantity, lossRate) {
+        var qty = quantity || 0;
+        var loss = lossRate || 0;
+        return (100 + loss) * qty / 100;
+    }
+
     function getSearchModel() {
         let searchString = $("#searchString").val();
         let customerId = $("#customerId").data("kendoDropDownList")?.value();
@@ -225,17 +232,25 @@
                 data: data.purchaseOrderItems || []
             },
             columns: [
-                { field: "productName", title: "Sản phẩm", width: 200 },
-                { field: "quantity", title: "Số lượng", width: 100, format: "{0:n2}" },
-                { field: "unitName", title: "Đơn vị", width: 100 },
-                { field: "price", title: "Đơn giá", width: 120, format: "{0:n0}" },
-                { field: "lossRate", title: "Hao hụt (%)", width: 100, format: "{0:n1}" },
-                { field: "additionalCost", title: "Chi phí thêm", width: 110, format: "{0:n0}" },
-                { field: "taxRate", title: "Thuế suất (%)", width: 100, format: "{0:n1}" },
-                { field: "processingFee", title: "Phí gia công", width: 120, format: "{0:n0}" },
+                { field: "productName", title: "Sản phẩm", width: "200px" },
+                { field: "quantity", title: "Số lượng", width: "100px", format: "{0:n2}" },
+                { field: "unitName", title: "Đơn vị", width: "80px" },
+                { field: "price", title: "Đơn giá", width: "120px", format: "{0:n0}" },
+                { field: "lossRate", title: "Hao hụt (%)", width: "100px", format: "{0:n1}" },
+                {
+                    title: "Tổng ước tính nguyên liệu",
+                    width: "150px",
+                    template: function(dataItem) {
+                        var totalEstimatedMaterial = calculateTotalEstimatedMaterial(dataItem.quantity, dataItem.lossRate);
+                        return kendo.toString(totalEstimatedMaterial, 'n2');
+                    }
+                },
+                { field: "additionalCost", title: "Chi phí thêm", width: "110px", format: "{0:n0}" },
+                { field: "taxRate", title: "Thuế suất (%)", width: "100px", format: "{0:n1}" },
+                { field: "processingFee", title: "Phí gia công", width: "120px", format: "{0:n0}" },
                 {
                     title: "Thành tiền",
-                    width: 150,
+                    width: "150px",
                     template: function(dataItem) {
                         var baseAmount = (dataItem.quantity || 0) * (dataItem.price || 0);
                         var lossAmount = baseAmount * ((dataItem.lossRate || 0) / 100);
@@ -248,7 +263,7 @@
                 }
             ],
             pageable: false,
-            scrollable: true,
+            scrollable: { virtual: false },
             height: 300
         });
 
@@ -793,15 +808,23 @@
                 }
             },
             columns: [
-                { field: "productName", title: "Sản phẩm", width: "150px" },
-                { field: "quantity", title: "Số lượng", width: "80px", template: "#= kendo.toString(quantity, 'n2') #" },
+                { field: "productName", title: "Sản phẩm", width: "180px" },
+                { field: "quantity", title: "Số lượng", width: "90px", template: "#= kendo.toString(quantity, 'n2') #" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
-                { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
-                { field: "additionalCost", title: "Chi phí thêm", width: "100px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n0') + ' VNĐ' : '' #" },
-                { field: "taxRate", title: "Thuế (%)", width: "80px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
-                { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
-                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
+                { field: "price", title: "Đơn giá", width: "110px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                { field: "lossRate", title: "Hao hụt (%)", width: "100px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
+                {
+                    title: "Tổng ước tính nguyên liệu",
+                    width: "140px",
+                    template: function(dataItem) {
+                        var totalEstimatedMaterial = calculateTotalEstimatedMaterial(dataItem.quantity, dataItem.lossRate);
+                        return kendo.toString(totalEstimatedMaterial, 'n2');
+                    }
+                },
+                { field: "additionalCost", title: "Chi phí thêm", width: "110px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n0') + ' VNĐ' : '' #" },
+                { field: "taxRate", title: "Thuế (%)", width: "90px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
+                { field: "processingFee", title: "Phí gia công", width: "110px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
+                { field: "totalAmount", title: "Thành tiền", width: "130px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
                 { field: "note", title: "Ghi chú", width: "150px" },
                 {
                     title: "Thao tác",
@@ -810,7 +833,7 @@
                 }
             ],
             pageable: false,
-            scrollable: true,
+            scrollable: { virtual: false },
             height: 300
         });
 
@@ -930,6 +953,7 @@
                 },
             },
             selectable: true,
+            scrollable: { virtual: false },
             pageable: {
                 pageSizes: [10, 20, 50],
             },
@@ -945,26 +969,26 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: "#: ++record #",
-                    width: 80
+                    width: "80px"
                 },
                 {
                     field: "code",
                     title: "Mã đơn hàng",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 150,
+                    width: "150px",
                 },
                 {
                     field: "customerName",
                     title: "Khách hàng",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:left;" },
-                    width: 200,
+                    width: "200px",
                 },
                 {
                     field: "statusName",
                     title: "Trạng thái",
-                    width: 130,
+                    width: "130px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: function (dataItem) {
@@ -996,7 +1020,7 @@
                 {
                     field: "totalPriceNoTax",
                     title: "Tổng tiền chưa thuế",
-                    width: 150,
+                    width: "160px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
                     template: "<span class='currency'>#: kendo.toString(totalPriceNoTax, 'n0') # VNĐ</span>",
@@ -1004,7 +1028,7 @@
                 {
                     field: "totalPrice",
                     title: "Tổng tiền",
-                    width: 150,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
                     template: "<span class='currency'>#: kendo.toString(totalPrice, 'n0') # VNĐ</span>",
@@ -1012,7 +1036,7 @@
                 {
                     field: "updatedDate",
                     title: "Ngày cập nhật",
-                    width: 150,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: function (dataItem) {
@@ -1024,7 +1048,7 @@
                 {
                     field: "",
                     title: "Thao tác",
-                    width: 200,
+                    width: "200px",
                     attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
@@ -1113,6 +1137,14 @@
                 { field: "price", title: "Đơn giá", width: "120px", template: "#= price ? '<span class=\"currency\">' + kendo.toString(price, 'n0') + ' VNĐ</span>' : '' #" },
                 { field: "taxRate", title: "Thuế suất (%)", width: "100px", template: "#= taxRate ? '<span class=\"number\">' + kendo.toString(taxRate, 'n1') + '%</span>' : '' #" },
                 { field: "lossRate", title: "Tỷ lệ hao hụt (%)", width: "120px", template: "#= lossRate ? '<span class=\"number\">' + kendo.toString(lossRate, 'n1') + '%</span>' : '' #" },
+                {
+                    title: "Tổng ước tính nguyên liệu",
+                    width: "150px",
+                    template: function(dataItem) {
+                        var totalEstimatedMaterial = calculateTotalEstimatedMaterial(dataItem.quantity, dataItem.lossRate);
+                        return '<span class="number">' + kendo.toString(totalEstimatedMaterial, 'n2') + '</span>';
+                    }
+                },
                 { field: "additionalCost", title: "Chi phí thêm", width: "120px", template: "#= additionalCost ? '<span class=\"currency\">' + kendo.toString(additionalCost, 'n0') + ' VNĐ</span>' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "120px", template: "#= processingFee ? '<span class=\"currency\">' + kendo.toString(processingFee, 'n0') + ' VNĐ</span>' : '' #" },
                 {

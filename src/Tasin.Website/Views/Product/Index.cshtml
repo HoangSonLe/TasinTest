@@ -795,6 +795,7 @@
                 },
             },
             selectable: true,
+            scrollable: { virtual: false },
             pageable: {
                 pageSizes: [10, 20, 50],
             },
@@ -810,47 +811,47 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: "#: ++record #",
-                    width: 100
+                    width: "80px"
                 },
                 {
                     field: "code",
                     title: "Mã hàng hoá",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 200,
+                    width: "150px",
                 },
                 {
                     field: "name",
                     title: "Hàng hoá",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 200,
+                    width: "200px",
                 },
                 {
                     field: "name_EN",
                     title: "Hàng hoá tiếng anh",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 200,
+                    width: "180px",
                 },
                 {
                     field: "processingTypeName",
                     title: "Phân loại hàng hoá",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 150,
+                    width: "150px",
                 },
                 {
                     field: "note",
                     title: "Ghi chú",
-                    width: 200,
+                    width: "250px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    attributes: { style: "text-align:center;" },
+                    attributes: { style: "text-align:left;" },
                 },
                 {
                     field: "updatedDate",
                     title: "Ngày cập nhật",
-                    width: 200,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: '#: kendo.toString(kendo.parseDate(updatedDate || createdDate), "dd/MM/yyyy HH:mm:ss")#',
@@ -858,12 +859,12 @@
                 {
                     field: "updatedByName",
                     title: "Người cập nhật",
-                    width: 150,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
                 {
-                    field: "", title: "Thao tác", width: 150, attributes: { style: "text-align: center;" },
+                    field: "", title: "Thao tác", width: "120px", attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         return '<div class="action-buttons">' +
