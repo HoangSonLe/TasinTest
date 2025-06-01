@@ -419,6 +419,7 @@
                 },
             },
             selectable: true,
+            scrollable: { virtual: false },
             pageable: {
                 pageSizes: [10, 20, 50],
             },
@@ -434,47 +435,47 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: "#: ++record #",
-                    width: 100
+                    width: "80px"
                 },
                 {
                     field: "name",
                     title: "Họ tên",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 200,
+                    width: "200px",
                 },
                 {
                     field: "phone",
                     title: "Số điện thoại",
-                    width: 150,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
                 {
                     field: "userName",
                     title: "Tên đăng nhập",
-                    width: 250,
+                    width: "180px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
                 {
                     field: "email",
                     title: "Email",
-                    width: 200,
+                    width: "200px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
                 {
                     field: "address",
                     title: "Địa chỉ",
-                    width: 200,
+                    width: "250px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
-                    attributes: { style: "text-align:center;" },
+                    attributes: { style: "text-align:left;" },
                 },
                 {
                     field: "updatedDate",
                     title: "Ngày cập nhật",
-                    width: 200,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                     template: '#: kendo.toString(kendo.parseDate(updatedDate), "dd/MM/yyyy HH:mm:ss")#',
@@ -482,7 +483,7 @@
                 {
                     field: "updatedByName",
                     title: "Người cập nhật",
-                    width: 150,
+                    width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
                 },
@@ -491,7 +492,7 @@
                     title: "Vai trò",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:center;" },
-                    width: 120,
+                    width: "150px",
                     template: function (data) {
                         var html = "";
                         for (let i = 0; i < data.roleViewList.length; i++) {
@@ -503,7 +504,7 @@
                 },
 
                 {
-                    field: "", title: "Thao tác", width: 180, attributes: { style: "text-align: center;" },
+                    field: "", title: "Thao tác", width: "180px", attributes: { style: "text-align: center;" },
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         return '<div class="action-buttons">' +

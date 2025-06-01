@@ -16,7 +16,23 @@
 .k-grid .k-grid-content table,
 .k-grid .k-grid-header table {
     width: 100%;
-    table-layout: auto;
+    table-layout: fixed !important;
+}
+
+/* Fix column alignment issues with fixed widths */
+.k-grid .k-grid-header-wrap table,
+.k-grid .k-grid-content table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+/* Ensure header and content columns have same width */
+.k-grid .k-grid-header .k-header,
+.k-grid .k-grid-content td {
+    box-sizing: border-box !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Force full width for non-scrollable grids */
@@ -264,6 +280,26 @@
     overflow-x: auto !important;
 }
 
+/* Fix scrollable grid column alignment */
+.k-grid.k-grid-scrollable .k-grid-header-wrap,
+.k-grid.k-grid-scrollable .k-grid-content {
+    overflow-x: auto !important;
+}
+
+/* Ensure scrollable grid tables maintain fixed layout */
+.k-grid.k-grid-scrollable .k-grid-header table,
+.k-grid.k-grid-scrollable .k-grid-content table {
+    table-layout: fixed !important;
+    min-width: 100% !important;
+}
+
+/* Prevent column width changes on scroll */
+.k-grid.k-grid-scrollable .k-grid-header .k-header,
+.k-grid.k-grid-scrollable .k-grid-content td {
+    min-width: inherit !important;
+    max-width: inherit !important;
+}
+
 /* Grid Performance Optimizations */
 .k-grid .k-virtual-scrollable-wrap {
     overflow-x: auto;
@@ -372,6 +408,33 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     max-width: 200px !important;
+}
+
+/* Additional fixes for column alignment */
+.k-grid .k-grid-header-wrap {
+    border-right: 0 !important;
+}
+
+.k-grid .k-grid-content {
+    border-top: 0 !important;
+}
+
+/* Ensure consistent column borders */
+.k-grid .k-grid-header .k-header,
+.k-grid .k-grid-content td {
+    border-right: 1px solid #e9ecef !important;
+    border-left: 0 !important;
+}
+
+.k-grid .k-grid-header .k-header:last-child,
+.k-grid .k-grid-content td:last-child {
+    border-right: 0 !important;
+}
+
+/* Force consistent width calculation */
+.k-grid .k-grid-header colgroup col,
+.k-grid .k-grid-content colgroup col {
+    width: auto !important;
 }
 
 /* Grid Column Width Utilities */
