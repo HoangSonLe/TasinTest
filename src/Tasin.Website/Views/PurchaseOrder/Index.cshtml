@@ -213,8 +213,8 @@
                         <p><strong>Trạng thái:</strong> ${data.statusName || ''}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Tổng tiền chưa thuế:</strong> ${kendo.toString(data.totalPriceNoTax || 0, "n0")} VNĐ</p>
-                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n0")} VNĐ</p>
+                        <p><strong>Tổng tiền chưa thuế:</strong> ${kendo.toString(data.totalPriceNoTax || 0, "n2")} VNĐ</p>
+                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n2")} VNĐ</p>
                         <p><strong>Ngày tạo:</strong> ${data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : ''}</p>
                     </div>
                 </div>
@@ -253,12 +253,11 @@
                     width: "150px",
                     template: function(dataItem) {
                         var baseAmount = (dataItem.quantity || 0) * (dataItem.price || 0);
-                        var lossAmount = baseAmount * ((dataItem.lossRate || 0) / 100);
                         var totalProcessingFee = (dataItem.quantity || 0) * (dataItem.processingFee || 0);
-                        var totalBeforeTax = baseAmount + lossAmount + (dataItem.additionalCost || 0) + totalProcessingFee;
+                        var totalBeforeTax = baseAmount + (dataItem.additionalCost || 0) + totalProcessingFee; // BỎ lossAmount
                         var taxAmount = totalBeforeTax * ((dataItem.taxRate || 0) / 100);
                         var finalAmount = totalBeforeTax + taxAmount;
-                        return kendo.toString(finalAmount, 'n0') + ' VNĐ';
+                        return kendo.toString(finalAmount, 'n2') + ' VNĐ';
                     }
                 }
             ],
@@ -601,6 +600,9 @@
         var isEdit = data !== null && data !== undefined;
         var poItems = [];
 
+        // Store edit mode for later use
+        window.purchaseOrderEditMode = isEdit;
+
         // Initialize Customer Dropdown
         $("#po-customerId").kendoDropDownList({
             dataTextField: "text",
@@ -617,6 +619,20 @@
                     return "-- Chọn khách hàng --";
                 }
                 return dataItem.text;
+            },
+            change: function (e) {
+                var selectedCustomerId = this.value();
+                if (selectedCustomerId && selectedCustomerId !== "") {
+                    // Load customer details to determine tax rate
+                    loadCustomerDetails(selectedCustomerId);
+                    // Enable product selection when customer is selected
+                    enableProductSelection();
+                } else {
+                    // Clear stored customer data
+                    $("#po-customerId").removeData("customerType");
+                    // Disable product selection when no customer is selected
+                    disableProductSelection();
+                }
             },
             dataSource: {
                 transport: {
@@ -702,7 +718,7 @@
         $("#item-productId").kendoComboBox({
             dataTextField: "text",
             dataValueField: "value",
-            placeholder: "Tìm kiếm sản phẩm...",
+            placeholder: "Vui lòng chọn sản phẩm...",
             clearButton: false,
             suggest: true,
             filter: "contains", // Enable filtering to trigger server-side search
@@ -715,19 +731,21 @@
                 return dataItem.text;
             },
             change: function (e) {
+                // Check if customer is selected first
+                var customerId = $("#po-customerId").data("kendoDropDownList").value();
+                if (!customerId || customerId === "") {
+                    showErrorMessages(["Vui lòng chọn khách hàng trước khi chọn sản phẩm"]);
+                    this.value("");
+                    return;
+                }
+
                 var selectedProduct = this.dataItem();
                 if (selectedProduct && selectedProduct.value) {
                     // Load product details
                     loadProductDetails(selectedProduct.value);
                 } else {
                     // Clear product details if no valid selection
-                    $("#item-unitName").val('').removeData("unitId");
-                    $("#item-additionalCost").val("0");
-                    $("#item-price").val('');
-                    $("#item-taxRate").val('');
-                    $("#item-lossRate").val('');
-                    $("#item-processingFee").val('');
-                    $("#item-totalAmount").val('');
+                    clearProductFields();
                 }
             },
             select: function (e) {
@@ -823,7 +841,7 @@
                 { field: "additionalCost", title: "Chi phí thêm", width: "110px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n0') + ' VNĐ' : '' #" },
                 { field: "taxRate", title: "Thuế (%)", width: "90px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
                 { field: "processingFee", title: "Phí gia công", width: "110px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
-                { field: "totalAmount", title: "Thành tiền", width: "130px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
+                { field: "totalAmount", title: "Thành tiền", width: "130px", template: "#= kendo.toString(totalAmount, 'n2') # VNĐ" },
                 { field: "note", title: "Ghi chú", width: "150px" },
                 {
                     title: "Thao tác",
@@ -849,12 +867,21 @@
             $("#window").data("kendoWindow").close();
         });
 
-        // Load data if editing
-        if (isEdit && data) {
-            // Delay to ensure dropdowns are initialized
+        // Initialize form state based on mode
+        if (isEdit) {
+            // Disable customer dropdown in edit mode
+            var customerDropdown = $("#po-customerId").data("kendoDropDownList");
+            if (customerDropdown) {
+                customerDropdown.enable(false);
+            }
+
+            // Load data if editing
             setTimeout(function () {
                 loadPurchaseOrderData(data);
             }, 200);
+        } else {
+            // Disable product selection initially for new orders
+            disableProductSelection();
         }
     }
 
@@ -1022,7 +1049,7 @@
                     width: "160px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
-                    template: "<span class='currency'>#: kendo.toString(totalPriceNoTax, 'n0') # VNĐ</span>",
+                    template: "<span class='currency'>#: kendo.toString(totalPriceNoTax, 'n2') # VNĐ</span>",
                 },
                 {
                     field: "totalPrice",
@@ -1030,7 +1057,7 @@
                     width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
-                    template: "<span class='currency'>#: kendo.toString(totalPrice, 'n0') # VNĐ</span>",
+                    template: "<span class='currency'>#: kendo.toString(totalPrice, 'n2') # VNĐ</span>",
                 },
                 {
                     field: "updatedDate",
@@ -1151,12 +1178,11 @@
                     width: "150px",
                     template: function(dataItem) {
                         var baseAmount = (dataItem.quantity || 0) * (dataItem.price || 0);
-                        var lossAmount = baseAmount * ((dataItem.lossRate || 0) / 100);
                         var totalProcessingFee = (dataItem.quantity || 0) * (dataItem.processingFee || 0);
-                        var totalBeforeTax = baseAmount + lossAmount + (dataItem.additionalCost || 0) + totalProcessingFee;
+                        var totalBeforeTax = baseAmount + (dataItem.additionalCost || 0) + totalProcessingFee; // BỎ lossAmount
                         var taxAmount = totalBeforeTax * ((dataItem.taxRate || 0) / 100);
                         var finalAmount = totalBeforeTax + taxAmount;
-                        return '<span class="currency">' + kendo.toString(finalAmount, 'n0') + ' VNĐ</span>';
+                        return '<span class="currency">' + kendo.toString(finalAmount, 'n2') + ' VNĐ</span>';
                     }
                 },
                 { field: "note", title: "Ghi chú", width: "200px" }
@@ -1287,6 +1313,123 @@
     }
 
     // Helper Functions for Purchase Order Form
+    function enableProductSelection() {
+        var productComboBox = $("#item-productId").data("kendoComboBox");
+        if (productComboBox) {
+            productComboBox.enable(true);
+            // Update placeholder text when enabled
+            productComboBox.setOptions({
+                placeholder: "Tìm kiếm sản phẩm..."
+            });
+        }
+        // Remove disabled styling and placeholder
+        $("#item-productId").removeClass("k-disabled");
+        $("#item-productId_wrapper").removeClass("k-disabled");
+    }
+
+    function disableProductSelection() {
+        var productComboBox = $("#item-productId").data("kendoComboBox");
+        if (productComboBox) {
+            productComboBox.enable(false);
+            productComboBox.value("");
+        }
+        // Clear product-related fields when disabled
+        clearProductFields();
+        // Add disabled styling
+        $("#item-productId").addClass("k-disabled");
+        $("#item-productId_wrapper").addClass("k-disabled");
+    }
+
+    function clearProductFields() {
+        $("#item-unitName").val("").removeData("unitId");
+        $("#item-price").val("");
+        $("#item-taxRate").val("");
+        $("#item-lossRate").val("");
+        $("#item-processingFee").val("");
+        $("#item-additionalCost").val("0");
+        $("#item-totalAmount").val("");
+        $("#item-quantity").val("");
+        $("#item-note").val("");
+    }
+
+    function loadCustomerDetails(customerId) {
+        ajax("GET", "/Customer/GetCustomerById/" + customerId, {}, function (response) {
+            if (response.isSuccess && response.data) {
+                var customer = response.data;
+                // Store customer type for tax rate calculation
+                $("#po-customerId").data("customerType", customer.type);
+
+                // Update tax rate for currently selected product in form
+                var productComboBox = $("#item-productId").data("kendoComboBox");
+                if (productComboBox && productComboBox.value()) {
+                    var selectedProductId = productComboBox.value();
+                    // Reload product details to recalculate tax rate with new customer type
+                    loadProductDetails(selectedProductId);
+                }
+
+                // Update tax rates for all products in the grid
+                updateAllGridItemsTaxRates();
+            }
+            // No notification - silent operation
+        }, function (error) {
+            // Silent error handling - no notification
+        }, false);
+    }
+
+    function updateAllGridItemsTaxRates() {
+        var grid = $("#itemsGrid").data("kendoGrid");
+        if (!grid) return;
+
+        var items = grid.dataSource.data();
+        var hasUpdates = false;
+
+        // Process each item in the grid
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var productId = item.productId;
+
+            // Get product details to calculate new tax rate
+            (function(gridItem) {
+                ajax("GET", "/Product/GetProductById/" + productId, {}, function (response) {
+                    if (response.isSuccess && response.data) {
+                        var product = response.data;
+                        var newTaxRate = getTaxRateBasedOnCustomer(product);
+
+                        // Update the grid item if tax rate changed
+                        if (gridItem.taxRate !== newTaxRate) {
+                            gridItem.set("taxRate", newTaxRate);
+                            gridItem.set("totalAmount", calculateItemTotal(gridItem));
+                            hasUpdates = true;
+                        }
+                    }
+                }, null, false);
+            })(item);
+        }
+
+        // Update totals after all items are processed
+        setTimeout(function() {
+            updatePurchaseOrderTotals();
+        }, 500);
+    }
+
+    function getTaxRateBasedOnCustomer(product) {
+        var customerType = $("#po-customerId").data("customerType");
+
+        if (customerType === undefined || customerType === null) {
+            return 0; // No customer selected, default to 0
+        }
+
+        // Handle both string and numeric customer types
+        // ECustomerType.Company = 0 or "Company", ECustomerType.Individual = 1 or "Individual"
+        if (customerType === 0 || customerType === "Company" || customerType.toString().toLowerCase() === "company") {
+            return product.companyTaxRate || 0;
+        } else if (customerType === 1 || customerType === "Individual" || customerType.toString().toLowerCase() === "individual") {
+            return product.consumerTaxRate || 0;
+        }
+
+        return 0; // Default fallback
+    }
+
     function loadProductDetails(productId) {
         ajax("GET", "/Product/GetProductById/" + productId, {}, function (response) {
             if (response.isSuccess && response.data) {
@@ -1294,7 +1437,10 @@
                 $("#item-unitName").val(product.unitName || '');
                 $("#item-unitName").data("unitId", product.unit_ID || null); // Store unit_ID for later use
                 $("#item-price").val(product.defaultPrice || 0); // Đơn giá = defaultPrice
-                $("#item-taxRate").val(0); // Default tax rate since removed from Product
+
+                // Set tax rate based on customer type and product tax rates
+                var taxRate = getTaxRateBasedOnCustomer(product);
+                $("#item-taxRate").val(taxRate);
 
                 // Auto-fill the requested fields
                 $("#item-lossRate").val(product.lossRate || 0);
@@ -1317,7 +1463,6 @@
     function calculateTotalAmount() {
         var quantity = parseFloat($("#item-quantity").val()) || 0;
         var price = parseFloat($("#item-price").val()) || 0;
-        var lossRate = parseFloat($("#item-lossRate").val()) || 0;
         var additionalCost = parseFloat($("#item-additionalCost").val()) || 0;
         var processingFee = parseFloat($("#item-processingFee").val()) || 0;
         var taxRate = parseFloat($("#item-taxRate").val()) || 0;
@@ -1325,19 +1470,16 @@
         // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
         var baseAmount = quantity * price;
 
-        // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
-        var lossAmount = baseAmount * (lossRate / 100);
-
-        // Bước 3: Tính phí gia công (Số lượng × Phí gia công đơn vị)
+        // Bước 2: Tính phí gia công (Số lượng × Phí gia công đơn vị)
         var totalProcessingFee = quantity * processingFee;
 
-        // Bước 4: Tính tổng trước thuế (tiền cơ bản + hao hụt + chi phí thêm + phí gia công)
-        var totalBeforeTax = baseAmount + lossAmount + additionalCost + totalProcessingFee;
+        // Bước 3: Tính tổng trước thuế (tiền cơ bản + chi phí thêm + phí gia công) - BỎ lossAmount
+        var totalBeforeTax = baseAmount + additionalCost + totalProcessingFee;
 
-        // Bước 5: Tính tiền thuế (% thuế × tổng trước thuế)
+        // Bước 4: Tính tiền thuế (% thuế × tổng trước thuế)
         var taxAmount = totalBeforeTax * (taxRate / 100);
 
-        // Bước 6: Tổng cuối cùng (tổng trước thuế + thuế)
+        // Bước 5: Tổng cuối cùng (tổng trước thuế + thuế)
         var finalAmount = totalBeforeTax + taxAmount;
 
         $("#item-totalAmount").val(finalAmount.toFixed(2));
@@ -1434,16 +1576,13 @@
             // Bước 1: Tính tiền cơ bản (Số lượng × Đơn giá)
             var baseAmount = item.quantity * item.price;
 
-            // Bước 2: Tính tiền hao hụt (% hao hụt × tiền cơ bản)
-            var lossAmount = baseAmount * (item.lossRate / 100);
-
-            // Bước 3: Tính phí gia công (Số lượng × Phí gia công đơn vị)
+            // Bước 2: Tính phí gia công (Số lượng × Phí gia công đơn vị)
             var totalProcessingFee = item.quantity * (item.processingFee || 0);
 
-            // Bước 4: Tính tổng trước thuế (tiền cơ bản + hao hụt + chi phí thêm + phí gia công)
-            var totalBeforeTax = baseAmount + lossAmount + (item.additionalCost || 0) + totalProcessingFee;
+            // Bước 3: Tính tổng trước thuế (tiền cơ bản + chi phí thêm + phí gia công) - BỎ lossAmount
+            var totalBeforeTax = baseAmount + (item.additionalCost || 0) + totalProcessingFee;
 
-            // Bước 5: Tính tiền thuế (% thuế × tổng trước thuế)
+            // Bước 4: Tính tiền thuế (% thuế × tổng trước thuế)
             var taxAmount = totalBeforeTax * ((item.taxRate || 0) / 100);
 
             // Cộng dồn vào tổng
@@ -1451,8 +1590,8 @@
             totalPrice += totalBeforeTax + taxAmount;
         }
 
-        $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n0") + " VNĐ");
-        $("#po-totalPrice").val(kendo.toString(totalPrice, "n0") + " VNĐ");
+        $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n2") + " VNĐ");
+        $("#po-totalPrice").val(kendo.toString(totalPrice, "n2") + " VNĐ");
     }
 
     function generateTempId() {
@@ -1461,9 +1600,8 @@
 
     function calculateItemTotal(item) {
         var baseAmount = (item.quantity || 0) * (item.price || 0);
-        var lossAmount = baseAmount * ((item.lossRate || 0) / 100);
         var totalProcessingFee = (item.quantity || 0) * (item.processingFee || 0);
-        var totalBeforeTax = baseAmount + lossAmount + (item.additionalCost || 0) + totalProcessingFee;
+        var totalBeforeTax = baseAmount + (item.additionalCost || 0) + totalProcessingFee; // BỎ lossAmount
         var taxAmount = totalBeforeTax * ((item.taxRate || 0) / 100);
         return totalBeforeTax + taxAmount;
     }
@@ -1475,6 +1613,10 @@
                 var customerDropdown = $("#po-customerId").data("kendoDropDownList");
                 if (customerDropdown) {
                     customerDropdown.value(data.customer_ID);
+                    // Load customer details for tax rate calculation
+                    loadCustomerDetails(data.customer_ID);
+                    // Enable product selection since customer is loaded
+                    enableProductSelection();
                 }
             }
 
@@ -1521,10 +1663,10 @@
 
             // Load totals
             if (data.totalPriceNoTax !== undefined) {
-                $("#po-totalPriceNoTax").val(kendo.toString(data.totalPriceNoTax, "n0") + " VNĐ");
+                $("#po-totalPriceNoTax").val(kendo.toString(data.totalPriceNoTax, "n2") + " VNĐ");
             }
             if (data.totalPrice !== undefined) {
-                $("#po-totalPrice").val(kendo.toString(data.totalPrice, "n0") + " VNĐ");
+                $("#po-totalPrice").val(kendo.toString(data.totalPrice, "n2") + " VNĐ");
             }
 
         } catch (error) {
@@ -1782,6 +1924,38 @@
         font-weight: 600;
         border-bottom: 2px solid #096b73;
         padding-bottom: 8px;
+    }
+
+    /* Disabled product selection styling */
+    .k-combobox.k-disabled {
+        background-color: #f8f9fa !important;
+        border-color: #e9ecef !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .k-combobox.k-disabled .k-dropdown-wrap {
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+        cursor: not-allowed;
+    }
+
+    .k-combobox.k-disabled .k-select {
+        background-color: #f8f9fa !important;
+        border-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+
+    /* Add visual indicator for disabled customer dropdown in edit mode */
+    .k-dropdown.k-disabled::before {
+        content: "🔒 Không thể thay đổi trong chế độ chỉnh sửa";
+        position: absolute;
+        top: -20px;
+        left: 0;
+        font-size: 11px;
+        color: #6c757d;
+        font-style: italic;
+        white-space: nowrap;
     }
 
     /* Enhanced styling for item input section */

@@ -438,9 +438,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 if (item.Price.HasValue)
                 {
                     decimal baseAmount = item.Quantity * item.Price.Value;
-                    decimal lossAmount = baseAmount * ((item.LossRate ?? 0) / 100);
+                    // Removed lossAmount from calculation as per requirement
                     decimal totalProcessingFee = item.Quantity * (item.ProcessingFee ?? 0);
-                    decimal totalBeforeTax = baseAmount + lossAmount + (item.AdditionalCost ?? 0) + totalProcessingFee;
+                    decimal totalBeforeTax = baseAmount + (item.AdditionalCost ?? 0) + totalProcessingFee;
                     decimal taxAmount = totalBeforeTax * ((item.TaxRate ?? 0) / 100);
 
                     totalPriceNoTax += totalBeforeTax;
