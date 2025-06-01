@@ -161,7 +161,7 @@
                 //    var sheet = e.workbook.sheets[0];
                 //    for (var rowIndex = 1; rowIndex < sheet.rows.length; rowIndex++) {
                 //        var row = sheet.rows[rowIndex];
-                //        debugger
+                //        
                 //        for (var cellIndex = 2; cellIndex < row.cells.length; cellIndex++) {
                 //            if ((row.type == "group-footer" || row.type == "footer") && cellIndex >= 3) {
                 //                row.cells[cellIndex].value = $(row.cells[cellIndex].value).text();

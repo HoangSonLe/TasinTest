@@ -198,65 +198,93 @@
                         }
                     },
                 },
+
                 {
-                    field: "parentID",
-                    title: "Nguyên liệu chính",
-                    label: "Nguyên liệu chính:",
+                    field: "specialProductTaxRate_ID",
+                    title: "Loại mặt hàng",
+                    label: "Loại mặt hàng:",
                     colSpan: 1,
                     editor: "DropDownList",
                     editorOptions: {
-                        optionLabel: "Chọn nguyên liệu chính",
+                        optionLabel: "Chọn loại mặt hàng",
                         dataTextField: "name",
                         dataValueField: "id",
-                        valuePrimitive: true, // 🔑 Bắt buộc để giá trị là ID thay vì object
+                        valuePrimitive: true,
                         filter: filterCustom,
                         dataSource: {
                             transport: {
                                 read: {
-                                    url: "/Product/GetProductList",
-                                    datatype: "json",
+                                    url: "/SpecialProductTaxRate/GetSpecialProductTaxRateList",
+                                    dataType: "json",
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
                                         return {
-                                            pageSize: 100,
-                                            pageNumber: 1,
-                                            includeDiscontinued: false,
-                                            excludeProductId: formData.id > 0 ? formData.id : null
-                                        };
+                                            pageSize: data.pageSize,
+                                            pageNumber: data.page,
+                                        }
                                     }
                                 },
                             },
                             serverPaging: true,
                             serverFiltering: true,
-                            pageSize: 100,
+                            page: 1,
+                            pageSize: 9999,
                             schema: {
-                                type: 'json',
-                                parse: function (response) {
-                                    if (response.isSuccess === false) {
-                                        showErrorMessages(response.errorMessageList);
-                                        return { data: [], total: 0 };
-                                    }
-                                    return response.data;
-                                },
+                                data: "data.data",
+                                total: "data.total",
                                 model: {
                                     id: "id",
                                     fields: {
-                                        name: { type: "string" },
-                                        code: { type: "string" }
+                                        id: { type: "number" },
+                                        name: { type: "string" }
                                     }
-                                },
-                                data: "data",
-                                total: "total"
+                                }
                             },
                         },
                         change: function (e) {
-                            formData.parentID = this.value(); // đơn giản chỉ cần ID
+                            formData.specialProductTaxRate_ID = this.value();
                         }
-                    }
+                    },
                 },
 
                 // ===== NHÓM 2: PHÂN LOẠI VÀ THUẾ =====
+
+                {
+                    field: "companyTaxRate",
+                    title: "Mức thuế doanh nghiệp",
+                    label: "Mức thuế doanh nghiệp:",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+                {
+                    field: "consumerTaxRate",
+                    title: "Mức thuế người tiêu dùng",
+                    label: "Mức thuế người tiêu dùng:",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+
+                // ===== NHÓM 3: GIÁ VÀ CHI PHÍ =====
+                {
+                    field: "defaultPrice",
+                    title: "Giá mặc định",
+                    label: "Giá mặc định:",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
                 {
                     field: "processingType",
                     title: "Phân loại hàng hoá",
@@ -347,82 +375,68 @@
                         }
                     },
                 },
+
                 {
-                    field: "companyTaxRate",
-                    title: "Mức thuế doanh nghiệp",
-                    label: "Mức thuế doanh nghiệp:",
-                    colSpan: 1,
-                    attributes: {
-                        type: "number",
-                        step: "0.01",
-                        min: "0"
-                    }
-                },
-                {
-                    field: "consumerTaxRate",
-                    title: "Mức thuế người tiêu dùng",
-                    label: "Mức thuế người tiêu dùng:",
-                    colSpan: 1,
-                    attributes: {
-                        type: "number",
-                        step: "0.01",
-                        min: "0"
-                    }
-                },
-                {
-                    field: "specialProductTaxRate_ID",
-                    title: "Loại mặt hàng",
-                    label: "Loại mặt hàng:",
+                    field: "parentID",
+                    title: "Nguyên liệu chính",
+                    label: "Nguyên liệu chính:",
                     colSpan: 1,
                     editor: "DropDownList",
                     editorOptions: {
-                        optionLabel: "Chọn loại mặt hàng",
+                        optionLabel: "Chọn nguyên liệu chính",
                         dataTextField: "name",
                         dataValueField: "id",
-                        valuePrimitive: true,
+                        valuePrimitive: true, // 🔑 Bắt buộc để giá trị là ID thay vì object
                         filter: filterCustom,
                         dataSource: {
                             transport: {
                                 read: {
-                                    url: "/SpecialProductTaxRate/GetSpecialProductTaxRateList",
-                                    dataType: "json",
+                                    url: "/Product/GetProductList",
+                                    datatype: "json",
                                 },
                                 parameterMap: function (data, type) {
                                     if (type == "read") {
                                         return {
-                                            pageSize: data.pageSize,
-                                            pageNumber: data.page,
-                                        }
+                                            pageSize: 100,
+                                            pageNumber: 1,
+                                            includeDiscontinued: false,
+                                            excludeProductId: formData.id > 0 ? formData.id : null
+                                        };
                                     }
                                 },
                             },
                             serverPaging: true,
                             serverFiltering: true,
-                            page: 1,
-                            pageSize: 9999,
+                            pageSize: 100,
                             schema: {
-                                data: "data.data",
-                                total: "data.total",
+                                type: 'json',
+                                parse: function (response) {
+                                    if (response.isSuccess === false) {
+                                        showErrorMessages(response.errorMessageList);
+                                        return { data: [], total: 0 };
+                                    }
+                                    return response.data;
+                                },
                                 model: {
                                     id: "id",
                                     fields: {
-                                        id: { type: "number" },
-                                        name: { type: "string" }
+                                        name: { type: "string" },
+                                        code: { type: "string" }
                                     }
-                                }
+                                },
+                                data: "data",
+                                total: "total"
                             },
                         },
                         change: function (e) {
-                            formData.specialProductTaxRate_ID = this.value();
+                            formData.parentID = this.value(); // đơn giản chỉ cần ID
                         }
-                    },
+                    }
                 },
-
-                // ===== NHÓM 3: GIÁ VÀ CHI PHÍ =====
                 {
-                    field: "defaultPrice",
-                    title: "Giá mặc định",
-                    label: "Giá mặc định:",
+                    field: "lossRate",
+                    title: "Hao hụt (%)",
+                    label: "Hao hụt (%):",
                     colSpan: 1,
                     attributes: {
                         type: "number",
@@ -430,6 +444,18 @@
                         min: "0"
                     }
                 },
+                {
+                    field: "processingFee",
+                    title: "Mức phí gia công",
+                    label: "Mức phí gia công:",
+                    colSpan: 1,
+                    attributes: {
+                        type: "number",
+                        step: "0.01",
+                        min: "0"
+                    }
+                },
+
                 {
                     field: "additionalCost",
                     title: "Chi phí thêm",
@@ -444,28 +470,6 @@
                         validationMessage: "Vui lòng nhập đơn giá",
                         required: true
                     },
-                },
-                {
-                    field: "processingFee",
-                    title: "Mức phí gia công",
-                    label: "Mức phí gia công:",
-                    colSpan: 1,
-                    attributes: {
-                        type: "number",
-                        step: "0.01",
-                        min: "0"
-                    }
-                },
-                {
-                    field: "lossRate",
-                    title: "Hao hụt (%)",
-                    label: "Hao hụt (%):",
-                    colSpan: 1,
-                    attributes: {
-                        type: "number",
-                        step: "0.01",
-                        min: "0"
-                    }
                 },
 
                 // ===== NHÓM 4: THUỘC TÍNH SẢN PHẨM =====
@@ -1160,7 +1164,6 @@
         #formCreateAndEdit .k-form-field {
             grid-column: 1 !important;
         }
-
         /* Adjust window width for mobile */
         .k-window {
             width: 95% !important;
@@ -1189,9 +1192,9 @@
         margin-bottom: 15px;
     }
 
-    .result-summary p {
-        margin: 5px 0;
-    }
+        .result-summary p {
+            margin: 5px 0;
+        }
 
     .error-details {
         margin-top: 15px;

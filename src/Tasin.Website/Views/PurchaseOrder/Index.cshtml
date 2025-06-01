@@ -591,6 +591,7 @@
             dataTextField: "text",
             dataValueField: "value",
             optionLabel: "-- Chọn khách hàng --",
+            filter: filterCustom,
             template: function (dataItem) {
                 if (!dataItem || !dataItem.text) {
                     return "N/A";
