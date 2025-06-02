@@ -553,6 +553,18 @@
         // Initialize the editable grid
         var gridData = data.productVendorMappings || [];
 
+        // Debug: Log the data structure to see actual property names
+        console.log("Grid data:", gridData);
+        if (gridData.length > 0) {
+            console.log("First item availableVendors:", gridData[0].availableVendors);
+            if (gridData[0].availableVendors && gridData[0].availableVendors.length > 0) {
+                console.log("First vendor structure:", gridData[0].availableVendors[0]);
+                console.log("Vendor keys:", Object.keys(gridData[0].availableVendors[0]));
+            }
+        }
+
+
+
         $("#editableProductVendorGrid").kendoGrid({
             dataSource: {
                 data: gridData,
@@ -599,9 +611,11 @@
                         if (dataItem.availableVendors && Array.isArray(dataItem.availableVendors) && dataItem.availableVendors.length > 0) {
                             dataItem.availableVendors.forEach(function (vendor) {
                                 if (vendor && vendor.id) {
-                                    var selected = vendor.id === dataItem.vendor_ID ? 'selected' : '';
+                                    var selected = vendor.id == dataItem.vendor_ID ? 'selected' : '';
                                     var displayText = vendor.text || vendor.name || 'Vendor ' + vendor.id;
-                                    options += '<option value="' + vendor.id + '" ' + selected + '>' + displayText + '</option>';
+                                    var vendorPrice = vendor.price || 0;
+                                    var priceText = vendorPrice > 0 ? ' - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ' : ' - Chưa có giá';
+                                    options += '<option value="' + vendor.id + '" ' + selected + '>' + displayText + priceText + '</option>';
                                 }
                             });
                         }
@@ -630,11 +644,31 @@
                     }
 
                     if (currentData && currentData.availableVendors && currentData.availableVendors.length > 0) {
+
+
                         $dropdown.kendoDropDownList({
                             dataTextField: "text",
                             dataValueField: "id",
                             dataSource: currentData.availableVendors,
                             value: currentData.vendor_ID,
+                            template: function(dataItem) {
+                                if (!dataItem) return "";
+                                var displayText = dataItem.text || dataItem.name || 'Vendor ' + dataItem.id;
+                                var vendorPrice = dataItem.price || 0;
+                                var priceText = vendorPrice > 0
+                                    ? '<span style="color: #28a745; font-weight: bold;"> - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ</span>'
+                                    : '<span style="color: #dc3545; font-style: italic;"> - Chưa có giá</span>';
+                                return displayText + priceText;
+                            },
+                            valueTemplate: function(dataItem) {
+                                if (!dataItem) return "";
+                                var displayText = dataItem.text || dataItem.name || 'Vendor ' + dataItem.id;
+                                var vendorPrice = dataItem.price || 0;
+                                var priceText = vendorPrice > 0
+                                    ? ' - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ'
+                                    : ' - Chưa có giá';
+                                return displayText + priceText;
+                            },
                             change: function (e) {
                                 updateVendorMapping(productId, e.sender.value());
                             }
@@ -650,18 +684,58 @@
 
 
         function updateVendorMapping(productId, newVendorId) {
+            console.log("updateVendorMapping called:", productId, newVendorId);
+
             // Find and update the mapping
             var mapping = data.productVendorMappings.find(m => m.product_ID === productId);
-            if (mapping) {
-                mapping.vendor_ID = newVendorId;
-                var newVendor = mapping.availableVendors.find(v => v.id === newVendorId);
-                if (newVendor) {
-                    mapping.vendorName = newVendor.name;
-                }
+            console.log("Found mapping:", mapping);
 
-                // Update total price display
-                var newTotalPrice = data.productVendorMappings.reduce((sum, m) => sum + (m.totalQuantity * m.price), 0);
-                $("#totalPriceDisplay").text(kendo.toString(newTotalPrice, "n0") + " VNĐ");
+            if (mapping) {
+                var oldPrice = mapping.price || 0; // Store old price for comparison
+                console.log("Old price:", oldPrice);
+
+                mapping.vendor_ID = newVendorId;
+                var newVendor = mapping.availableVendors.find(v => v.id == newVendorId);
+                console.log("Found new vendor:", newVendor);
+
+                if (newVendor) {
+                    console.log("New vendor keys:", Object.keys(newVendor));
+                    mapping.vendorName = newVendor.name;
+
+                    // Get new price from vendor data (no API call needed!)
+                    var newPrice = newVendor.price || 0;
+                    console.log("New price:", newPrice);
+
+                    mapping.price = newPrice;
+
+                    // Update the grid dataSource and refresh to show new price
+                    var grid = $("#editableProductVendorGrid").data("kendoGrid");
+                    if (grid) {
+                        // Update the dataSource with new data
+                        grid.dataSource.data(data.productVendorMappings);
+                        grid.refresh();
+                    }
+
+                    // Update total price display
+                    var newTotalPrice = data.productVendorMappings.reduce((sum, m) => sum + (m.totalQuantity * (m.price || 0)), 0);
+                    $("#totalPriceDisplay").text(kendo.toString(newTotalPrice, "n0") + " VNĐ");
+
+                    // Show notification about price change
+                    var productName = mapping.productName || "Sản phẩm";
+                    var vendorName = newVendor.name || "nhà cung cấp";
+                    var priceChangeMessage = "";
+
+                    if (newPrice === 0) {
+                        priceChangeMessage = productName + " - " + vendorName + ": Chưa có giá được thiết lập";
+                        showErrorMessages([priceChangeMessage]);
+                    } else if (oldPrice !== newPrice) {
+                        priceChangeMessage = productName + " - " + vendorName + ": Giá đã thay đổi từ " + kendo.toString(oldPrice, "n0") + " VNĐ → " + kendo.toString(newPrice, "n0") + " VNĐ";
+                        showSuccessMessages([priceChangeMessage]);
+                    } else {
+                        priceChangeMessage = productName + " - " + vendorName + ": Giá không thay đổi (" + kendo.toString(newPrice, "n0") + " VNĐ)";
+                        showSuccessMessages([priceChangeMessage]);
+                    }
+                }
             }
         }
 

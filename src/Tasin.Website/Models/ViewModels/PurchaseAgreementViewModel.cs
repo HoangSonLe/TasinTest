@@ -189,6 +189,11 @@ namespace Tasin.Website.Models.ViewModels
         public string? Code { get; set; }
 
         /// <summary>
+        /// Unit price for this vendor-product combination
+        /// </summary>
+        public decimal Price { get; set; }
+
+        /// <summary>
         /// Display text for dropdown (Name + Code)
         /// </summary>
         public string Text => !string.IsNullOrEmpty(Code) ? $"{Name} ({Code})" : Name ?? "";

@@ -595,17 +595,80 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Get product-vendor relationships for all products with highest priority vendors
+                // Get product information for transformation
                 var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
-                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
+                var products = await _productRepository.ReadOnlyRespository.GetAsync(
+                    filter: p => productIds.Contains(p.ID)
+                );
+                var productLookup = products.ToDictionary(p => p.ID, p => p);
+
+                // Get parent products for child products that have ParentID
+                var childProducts = products.Where(p => p.ParentID.HasValue).ToList();
+                var parentProductIds = childProducts.Select(p => p.ParentID!.Value).Distinct().ToList();
+
+                var parentProducts = new List<Product>();
+                if (parentProductIds.Any())
+                {
+                    parentProducts = (await _productRepository.ReadOnlyRespository.GetAsync(
+                        filter: p => parentProductIds.Contains(p.ID)
+                    )).ToList();
+
+                    // Add parent products to lookup if not already present
+                    foreach (var parentProduct in parentProducts)
+                    {
+                        if (!productLookup.ContainsKey(parentProduct.ID))
+                        {
+                            productLookup[parentProduct.ID] = parentProduct;
+                        }
+                    }
+                }
+
+                // Transform child products to parent products and calculate quantities with loss rate
+                var transformedOrderItems = allOrderItems.Select(item =>
+                {
+                    var product = productLookup.TryGetValue(item.Product_ID, out var prod) ? prod : null;
+
+                    // If product has a parent, use parent product instead
+                    var targetProductId = product?.ParentID ?? item.Product_ID;
+
+                    // Calculate quantity with loss rate if converting from child to parent
+                    var adjustedQuantity = item.Quantity;
+                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    {
+                        // Apply loss rate: (100 + LossRate) * Quantity / 100
+                        adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
+                    }
+
+                    return new
+                    {
+                        OriginalProductId = item.Product_ID,
+                        TargetProductId = targetProductId,
+                        Quantity = adjustedQuantity,
+                        Price = item.Price,
+                        Unit_ID = item.Unit_ID,
+                        TaxRate = item.TaxRate,
+                        ProcessingFee = item.ProcessingFee,
+                        POItemId = item.ID
+                    };
+                }).ToList();
+
+                // Get all target product IDs for vendor relationships
+                var allTargetProductIds = transformedOrderItems.Select(i => i.TargetProductId).Distinct().ToList();
+
+                // Get product-vendor relationships for all target products with highest priority vendors
+                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(allTargetProductIds);
 
                 // Create lookup dictionary for better performance - each product maps to its highest priority vendor
                 var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
-                // Group items by vendor using lookup
-                var vendorGroups = allOrderItems
-                    .Where(item => productVendorLookup.ContainsKey(item.Product_ID))
-                    .GroupBy(item => productVendorLookup[item.Product_ID])
+                // Create product-vendor price lookup for getting vendor prices
+                var productVendorPriceLookup = productVendors
+                    .ToDictionary(pv => $"{pv.Product_ID}_{pv.Vendor_ID}", pv => pv.UnitPrice ?? 0);
+
+                // Group transformed items by vendor using lookup
+                var vendorGroups = transformedOrderItems
+                    .Where(item => productVendorLookup.ContainsKey(item.TargetProductId))
+                    .GroupBy(item => productVendorLookup[item.TargetProductId])
                     .ToDictionary(g => g.Key, g => g.ToList());
 
                 if (!vendorGroups.Any())
@@ -621,17 +684,13 @@ namespace Tasin.Website.DAL.Services.WebServices
                 );
                 var vendorLookup = vendors.ToDictionary(v => v.ID, v => v);
 
-                // Get all product and unit information for display
-                var unitIds = allOrderItems.Where(item => item.Unit_ID.HasValue).Select(item => item.Unit_ID.Value).Distinct().ToList();
+                // Get all unit information for display
+                var unitIds = transformedOrderItems.Where(item => item.Unit_ID.HasValue).Select(item => item.Unit_ID.Value).Distinct().ToList();
 
-                var products = await _productRepository.ReadOnlyRespository.GetAsync(
-                    filter: p => productIds.Contains(p.ID)
-                );
                 var units = await _unitRepository.ReadOnlyRespository.GetAsync(
                     filter: u => unitIds.Contains(u.ID)
                 );
 
-                var productLookup = products.ToDictionary(p => p.ID, p => p);
                 var unitLookup = units.ToDictionary(u => u.ID, u => u);
 
                 var previewChildPAs = new List<PurchaseAgreementViewModel>();
@@ -644,21 +703,34 @@ namespace Tasin.Website.DAL.Services.WebServices
                     if (!vendorLookup.TryGetValue(vendorId, out var vendor))
                         continue;
 
-                    // Calculate total price for this vendor
-                    var totalPrice = vendorItems.Sum(item => (item.Quantity * item.Price) +
-                        (item.Quantity * item.Price * (item.TaxRate ?? 0) / 100) +
-                        (item.ProcessingFee ?? 0));
+                    // Group by target product and sum quantities
+                    var productGroups = vendorItems.GroupBy(item => item.TargetProductId)
+                        .Select(g => new
+                        {
+                            ProductId = g.Key,
+                            TotalQuantity = g.Sum(i => i.Quantity),
+                            UnitId = g.First().Unit_ID
+                        }).ToList();
 
-                    // Create preview PA items
-                    var paItems = vendorItems.Select(item => new PurchaseAgreementItemViewModel
+                    // Create preview PA items using target products with vendor prices
+                    var paItems = productGroups.Select(productGroup =>
                     {
-                        Product_ID = item.Product_ID,
-                        ProductName = productLookup.TryGetValue(item.Product_ID, out var product) ? product.Name : "",
-                        Quantity = item.Quantity,
-                        Unit_ID = item.Unit_ID,
-                        UnitName = item.Unit_ID.HasValue && unitLookup.TryGetValue(item.Unit_ID.Value, out var unit) ? unit.Name : "",
-                        Price = item.Price ?? 0
+                        // Get vendor price from product-vendor relationship
+                        var vendorPrice = productVendorPriceLookup.TryGetValue($"{productGroup.ProductId}_{vendorId}", out var price) ? price : 0;
+
+                        return new PurchaseAgreementItemViewModel
+                        {
+                            Product_ID = productGroup.ProductId,
+                            ProductName = productLookup.TryGetValue(productGroup.ProductId, out var product) ? product.Name : "",
+                            Quantity = productGroup.TotalQuantity,
+                            Unit_ID = productGroup.UnitId,
+                            UnitName = productGroup.UnitId.HasValue && unitLookup.TryGetValue(productGroup.UnitId.Value, out var unit) ? unit.Name : "",
+                            Price = vendorPrice // Use vendor price
+                        };
                     }).ToList();
+
+                    // Calculate total price using vendor prices
+                    var totalPrice = paItems.Sum(item => item.Quantity * item.Price);
 
                     var previewPA = new PurchaseAgreementViewModel
                     {
@@ -723,17 +795,78 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Get product-vendor relationships for all products with highest priority vendors
+                // Get product information for transformation
                 var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
-                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
+                var products = await _productRepository.ReadOnlyRespository.GetAsync(
+                    filter: p => productIds.Contains(p.ID)
+                );
+                var productLookup = products.ToDictionary(p => p.ID, p => p);
+
+                // Get parent products for child products that have ParentID
+                var childProducts = products.Where(p => p.ParentID.HasValue).ToList();
+                var parentProductIds = childProducts.Select(p => p.ParentID!.Value).Distinct().ToList();
+
+                var parentProducts = new List<Product>();
+                if (parentProductIds.Any())
+                {
+                    parentProducts = (await _productRepository.ReadOnlyRespository.GetAsync(
+                        filter: p => parentProductIds.Contains(p.ID)
+                    )).ToList();
+
+                    // Add parent products to lookup if not already present
+                    foreach (var parentProduct in parentProducts)
+                    {
+                        if (!productLookup.ContainsKey(parentProduct.ID))
+                        {
+                            productLookup[parentProduct.ID] = parentProduct;
+                        }
+                    }
+                }
+
+                // Transform child products to parent products and calculate quantities with loss rate
+                var transformedOrderItems = allOrderItems.Select(item =>
+                {
+                    var product = productLookup.TryGetValue(item.Product_ID, out var prod) ? prod : null;
+
+                    // If product has a parent, use parent product instead
+                    var targetProductId = product?.ParentID ?? item.Product_ID;
+
+                    // Calculate quantity with loss rate if converting from child to parent
+                    var adjustedQuantity = item.Quantity;
+                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    {
+                        // Apply loss rate: (100 + LossRate) * Quantity / 100
+                        adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
+                    }
+
+                    return new
+                    {
+                        OriginalProductId = item.Product_ID,
+                        TargetProductId = targetProductId,
+                        Quantity = adjustedQuantity,
+                        Price = item.Price,
+                        Unit_ID = item.Unit_ID,
+                        POItemId = item.ID
+                    };
+                }).ToList();
+
+                // Get all target product IDs for vendor relationships
+                var allTargetProductIds = transformedOrderItems.Select(i => i.TargetProductId).Distinct().ToList();
+
+                // Get product-vendor relationships for all target products with highest priority vendors
+                var productVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(allTargetProductIds);
 
                 // Create lookup dictionary for better performance - each product maps to its highest priority vendor
                 var productVendorLookup = productVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);
 
-                // Group items by vendor using lookup
-                var vendorGroups = allOrderItems
-                    .Where(item => productVendorLookup.ContainsKey(item.Product_ID))
-                    .GroupBy(item => productVendorLookup[item.Product_ID])
+                // Create product-vendor price lookup for getting vendor prices
+                var productVendorPriceLookup = productVendors
+                    .ToDictionary(pv => $"{pv.Product_ID}_{pv.Vendor_ID}", pv => pv.UnitPrice ?? 0);
+
+                // Group transformed items by vendor using lookup
+                var vendorGroups = transformedOrderItems
+                    .Where(item => productVendorLookup.ContainsKey(item.TargetProductId))
+                    .GroupBy(item => productVendorLookup[item.TargetProductId])
                     .ToDictionary(g => g.Key, g => g.ToList());
 
                 if (!vendorGroups.Any())
@@ -765,15 +898,15 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var vendorId = vendorGroup.Key;
                     var items = vendorGroup.Value;
 
-                    // Group items by product and sum quantities
-                    var productGroups = items.GroupBy(i => i.Product_ID)
+                    // Group items by target product and sum quantities
+                    var productGroups = items.GroupBy(i => i.TargetProductId)
                         .Select(g => new
                         {
                             ProductId = g.Key,
                             TotalQuantity = g.Sum(i => i.Quantity),
                             Price = g.First().Price,
                             UnitId = g.First().Unit_ID,
-                            POItemIds = string.Join(",", g.Select(i => i.ID))
+                            POItemIds = string.Join(",", g.Select(i => i.POItemId))
                         }).ToList();
 
                     // Create purchase agreement (Child PA)
@@ -782,7 +915,11 @@ namespace Tasin.Website.DAL.Services.WebServices
                         Vendor_ID = vendorId,
                         Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.PurchaseAgreement, DbContext),
                         GroupCode = groupCode,
-                        TotalPrice = productGroups.Sum(pg => (pg.Price ?? 0) * pg.TotalQuantity),
+                        TotalPrice = productGroups.Sum(pg =>
+                        {
+                            var vendorPrice = productVendorPriceLookup.TryGetValue($"{pg.ProductId}_{vendorId}", out var price) ? price : (pg.Price ?? 0);
+                            return vendorPrice * pg.TotalQuantity;
+                        }),
                         Status = EPAStatus.New.ToString(),
                         CreatedDate = currentDateTime,
                         CreatedBy = CurrentUserId,
@@ -793,15 +930,21 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                     purchaseAgreements.Add(purchaseAgreement);
 
-                    // Prepare agreement items (will set PA_ID after saving agreements)
-                    var agreementItems = productGroups.Select(productGroup => new Purchase_Agreement_Item
+                    // Prepare agreement items with vendor prices
+                    var agreementItems = productGroups.Select(productGroup =>
                     {
-                        // PA_ID will be set after saving the agreement
-                        Product_ID = productGroup.ProductId,
-                        Quantity = productGroup.TotalQuantity,
-                        Unit_ID = productGroup.UnitId,
-                        Price = productGroup.Price,
-                        PO_Item_ID_List = productGroup.POItemIds
+                        // Use vendor price if available, fallback to PO item price
+                        var vendorPrice = productVendorPriceLookup.TryGetValue($"{productGroup.ProductId}_{vendorId}", out var price) ? price : (productGroup.Price ?? 0);
+
+                        return new Purchase_Agreement_Item
+                        {
+                            // PA_ID will be set after saving the agreement
+                            Product_ID = productGroup.ProductId,
+                            Quantity = productGroup.TotalQuantity,
+                            Unit_ID = productGroup.UnitId,
+                            Price = vendorPrice, // Use vendor price
+                            PO_Item_ID_List = productGroup.POItemIds
+                        };
                     }).ToList();
 
                     allAgreementItems.AddRange(agreementItems);
@@ -816,7 +959,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 foreach (var agreement in purchaseAgreements)
                 {
                     var vendorItems = vendorGroups[agreement.Vendor_ID];
-                    var productGroupCount = vendorItems.GroupBy(i => i.Product_ID).Count();
+                    var productGroupCount = vendorItems.GroupBy(i => i.TargetProductId).Count();
 
                     for (int i = 0; i < productGroupCount; i++)
                     {
@@ -1109,11 +1252,27 @@ namespace Tasin.Website.DAL.Services.WebServices
                     return ack;
                 }
 
-                // Get product information for all products
+                // Get product information for all products and their parents in one query
                 var productIds = allOrderItems.Select(poi => poi.Product_ID).Distinct().ToList();
                 var products = await _productRepository.ReadOnlyRespository.GetAsync(
                     filter: p => productIds.Contains(p.ID)
                 );
+
+                // Get parent product IDs and fetch all products (original + parents) in one query
+                var parentProductIds = products.Where(p => p.ParentID.HasValue)
+                                              .Select(p => p.ParentID!.Value)
+                                              .Distinct()
+                                              .Except(productIds) // Only get parents not already loaded
+                                              .ToList();
+
+                if (parentProductIds.Any())
+                {
+                    var parentProducts = await _productRepository.ReadOnlyRespository.GetAsync(
+                        filter: p => parentProductIds.Contains(p.ID)
+                    );
+                    products = products.Concat(parentProducts).ToList();
+                }
+
                 var productLookup = products.ToDictionary(p => p.ID, p => p);
 
                 // Get unit information for all units
@@ -1123,27 +1282,80 @@ namespace Tasin.Website.DAL.Services.WebServices
                 );
                 var unitLookup = units.ToDictionary(u => u.ID, u => u);
 
-                // Get product-vendor relationships for all products (all vendors, not just highest priority)
-                var allProductVendors = await _productVendorRepository.GetByProductIdsAsync(productIds);
-                var productVendorLookup = allProductVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);//.OrderBy(e => e.Priority).ThenBy(e => e.UnitPrice)
-
-                // Also get highest priority vendors for default selection
-                var highestPriorityProductVendors = await _productVendorRepository.GetHighestPriorityVendorsByProductIdsAsync(productIds);
-                var defaultVendorLookup = highestPriorityProductVendors.ToDictionary(pv => pv.Product_ID, pv => pv.Vendor_ID);//.OrderBy(e => e.Priority).ThenBy(e => e.UnitPrice)
-
-                // Get all available vendors using common service
+                // Get all available vendors using common service and pre-parse them
                 var allVendorsResponse = await _commonService.GetDataOptionsDropdown("", ECategoryType.Vendor);
                 var allVendors = allVendorsResponse.IsSuccess ? allVendorsResponse.Data : new List<KendoDropdownListModel<string>>();
 
-                // Group items by product and create mappings
-                var productGroups = allOrderItems.GroupBy(i => i.Product_ID)
+                // Pre-parse all vendors to avoid repeated parsing in the loop
+                var parsedVendors = allVendors?
+                    .Where(vendor => vendor != null && !string.IsNullOrEmpty(vendor.Value) && int.TryParse(vendor.Value, out _))
+                    .Select(vendor => new VendorOptionViewModel
+                    {
+                        ID = int.Parse(vendor.Value),
+                        Name = vendor.Text?.Split('(')[0].Trim() ?? "",
+                        Code = vendor.Text?.Contains('(') == true ? vendor.Text.Split('(')[1].Replace(")", "").Trim() : ""
+                    })
+                    .ToList() ?? new List<VendorOptionViewModel>();
+
+                // Transform child products to parent products and calculate quantities with loss rate
+                var transformedOrderItems = allOrderItems.Select(item =>
+                {
+                    var product = productLookup.TryGetValue(item.Product_ID, out var prod) ? prod : null;
+
+                    // If product has a parent, use parent product instead
+                    var targetProductId = product?.ParentID ?? item.Product_ID;
+                    var targetProduct = productLookup.TryGetValue(targetProductId, out var targetProd) ? targetProd : product;
+
+                    // Calculate quantity with loss rate if converting from child to parent
+                    var adjustedQuantity = item.Quantity;
+                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    {
+                        // Apply loss rate: (100 + LossRate) * Quantity / 100
+                        adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
+                    }
+
+                    return new
+                    {
+                        OriginalProductId = item.Product_ID,
+                        TargetProductId = targetProductId,
+                        TargetProduct = targetProduct,
+                        Quantity = adjustedQuantity,
+                        Price = item.Price,
+                        UnitId = targetProduct?.Unit_ID ?? item.Unit_ID,
+                        POItemId = item.ID
+                    };
+                }).ToList();
+
+                // Get all target product IDs (including parent products)
+                var allTargetProductIds = transformedOrderItems.Select(i => i.TargetProductId).Distinct().ToList();
+
+                // Get product-vendor relationships for all target products in one call
+                var allProductVendors = await _productVendorRepository.GetByProductIdsAsync(allTargetProductIds);
+                var productVendorLookup = allProductVendors.ToLookup(pv => pv.Product_ID, pv => pv.Vendor_ID);
+
+                // Create default vendor lookup from the same data (highest priority = lowest priority number)
+                var defaultVendorLookup = allProductVendors
+                    .GroupBy(pv => pv.Product_ID)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderBy(pv => pv.Priority ?? int.MaxValue)
+                              .ThenBy(pv => pv.UnitPrice ?? decimal.MaxValue)
+                              .First().Vendor_ID
+                    );
+
+                // Create product-vendor price lookup for getting vendor prices
+                var productVendorPriceLookup = allProductVendors
+                    .ToDictionary(pv => $"{pv.Product_ID}_{pv.Vendor_ID}", pv => pv.UnitPrice ?? 0);
+
+                // Group items by target product (parent product) and create mappings
+                var productGroups = transformedOrderItems.GroupBy(i => i.TargetProductId)
                     .Select(g => new
                     {
                         ProductId = g.Key,
                         TotalQuantity = (int)g.Sum(i => i.Quantity),
                         Price = g.First().Price,
-                        UnitId = g.First().Unit_ID,
-                        POItemIds = string.Join(",", g.Select(i => i.ID))
+                        UnitId = g.First().UnitId,
+                        POItemIds = string.Join(",", g.Select(i => i.POItemId))
                     }).ToList();
 
                 var productVendorMappings = new List<ProductVendorMappingViewModel>();
@@ -1158,28 +1370,34 @@ namespace Tasin.Website.DAL.Services.WebServices
                         ? productVendorLookup[productGroup.ProductId].ToList()
                         : new List<int>();
 
-                    // Filter all vendors to only those available for this product
-                    var availableVendors = new List<VendorOptionViewModel>();
-                    if (allVendors != null && allVendors.Count > 0)
-                    {
-                        availableVendors = allVendors
-                            .Where(vendor => vendor != null && !string.IsNullOrEmpty(vendor.Value) &&
-                                           int.TryParse(vendor.Value, out var vendorId) &&
-                                           availableVendorIds.Contains(vendorId))
-                            //.OrderBy(vendor => availableVendorIds.IndexOf(int.Parse(vendor.Value)))
-                            .Select(vendor => new VendorOptionViewModel
+                    // Filter pre-parsed vendors to only those available for this product and add prices
+                    var availableVendors = parsedVendors
+                        .Where(vendor => availableVendorIds.Contains(vendor.ID))
+                        .Select(vendor =>
+                        {
+                            // Get price for this vendor-product combination
+                            var vendorPrice = productVendorPriceLookup.TryGetValue($"{productGroup.ProductId}_{vendor.ID}", out var price) ? price : 0;
+
+                            return new VendorOptionViewModel
                             {
-                                ID = int.Parse(vendor.Value),
-                                Name = vendor.Text?.Split('(')[0].Trim() ?? "", // Extract name before parentheses
-                                Code = vendor.Text?.Contains('(') == true ? vendor.Text.Split('(')[1].Replace(")", "").Trim() : ""
-                            }).ToList();
-                    }
+                                ID = vendor.ID,
+                                Name = vendor.Name,
+                                Code = vendor.Code,
+                                Price = vendorPrice // Add price to vendor option
+                            };
+                        })
+                        .ToList();
 
                     // Use highest priority vendor as default, fallback to first available vendor
                     var defaultVendorId = defaultVendorLookup.TryGetValue(productGroup.ProductId, out var highestPriorityVendorId)
                         ? highestPriorityVendorId
                         : availableVendorIds.FirstOrDefault();
                     var defaultVendor = availableVendors.FirstOrDefault(v => v.ID == defaultVendorId);
+
+                    // Get vendor price from product-vendor relationship
+                    var vendorPrice = defaultVendor != null
+                        ? productVendorPriceLookup.TryGetValue($"{productGroup.ProductId}_{defaultVendor.ID}", out var price) ? price : 0
+                        : 0;
 
                     var mapping = new ProductVendorMappingViewModel
                     {
@@ -1189,7 +1407,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                         TotalQuantity = productGroup.TotalQuantity,
                         Unit_ID = productGroup.UnitId,
                         UnitName = unit?.Name,
-                        Price = productGroup.Price ?? 0,
+                        Price = vendorPrice, // Use vendor price instead of PO item price
                         Vendor_ID = defaultVendor?.ID ?? 0,
                         VendorName = defaultVendor?.Name,
                         AvailableVendors = availableVendors,
@@ -1297,6 +1515,12 @@ namespace Tasin.Website.DAL.Services.WebServices
                 );
                 var vendorLookup = vendors.ToDictionary(v => v.ID, v => v);
 
+                // Get product-vendor relationships for price lookup
+                var allProductIds = request.ProductVendorMappings.Select(m => m.Product_ID).Distinct().ToList();
+                var allProductVendors = await _productVendorRepository.GetByProductIdsAsync(allProductIds);
+                var productVendorPriceLookup = allProductVendors
+                    .ToDictionary(pv => $"{pv.Product_ID}_{pv.Vendor_ID}", pv => pv.UnitPrice ?? 0);
+
                 var createdChildPAs = new List<PurchaseAgreementViewModel>();
                 var purchaseAgreements = new List<Purchase_Agreement>();
                 var allAgreementItems = new List<Purchase_Agreement_Item>();
@@ -1308,13 +1532,20 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var vendorId = vendorGroup.Key;
                     var mappings = vendorGroup.ToList();
 
+                    // Calculate total price using vendor prices
+                    var totalPrice = mappings.Sum(m =>
+                    {
+                        var vendorPrice = productVendorPriceLookup.TryGetValue($"{m.Product_ID}_{m.Vendor_ID}", out var price) ? price : (m.Price ?? 0);
+                        return (decimal)(m.TotalQuantity * vendorPrice);
+                    });
+
                     // Create purchase agreement
                     var purchaseAgreement = new Purchase_Agreement
                     {
                         Vendor_ID = vendorId,
                         Code = await Generator.GenerateEntityCodeAsync(EntityPrefix.PurchaseAgreement, DbContext),
                         GroupCode = groupCode,
-                        TotalPrice = mappings.Sum(m => m.TotalAmount),
+                        TotalPrice = totalPrice, // Use calculated total price with vendor prices
                         Status = EPAStatus.New.ToString(),
                         CreatedDate = currentDateTime,
                         CreatedBy = CurrentUserId,
@@ -1325,14 +1556,20 @@ namespace Tasin.Website.DAL.Services.WebServices
 
                     purchaseAgreements.Add(purchaseAgreement);
 
-                    // Prepare agreement items
-                    var agreementItems = mappings.Select(mapping => new Purchase_Agreement_Item
+                    // Prepare agreement items with vendor prices
+                    var agreementItems = mappings.Select(mapping =>
                     {
-                        Product_ID = mapping.Product_ID,
-                        Quantity = mapping.TotalQuantity,
-                        Unit_ID = mapping.Unit_ID,
-                        Price = mapping.Price,
-                        PO_Item_ID_List = mapping.PO_Item_ID_List
+                        // Use vendor price if available, fallback to mapping price
+                        var vendorPrice = productVendorPriceLookup.TryGetValue($"{mapping.Product_ID}_{mapping.Vendor_ID}", out var price) ? price : mapping.Price;
+
+                        return new Purchase_Agreement_Item
+                        {
+                            Product_ID = mapping.Product_ID,
+                            Quantity = mapping.TotalQuantity,
+                            Unit_ID = mapping.Unit_ID,
+                            Price = vendorPrice, // Use vendor price
+                            PO_Item_ID_List = mapping.PO_Item_ID_List
+                        };
                     }).ToList();
 
                     allAgreementItems.AddRange(agreementItems);
@@ -1363,14 +1600,20 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var vendor = vendorLookup.TryGetValue(pa.Vendor_ID, out var v) ? v : null;
                     var vendorMappings = request.ProductVendorMappings.Where(m => m.Vendor_ID == pa.Vendor_ID).ToList();
 
-                    var paItems = vendorMappings.Select(mapping => new PurchaseAgreementItemViewModel
+                    var paItems = vendorMappings.Select(mapping =>
                     {
-                        Product_ID = mapping.Product_ID,
-                        ProductName = mapping.ProductName,
-                        Quantity = mapping.TotalQuantity,
-                        Unit_ID = mapping.Unit_ID,
-                        UnitName = mapping.UnitName,
-                        Price = mapping.Price
+                        // Use vendor price if available, fallback to mapping price
+                        var vendorPrice = productVendorPriceLookup.TryGetValue($"{mapping.Product_ID}_{mapping.Vendor_ID}", out var price) ? price : (mapping.Price ?? 0);
+
+                        return new PurchaseAgreementItemViewModel
+                        {
+                            Product_ID = mapping.Product_ID,
+                            ProductName = mapping.ProductName,
+                            Quantity = mapping.TotalQuantity,
+                            Unit_ID = mapping.Unit_ID,
+                            UnitName = mapping.UnitName,
+                            Price = vendorPrice // Use vendor price
+                        };
                     }).ToList();
 
                     var paViewModel = new PurchaseAgreementViewModel
@@ -1684,6 +1927,72 @@ namespace Tasin.Website.DAL.Services.WebServices
             }
             return ack;
         }
+
+        /// <summary>
+        /// Transform child products to parent products and calculate quantities with loss rate
+        /// </summary>
+        private async Task<(List<dynamic> transformedItems, Dictionary<int, Product> productLookup)> TransformOrderItemsToParentProducts(
+            List<Purchase_Order_Item> orderItems)
+        {
+            // Get product information for all products
+            var productIds = orderItems.Select(poi => poi.Product_ID).Distinct().ToList();
+            var products = await _productRepository.ReadOnlyRespository.GetAsync(
+                filter: p => productIds.Contains(p.ID)
+            );
+
+            // Get parent product IDs and fetch all products (original + parents) in one query
+            var parentProductIds = products.Where(p => p.ParentID.HasValue)
+                                          .Select(p => p.ParentID!.Value)
+                                          .Distinct()
+                                          .Except(productIds) // Only get parents not already loaded
+                                          .ToList();
+
+            if (parentProductIds.Any())
+            {
+                var parentProducts = await _productRepository.ReadOnlyRespository.GetAsync(
+                    filter: p => parentProductIds.Contains(p.ID)
+                );
+                products = products.Concat(parentProducts).ToList();
+            }
+
+            var productLookup = products.ToDictionary(p => p.ID, p => p);
+
+            // Transform child products to parent products and calculate quantities with loss rate
+            var transformedItems = orderItems.Select(item =>
+            {
+                var product = productLookup.TryGetValue(item.Product_ID, out var prod) ? prod : null;
+
+                // If product has a parent, use parent product instead
+                var targetProductId = product?.ParentID ?? item.Product_ID;
+                var targetProduct = productLookup.TryGetValue(targetProductId, out var targetProd) ? targetProd : product;
+
+                // Calculate quantity with loss rate if converting from child to parent
+                var adjustedQuantity = item.Quantity;
+                if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                {
+                    // Apply loss rate: (100 + LossRate) * Quantity / 100
+                    adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
+                }
+
+                return new
+                {
+                    OriginalProductId = item.Product_ID,
+                    TargetProductId = targetProductId,
+                    TargetProduct = targetProduct,
+                    Quantity = adjustedQuantity,
+                    Price = item.Price,
+                    UnitId = targetProduct?.Unit_ID ?? item.Unit_ID,
+                    Unit_ID = item.Unit_ID,
+                    TaxRate = item.TaxRate,
+                    ProcessingFee = item.ProcessingFee,
+                    POItemId = item.ID
+                };
+            }).ToList();
+
+            return (transformedItems.Cast<dynamic>().ToList(), productLookup);
+        }
+
+
 
         private async Task SavePurchaseAgreementItems(int purchaseAgreementId, List<PurchaseAgreementItemViewModel>? items)
         {
