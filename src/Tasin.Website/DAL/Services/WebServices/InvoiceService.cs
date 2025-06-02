@@ -394,7 +394,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                 html.AppendLine($"<td>{item.ProductCode}</td>");
                 html.AppendLine($"<td>{item.ProductName}</td>");
                 html.AppendLine($"<td class='text-center'>{item.Unit}</td>");
-                html.AppendLine($"<td class='text-right'>{item.Quantity:N0}</td>");
+                html.AppendLine($"<td class='text-right'>{item.Quantity:N2}</td>");
                 html.AppendLine($"<td class='text-right'>{PdfHelper.FormatCurrency(item.UnitPrice)}</td>");
                 html.AppendLine($"<td class='text-center'>{item.TaxRate:N1}%</td>");
                 html.AppendLine($"<td class='text-right'>{PdfHelper.FormatCurrency(item.TotalAmount)}</td>");

@@ -260,7 +260,7 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
                     width: 150,
-                    template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n0') + ' VNĐ</span>' #"
+                    template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n2') + ' VNĐ</span>' #"
                 },
                 {
                     field: "totalOrderAmount",
@@ -268,7 +268,7 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
                     width: 150,
-                    template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n0') + ' VNĐ</span>' #"
+                    template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n2') + ' VNĐ</span>' #"
                 }
             ],
             detailInit: detailInit,
@@ -380,12 +380,12 @@
                 { field: "productName", title: "Tên sản phẩm", width: "200px" },
                 { field: "unitName", title: "Đơn vị", width: "100px" },
                 { field: "totalQuantity", title: "Tổng SL", width: "100px", template: "#= '<span class=\"number\">' + kendo.toString(totalQuantity, 'n2') + '</span>' #" },
-                { field: "minPrice", title: "Giá thấp nhất", width: "120px", template: "#= minPrice ? '<span class=\"currency\">' + kendo.toString(minPrice, 'n0') + ' VNĐ</span>' : '' #" },
-                { field: "maxPrice", title: "Giá cao nhất", width: "120px", template: "#= maxPrice ? '<span class=\"currency\">' + kendo.toString(maxPrice, 'n0') + ' VNĐ</span>' : '' #" },
-                { field: "averagePrice", title: "Giá TB", width: "120px", template: "#= averagePrice ? '<span class=\"currency\">' + kendo.toString(averagePrice, 'n0') + ' VNĐ</span>' : '' #" },
-                { field: "currentPrice", title: "Giá hiện tại", width: "120px", template: "#= currentPrice ? '<span class=\"currency\">' + kendo.toString(currentPrice, 'n0') + ' VNĐ</span>' : '' #" },
-                { field: "totalValue", title: "Tổng giá trị", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n0') + ' VNĐ</span>' #" },
-                { field: "totalOrderAmount", title: "Tổng tiền đặt hàng", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n0') + ' VNĐ</span>' #" },
+                { field: "minPrice", title: "Giá thấp nhất", width: "120px", template: "#= minPrice ? '<span class=\"currency\">' + kendo.toString(minPrice, 'n2') + ' VNĐ</span>' : '' #" },
+                { field: "maxPrice", title: "Giá cao nhất", width: "120px", template: "#= maxPrice ? '<span class=\"currency\">' + kendo.toString(maxPrice, 'n2') + ' VNĐ</span>' : '' #" },
+                { field: "averagePrice", title: "Giá TB", width: "120px", template: "#= averagePrice ? '<span class=\"currency\">' + kendo.toString(averagePrice, 'n2') + ' VNĐ</span>' : '' #" },
+                { field: "currentPrice", title: "Giá hiện tại", width: "120px", template: "#= currentPrice ? '<span class=\"currency\">' + kendo.toString(currentPrice, 'n2') + ' VNĐ</span>' : '' #" },
+                { field: "totalValue", title: "Tổng giá trị", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalValue, 'n2') + ' VNĐ</span>' #" },
+                { field: "totalOrderAmount", title: "Tổng tiền đặt hàng", width: "150px", template: "#= '<span class=\"currency\">' + kendo.toString(totalOrderAmount, 'n2') + ' VNĐ</span>' #" },
                 { field: "poCount", title: "Số PO", width: "80px", template: "#= '<span class=\"number\">' + poCount + '</span>' #" }
             ]
         });

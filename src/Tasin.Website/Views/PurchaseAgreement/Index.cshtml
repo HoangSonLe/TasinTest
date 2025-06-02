@@ -126,7 +126,7 @@
                     field: "totalPrice",
                     title: "Tổng tiền",
                     width: "120px",
-                    template: "#= kendo.toString(totalPrice, 'n0') # VNĐ",
+                    template: "#= kendo.toString(totalPrice, 'n2') # VNĐ",
                     attributes: { style: "text-align: right;" }
                 },
                 {
@@ -389,7 +389,7 @@
                         <p><strong>Trạng thái:</strong> ${data.statusName || ''}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n0")} VNĐ</p>
+                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n2")} VNĐ</p>
                         <p><strong>Ngày tạo:</strong> ${data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : ''}</p>
                         <p><strong>Ghi chú:</strong> ${data.note || ''}</p>
                     </div>
@@ -417,13 +417,13 @@
             },
             columns: [
                 { field: "productName", title: "Sản phẩm", width: "200px" },
-                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n0') #" },
+                { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n2') #" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n2') # VNĐ" },
                 {
                     title: "Thành tiền",
                     width: "120px",
-                    template: "#= kendo.toString((quantity || 0) * (price || 0), 'n0') # VNĐ"
+                    template: "#= kendo.toString(parseFloat(quantity || 0) * parseFloat(price || 0), 'n2') # VNĐ"
                 }
             ],
             pageable: false,
@@ -497,7 +497,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Tổng tiền</label>
-                                <input type="text" id="formTotalPrice" class="form-control" readonly value="${data ? kendo.toString(data.totalPrice, 'n0') : '0'}" />
+                                <input type="text" id="formTotalPrice" class="form-control" readonly value="${data ? kendo.toString(data.totalPrice, 'n2') : '0'}" />
                             </div>
                         </div>
                     </div>
@@ -756,10 +756,10 @@
                 { field: "productName", title: "Sản phẩm", width: "150px" },
                 { field: "quantity", title: "Số lượng", width: "80px", template: "#= kendo.toString(quantity, 'n2') #" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
+                { field: "price", title: "Đơn giá", width: "100px", template: "#= kendo.toString(price, 'n2') # VNĐ" },
                 { field: "lossRate", title: "Hao hụt (%)", width: "80px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
-                { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
-                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
+                { field: "processingFee", title: "Phí gia công", width: "100px", template: "#= processingFee ? kendo.toString(processingFee, 'n2') + ' VNĐ' : '' #" },
+                { field: "totalAmount", title: "Thành tiền", width: "120px", template: "#= kendo.toString(totalAmount, 'n2') # VNĐ" },
                 { field: "processingTypeName", title: "Loại gia công", width: "120px" },
                 {
                     title: "Thao tác",
@@ -853,7 +853,7 @@
                 total += item.totalAmount || ((item.quantity || 0) * (item.price || 0) + (item.processingFee || 0) * (item.quantity || 0));
             });
 
-            $("#formTotalPrice").val(kendo.toString(total, 'n0'));
+            $("#formTotalPrice").val(kendo.toString(total, 'n2'));
         }
 
         // Global function for removing items

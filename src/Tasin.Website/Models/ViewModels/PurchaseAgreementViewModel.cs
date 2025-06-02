@@ -125,7 +125,7 @@ namespace Tasin.Website.Models.ViewModels
         /// <summary>
         /// Total Quantity from all purchase orders
         /// </summary>
-        public int TotalQuantity { get; set; }
+        public decimal TotalQuantity { get; set; }
 
         /// <summary>
         /// Unit ID

@@ -178,7 +178,7 @@ namespace Tasin.Website.Common.Helper
                 itemHtml = itemHtml.Replace("{{ProductCode}}", item.ProductCode ?? "");
                 itemHtml = itemHtml.Replace("{{ProductName}}", item.ProductName ?? "");
                 itemHtml = itemHtml.Replace("{{Unit}}", item.Unit ?? "");
-                itemHtml = itemHtml.Replace("{{Quantity}}", item.Quantity.ToString("N0"));
+                itemHtml = itemHtml.Replace("{{Quantity}}", item.Quantity.ToString("N2"));
                 itemHtml = itemHtml.Replace("{{UnitPrice}}", PdfHelper.FormatCurrency(item.UnitPrice));
                 itemHtml = itemHtml.Replace("{{TaxRate}}", item.TaxRate.ToString("N1"));
                 itemHtml = itemHtml.Replace("{{TotalAmount}}", PdfHelper.FormatCurrency(item.TotalAmount));
@@ -204,7 +204,7 @@ namespace Tasin.Website.Common.Helper
                 
                 // For now, return a simple format
                 // In production, use a proper Vietnamese number-to-words converter
-                return $"{integerPart:N0} đồng".Replace(",", " ");
+                return $"{integerPart:N2} đồng".Replace(",", " ");
             }
             catch
             {

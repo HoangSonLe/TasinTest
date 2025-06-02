@@ -631,9 +631,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // If product has a parent, use parent product instead
                     var targetProductId = product?.ParentID ?? item.Product_ID;
 
-                    // Calculate quantity with loss rate if converting from child to parent
+                    // Calculate quantity with loss rate for all products that have LossRate
                     var adjustedQuantity = item.Quantity;
-                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    if (product?.LossRate.HasValue == true)
                     {
                         // Apply loss rate: (100 + LossRate) * Quantity / 100
                         adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
@@ -831,9 +831,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     // If product has a parent, use parent product instead
                     var targetProductId = product?.ParentID ?? item.Product_ID;
 
-                    // Calculate quantity with loss rate if converting from child to parent
+                    // Calculate quantity with loss rate for all products that have LossRate
                     var adjustedQuantity = item.Quantity;
-                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    if (product?.LossRate.HasValue == true)
                     {
                         // Apply loss rate: (100 + LossRate) * Quantity / 100
                         adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
@@ -1306,9 +1306,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                     var targetProductId = product?.ParentID ?? item.Product_ID;
                     var targetProduct = productLookup.TryGetValue(targetProductId, out var targetProd) ? targetProd : product;
 
-                    // Calculate quantity with loss rate if converting from child to parent
+                    // Calculate quantity with loss rate for all products that have LossRate
                     var adjustedQuantity = item.Quantity;
-                    if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                    if (product?.LossRate.HasValue == true)
                     {
                         // Apply loss rate: (100 + LossRate) * Quantity / 100
                         adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;
@@ -1352,7 +1352,7 @@ namespace Tasin.Website.DAL.Services.WebServices
                     .Select(g => new
                     {
                         ProductId = g.Key,
-                        TotalQuantity = (int)g.Sum(i => i.Quantity),
+                        TotalQuantity = g.Sum(i => i.Quantity),
                         Price = g.First().Price,
                         UnitId = g.First().UnitId,
                         POItemIds = string.Join(",", g.Select(i => i.POItemId))
@@ -1966,9 +1966,9 @@ namespace Tasin.Website.DAL.Services.WebServices
                 var targetProductId = product?.ParentID ?? item.Product_ID;
                 var targetProduct = productLookup.TryGetValue(targetProductId, out var targetProd) ? targetProd : product;
 
-                // Calculate quantity with loss rate if converting from child to parent
+                // Calculate quantity with loss rate for all products that have LossRate
                 var adjustedQuantity = item.Quantity;
-                if (product?.ParentID.HasValue == true && product.LossRate.HasValue)
+                if (product?.LossRate.HasValue == true)
                 {
                     // Apply loss rate: (100 + LossRate) * Quantity / 100
                     adjustedQuantity = (100 + product.LossRate.Value) * item.Quantity / 100;

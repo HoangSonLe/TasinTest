@@ -175,15 +175,15 @@
                         field: "UnitPrice",
                         title: "Đơn giá",
                         width: 130,
-                        format: "{0:n0}",
+                        format: "{0:n2}",
                         headerAttributes: { style: "text-align: center; font-weight: 600;" },
                         attributes: { style: "text-align: right;" },
                         editor: function (container, options) {
                             $('<input data-bind="value:' + options.field + '"/>')
                                 .appendTo(container)
                                 .kendoNumericTextBox({
-                                    format: "n0",
-                                    decimals: 0
+                                    format: "n2",
+                                    decimals: 2
                                 });
                         }
                     },
