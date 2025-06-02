@@ -255,6 +255,15 @@ function SundayInWeekNearlest() {
     date.setMilliseconds(0);
     return date;
 }
+function EndDay() {
+
+    let date = new Date(); 
+    date.setHours(23);
+    date.setMinutes(59);
+    date.setSeconds(59);
+    date.setMilliseconds(0);
+    return date;
+}
 
 function getFirstDateOfMonth(d) {
     let d1 = new Date(d);

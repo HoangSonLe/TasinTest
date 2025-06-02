@@ -25,7 +25,7 @@
         <div class="pa-info-row">
             <div class="pa-info-col">
                 <p><strong>Nhà cung cấp:</strong> #=vendorName#</p>
-                <p><strong>Tổng tiền:</strong> #=kendo.toString(totalPrice, 'n2')# VNĐ</p>
+                <p><strong>Tổng tiền:</strong> #=kendo.toString(totalPrice, 'n0')# VNĐ</p>
             </div>
             <div class="pa-info-col">
                 <p><strong>Trạng thái:</strong>
@@ -79,7 +79,7 @@
             '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
             '</div>' +
             '<div class="pa-info-col">' +
-            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n2") + ' VNĐ</p>' +
+            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
             '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
             '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
             '</div>' +
@@ -105,7 +105,7 @@
             columns: [
                 { field: "code", title: "Mã hợp đồng", width: "120px" },
                 { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
-                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n2') # VNĐ" },
+                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
                 {
                     field: "statusName",
                     title: "Trạng thái",
@@ -261,11 +261,11 @@
                 { field: "productName", title: "Sản phẩm", width: "200px" },
                 { field: "quantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(quantity, 'n2') #", attributes: { style: "text-align: center;" } },
                 { field: "unitName", title: "Đơn vị", width: "80px", attributes: { style: "text-align: center;" } },
-                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n2') # VNĐ", attributes: { style: "text-align: right;" } },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price, 'n0') # VNĐ", attributes: { style: "text-align: right;" } },
                 {
                     title: "Thành tiền",
                     width: "120px",
-                    template: "#= kendo.toString(parseFloat(quantity || 0) * parseFloat(price || 0), 'n2') # VNĐ",
+                    template: "#= kendo.toString(parseFloat(quantity || 0) * parseFloat(price || 0), 'n0') # VNĐ",
                     attributes: { style: "text-align: right;" }
                 },
                 { field: "note", title: "Ghi chú", width: "150px" }
@@ -388,7 +388,7 @@
             '<p><strong>Số sản phẩm:</strong> ' + (data.totalItemCount || 0) + '</p>' +
             '</div>' +
             '<div class="pa-info-col">' +
-            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n2") + ' VNĐ</p>' +
+            '<p><strong>Tổng tiền:</strong> ' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</p>' +
             '<p><strong>Trạng thái:</strong> ' + (data.statusName || '') + '</p>' +
             '<p><strong>Ngày tạo:</strong> ' + (data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : '') + '</p>' +
             '</div>' +
@@ -424,7 +424,7 @@
             columns: [
                 { field: "code", title: "Mã hợp đồng", width: "120px" },
                 { field: "vendorName", title: "Nhà cung cấp", width: "200px" },
-                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n2') # VNĐ" },
+                { field: "totalPrice", title: "Tổng tiền", width: "120px", template: "#= kendo.toString(totalPrice, 'n0') # VNĐ" },
                 {
                     field: "statusName",
                     title: "Trạng thái",
@@ -529,7 +529,7 @@
             '<p><strong>Số sản phẩm:</strong> ' + (data.productVendorMappings ? data.productVendorMappings.length : 0) + '</p>' +
             '</div>' +
             '<div class="pa-info-col">' +
-            '<p><strong>Tổng tiền:</strong> <span id="totalPriceDisplay">' + kendo.toString(data.totalPrice || 0, "n2") + ' VNĐ</span></p>' +
+            '<p><strong>Tổng tiền:</strong> <span id="totalPriceDisplay">' + kendo.toString(data.totalPrice || 0, "n0") + ' VNĐ</span></p>' +
             '<p><strong>Trạng thái:</strong> ' + (data.statusName || 'Mới') + '</p>' +
             '</div>' +
             '</div>' +
@@ -589,11 +589,11 @@
                 { field: "productName", title: "Tên sản phẩm", width: "200px", template: "#= productName || 'N/A' #" },
                 { field: "totalQuantity", title: "Số lượng", width: "100px", template: "#= kendo.toString(totalQuantity || 0, 'n2') #", attributes: { style: "text-align: center;" } },
                 { field: "unitName", title: "Đơn vị", width: "80px", template: "#= unitName || 'N/A' #", attributes: { style: "text-align: center;" } },
-                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price || 0, 'n2') # VNĐ", attributes: { style: "text-align: right;" } },
+                { field: "price", title: "Đơn giá", width: "120px", template: "#= kendo.toString(price || 0, 'n0') # VNĐ", attributes: { style: "text-align: right;" } },
                 {
                     title: "Thành tiền",
                     width: "120px",
-                    template: "#= kendo.toString(parseFloat(totalQuantity || 0) * parseFloat(price || 0), 'n2') # VNĐ",
+                    template: "#= kendo.toString(parseFloat(totalQuantity || 0) * parseFloat(price || 0), 'n0') # VNĐ",
                     attributes: { style: "text-align: right;" }
                 },
                 {
@@ -614,7 +614,7 @@
                                     var selected = vendor.id == dataItem.vendor_ID ? 'selected' : '';
                                     var displayText = vendor.text || vendor.name || 'Vendor ' + vendor.id;
                                     var vendorPrice = vendor.price || 0;
-                                    var priceText = vendorPrice > 0 ? ' - ' + kendo.toString(vendorPrice, 'n2') + ' VNĐ' : ' - Chưa có giá';
+                                    var priceText = vendorPrice > 0 ? ' - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ' : ' - Chưa có giá';
                                     options += '<option value="' + vendor.id + '" ' + selected + '>' + displayText + priceText + '</option>';
                                 }
                             });
@@ -656,7 +656,7 @@
                                 var displayText = dataItem.text || dataItem.name || 'Vendor ' + dataItem.id;
                                 var vendorPrice = dataItem.price || 0;
                                 var priceText = vendorPrice > 0
-                                    ? '<span style="color: #28a745; font-weight: bold;"> - ' + kendo.toString(vendorPrice, 'n2') + ' VNĐ</span>'
+                                    ? '<span style="color: #28a745; font-weight: bold;"> - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ</span>'
                                     : '<span style="color: #dc3545; font-style: italic;"> - Chưa có giá</span>';
                                 return displayText + priceText;
                             },
@@ -665,7 +665,7 @@
                                 var displayText = dataItem.text || dataItem.name || 'Vendor ' + dataItem.id;
                                 var vendorPrice = dataItem.price || 0;
                                 var priceText = vendorPrice > 0
-                                    ? ' - ' + kendo.toString(vendorPrice, 'n2') + ' VNĐ'
+                                    ? ' - ' + kendo.toString(vendorPrice, 'n0') + ' VNĐ'
                                     : ' - Chưa có giá';
                                 return displayText + priceText;
                             },
@@ -718,7 +718,7 @@
 
                     // Update total price display
                     var newTotalPrice = data.productVendorMappings.reduce((sum, m) => sum + (parseFloat(m.totalQuantity || 0) * parseFloat(m.price || 0)), 0);
-                    $("#totalPriceDisplay").text(kendo.toString(newTotalPrice, "n2") + " VNĐ");
+                    $("#totalPriceDisplay").text(kendo.toString(newTotalPrice, "n0") + " VNĐ");
 
                     // Show notification about price change
                     var productName = mapping.productName || "Sản phẩm";
@@ -729,10 +729,10 @@
                         priceChangeMessage = productName + " - " + vendorName + ": Chưa có giá được thiết lập";
                         showErrorMessages([priceChangeMessage]);
                     } else if (oldPrice !== newPrice) {
-                        priceChangeMessage = productName + " - " + vendorName + ": Giá đã thay đổi từ " + kendo.toString(oldPrice, "n2") + " VNĐ → " + kendo.toString(newPrice, "n2") + " VNĐ";
+                        priceChangeMessage = productName + " - " + vendorName + ": Giá đã thay đổi từ " + kendo.toString(oldPrice, "n0") + " VNĐ → " + kendo.toString(newPrice, "n0") + " VNĐ";
                         showSuccessMessages([priceChangeMessage]);
                     } else {
-                        priceChangeMessage = productName + " - " + vendorName + ": Giá không thay đổi (" + kendo.toString(newPrice, "n2") + " VNĐ)";
+                        priceChangeMessage = productName + " - " + vendorName + ": Giá không thay đổi (" + kendo.toString(newPrice, "n0") + " VNĐ)";
                         showSuccessMessages([priceChangeMessage]);
                     }
                 }
@@ -947,7 +947,7 @@
                     title: "Tổng tiền",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
-                    template: "#= kendo.toString(totalPrice, 'n2') # VNĐ",
+                    template: "#= kendo.toString(totalPrice, 'n0') # VNĐ",
                     width: 150,
                 },
                 {
@@ -1167,7 +1167,7 @@
         });
 
         // Set default date range to last 1 week
-        var today = new Date();
+        var today = EndDay();
         var oneWeekAgo = new Date();
         oneWeekAgo.setDate(today.getDate() - 7);
 

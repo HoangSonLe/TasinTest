@@ -213,8 +213,8 @@
                         <p><strong>Trạng thái:</strong> ${data.statusName || ''}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Tổng tiền chưa thuế:</strong> ${kendo.toString(data.totalPriceNoTax || 0, "n2")} VNĐ</p>
-                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n2")} VNĐ</p>
+                        <p><strong>Tổng tiền chưa thuế:</strong> ${kendo.toString(data.totalPriceNoTax || 0, "n0")} VNĐ</p>
+                        <p><strong>Tổng tiền:</strong> ${kendo.toString(data.totalPrice || 0, "n0")} VNĐ</p>
                         <p><strong>Ngày tạo:</strong> ${data.createdDate ? kendo.toString(kendo.parseDate(data.createdDate), "dd/MM/yyyy HH:mm") : ''}</p>
                     </div>
                 </div>
@@ -235,7 +235,7 @@
                 { field: "productName", title: "Sản phẩm", width: "200px" },
                 { field: "quantity", title: "Số lượng", width: "100px", format: "{0:n2}" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "120px", format: "{0:n2}" },
+                { field: "price", title: "Đơn giá", width: "120px", format: "{0:n0}" },
                 { field: "lossRate", title: "Hao hụt (%)", width: "100px", format: "{0:n1}" },
                 {
                     title: "Tổng ước tính nguyên liệu",
@@ -245,9 +245,9 @@
                         return kendo.toString(totalEstimatedMaterial, 'n2');
                     }
                 },
-                { field: "additionalCost", title: "Chi phí thêm", width: "110px", format: "{0:n2}" },
+                { field: "additionalCost", title: "Chi phí thêm", width: "110px", format: "{0:n0}" },
                 { field: "taxRate", title: "Thuế suất (%)", width: "100px", format: "{0:n1}" },
-                { field: "processingFee", title: "Phí gia công", width: "120px", format: "{0:n2}" },
+                { field: "processingFee", title: "Phí gia công", width: "120px", format: "{0:n0}" },
                 {
                     title: "Thành tiền",
                     width: "150px",
@@ -257,7 +257,7 @@
                         var totalBeforeTax = baseAmount + (dataItem.additionalCost || 0) + totalProcessingFee; // BỎ lossAmount
                         var taxAmount = totalBeforeTax * ((dataItem.taxRate || 0) / 100);
                         var finalAmount = totalBeforeTax + taxAmount;
-                        return kendo.toString(finalAmount, 'n2') + ' VNĐ';
+                        return kendo.toString(finalAmount, 'n0') + ' VNĐ';
                     }
                 }
             ],
@@ -829,7 +829,7 @@
                 { field: "productName", title: "Sản phẩm", width: "180px" },
                 { field: "quantity", title: "Số lượng", width: "90px", template: "#= kendo.toString(quantity, 'n2') #" },
                 { field: "unitName", title: "Đơn vị", width: "80px" },
-                { field: "price", title: "Đơn giá", width: "110px", template: "#= kendo.toString(price, 'n2') # VNĐ" },
+                { field: "price", title: "Đơn giá", width: "110px", template: "#= kendo.toString(price, 'n0') # VNĐ" },
                 { field: "lossRate", title: "Hao hụt (%)", width: "100px", template: "#= lossRate ? kendo.toString(lossRate, 'n1') + '%' : '' #" },
                 {
                     title: "Tổng ước tính nguyên liệu",
@@ -839,10 +839,10 @@
                         return kendo.toString(totalEstimatedMaterial, 'n2');
                     }
                 },
-                { field: "additionalCost", title: "Chi phí thêm", width: "110px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n2') + ' VNĐ' : '' #" },
+                { field: "additionalCost", title: "Chi phí thêm", width: "110px", template: "#= additionalCost ? kendo.toString(additionalCost, 'n0') + ' VNĐ' : '' #" },
                 { field: "taxRate", title: "Thuế (%)", width: "90px", template: "#= taxRate ? kendo.toString(taxRate, 'n1') + '%' : '' #" },
-                { field: "processingFee", title: "Phí gia công", width: "110px", template: "#= processingFee ? kendo.toString(processingFee, 'n2') + ' VNĐ' : '' #" },
-                { field: "totalAmount", title: "Thành tiền", width: "130px", template: "#= kendo.toString(totalAmount, 'n2') # VNĐ" },
+                { field: "processingFee", title: "Phí gia công", width: "110px", template: "#= processingFee ? kendo.toString(processingFee, 'n0') + ' VNĐ' : '' #" },
+                { field: "totalAmount", title: "Thành tiền", width: "130px", template: "#= kendo.toString(totalAmount, 'n0') # VNĐ" },
                 { field: "note", title: "Ghi chú", width: "150px" },
                 {
                     title: "Thao tác",
@@ -1050,7 +1050,7 @@
                     width: "160px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
-                    template: "<span class='currency'>#: kendo.toString(totalPriceNoTax, 'n2') # VNĐ</span>",
+                    template: "<span class='currency'>#: kendo.toString(totalPriceNoTax, 'n0') # VNĐ</span>",
                 },
                 {
                     field: "totalPrice",
@@ -1058,7 +1058,7 @@
                     width: "150px",
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     attributes: { style: "text-align:right;" },
-                    template: "<span class='currency'>#: kendo.toString(totalPrice, 'n2') # VNĐ</span>",
+                    template: "<span class='currency'>#: kendo.toString(totalPrice, 'n0') # VNĐ</span>",
                 },
                 {
                     field: "updatedDate",
@@ -1304,7 +1304,7 @@
         });
 
         // Set default date range to last 1 week (user preference)
-        var today = new Date();
+        var today = EndDay();
         var oneWeekAgo = new Date();
         oneWeekAgo.setDate(today.getDate() - 7);
 
@@ -1483,7 +1483,7 @@
         // Bước 5: Tổng cuối cùng (tổng trước thuế + thuế)
         var finalAmount = totalBeforeTax + taxAmount;
 
-        $("#item-totalAmount").val(finalAmount.toFixed(2));
+        $("#item-totalAmount").val(finalAmount.toFixed(0));
     }
 
     function addItemToGrid() {
@@ -1591,8 +1591,8 @@
             totalPrice += totalBeforeTax + taxAmount;
         }
 
-        $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n2") + " VNĐ");
-        $("#po-totalPrice").val(kendo.toString(totalPrice, "n2") + " VNĐ");
+        $("#po-totalPriceNoTax").val(kendo.toString(totalPriceNoTax, "n0") + " VNĐ");
+        $("#po-totalPrice").val(kendo.toString(totalPrice, "n0") + " VNĐ");
     }
 
     function generateTempId() {
