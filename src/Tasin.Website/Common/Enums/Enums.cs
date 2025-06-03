@@ -108,6 +108,7 @@ namespace Tasin.Website.Common.Enums
         UPDATE_PURCHASE_AGREEMENT,
         DELETE_PURCHASE_AGREEMENT,
 
-
+        READ_REPORT_PO,
+        READ_REPORT_PA,
     }
 }

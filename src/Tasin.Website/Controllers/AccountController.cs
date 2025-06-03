@@ -194,7 +194,7 @@ namespace Tasin.Website.Controllers
                 #region Redirect after Login
                 if (returnUrl != null && Url.IsLocalUrl(returnUrl) && returnUrl != "/")
                     return Redirect(returnUrl);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "PurchaseOrder");
                 #endregion
             }
             else

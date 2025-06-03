@@ -298,7 +298,7 @@
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
                                 <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='create' title="Thêm" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id='create' title="Thêm" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='8'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
                                     <button id="downloadTemplate" title="Tải mẫu Excel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-info"><span class="k-icon k-i-download k-button-icon"></span><span class="k-button-text">Tải mẫu</span></button>
                                     <button id="importExcel" title="Import Excel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-warning _permission_" data-enum="16"><span class="k-icon k-i-upload k-button-icon"></span><span class="k-button-text">Import Excel</span></button>
                                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
@@ -444,10 +444,10 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         return '<div class="action-buttons">' +
-                            '<button onclick="editCustomer(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="8">' +
+                            '<button onclick="editCustomer(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="10">' +
                             '<i class="fas fa-edit"></i>' +
                             '</button>' +
-                            '<button onclick="deleteCustomer(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="9">' +
+                            '<button onclick="deleteCustomer(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="11">' +
                             '<i class="fas fa-trash"></i>' +
                             '</button>' +
                             '</div>';

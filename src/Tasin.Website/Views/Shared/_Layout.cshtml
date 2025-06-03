@@ -120,7 +120,7 @@
         </button>
 
         <div class="navbar-brand ps-0 ms-sm-0 text-decoration-none" style="flex: 1;">
-            <a class="d-flex align-items-center text-decoration-none" style="width: 184px;" href="/">
+            <a class="d-flex align-items-center text-decoration-none" style="width: 184px;" href="/PurchaseOrder/Index">
                 <img src="@AppSettings.WebsiteInfo.SiteUILogoUrl" style="height: 44px;">
                 <span id="titleHeader" class="text-primary text-decoration-none"
                     style="font-size: 18px;color:white !important; margin: 0; padding-left: 10px;">@AppSettings.WebsiteInfo.NameWebsite</span>
@@ -292,7 +292,7 @@
         function menu(EnumRoleList) {
 
             if (!EnumRoleList) return;
-            let listDanhMuc = [1, 5, 9, 13, 17, 21, 25, 29, 33, 37];
+            let listDanhMuc = [1, 5, 9, 13, 17, 21, 25, 29, 33];
             let html = "";
             if (EnumRoleList.find(e => listDanhMuc.includes(e))) {
                 html += ` <a id="category_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-category" aria-expanded="false" aria-controls="menu-category">
@@ -351,10 +351,11 @@
                 html += `<a class="nav-link  my-1 _permission_" data-enum="44" href="/PurchaseAgreement/PAGroupIndex">
                                 <i class="fa-solid fa-file-contract menu-icon"></i>
                                 Đơn tổng hợp
+                                <span id="count_PO"></span>
                             </a>`;
             }
             // Báo cáo menu
-            let listBaoCao = [41, 45]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
+            let listBaoCao = [48, 49]; // READ_PURCHASE_AGREEMENT, READ_PURCHASE_ORDER permissions
             if (EnumRoleList.find(e => listBaoCao.includes(e))) {
                 html += ` <a id="report_" class="nav-link my-1 collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#menu-report" aria-expanded="false" aria-controls="menu-report">
                                                 <div class="nav-link-icon"><i class="fa-solid fa-chart-line menu-icon"></i></div>
@@ -367,11 +368,11 @@
                             <div class="nav collapse" id="menu-report" data-bs-parent="#accordionSidenav">
                                  <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavReport">`;
 
-                if (EnumRoleList.find(e => e == 45)) { // READ_PURCHASE_AGREEMENT
-                    html += `<a class="nav-link _permission_" data-enum="45" href="/ProductOrderStatistics/Index"><i class="fa-solid fa-chart-bar submenu-icon"></i>Thống kê sản phẩm đặt hàng</a>`;
+                if (EnumRoleList.find(e => e == 48)) { // READ_PURCHASE_AGREEMENT
+                    html += `<a class="nav-link _permission_" data-enum="48" href="/ProductOrderStatistics/Index"><i class="fa-solid fa-chart-bar submenu-icon"></i>Thống kê sản phẩm đặt hàng</a>`;
                 }
-                if (EnumRoleList.find(e => e == 41)) { // READ_PURCHASE_ORDER
-                    html += `<a class="nav-link _permission_" data-enum="41" href="/ProductOrderStatistics/CustomerIndex"><i class="fa-solid fa-chart-pie submenu-icon"></i>Thống kê khách hàng đặt hàng</a>`;
+                if (EnumRoleList.find(e => e == 49)) { // READ_PURCHASE_ORDER
+                    html += `<a class="nav-link _permission_" data-enum="49" href="/ProductOrderStatistics/CustomerIndex"><i class="fa-solid fa-chart-pie submenu-icon"></i>Thống kê khách hàng đặt hàng</a>`;
                 }
 
                 html += `</nav>
@@ -479,6 +480,10 @@
                 () => {
                     location.href = 'Account/Logout';
                 }, false);
+
+            ajax("GET", "/PurchaseOrder/CountPO", null, (response) => {
+                $("#count_PO").text(response.data);
+            });
         });
     </script>
 </body>

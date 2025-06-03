@@ -53,7 +53,6 @@ namespace Tasin.Website.Common.Services
             get
             {
                 //TODO
-                return 1;
                 try
                 {
                     if (!IsAuthenticated)
@@ -85,7 +84,6 @@ namespace Tasin.Website.Common.Services
             get
             {
                 //TODO
-                return [];
                 try
                 {
                     if (!IsAuthenticated)

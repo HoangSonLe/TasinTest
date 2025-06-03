@@ -362,7 +362,7 @@
                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4 col-12 d-flex align-items-end">
                                 <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class = "k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary  k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='16' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
+                                    <button id='create' title="Thêm"  class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='0' ><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm</span></button>
                                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
@@ -508,13 +508,13 @@
                     headerAttributes: { style: "text-align: center; justify-content: center" },
                     template: function (dataItem) {
                         return '<div class="action-buttons">' +
-                            '<button onclick="editUser(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="8">' +
+                            '<button onclick="editUser(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="2">' +
                             '<i class="fas fa-edit"></i>' +
                             '</button>' +
-                            '<button onclick="deleteUser(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="9">' +
+                            '<button onclick="deleteUser(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="3">' +
                             '<i class="fas fa-trash"></i>' +
                             '</button>' +
-                            '<button onclick="resetPassword(' + dataItem.id + ')" title="Reset mật khẩu" class="btn-action btn-reset _permission_" data-enum="8">' +
+                            '<button onclick="resetPassword(' + dataItem.id + ')" title="Reset mật khẩu" class="btn-action btn-reset _permission_" data-enum="2">' +
                             '<i class="fas fa-lock"></i>' +
                             '</button>' +
                             '</div>';

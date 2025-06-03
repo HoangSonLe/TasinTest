@@ -923,7 +923,7 @@
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-end">
                                 <div class="pe-1 d-flex gap-2">
                                     <button id="search" title="Tìm kiếm" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary k-icon-button"><span class='k-icon k-i-search k-button-icon'></span><span class='k-button-text d-none'>Tìm kiếm</span></button>
-                                    <button id='create' title="Thêm đơn hàng mới" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='32'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm mới</span></button>
+                                    <button id='create' title="Thêm đơn hàng mới" class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-success _permission_' data-enum='40'><span class='k-icon k-i-plus k-button-icon'></span><span class='k-button-text'>Thêm mới</span></button>
                                     <button id="exportExcel" class="k-button k-button-md k-rounded-md k-button-outline k-button-outline-error"><span class="k-icon k-i-file-excel k-button-icon"></span><span class="k-button-text">Export Excel</span></button>
                                 </div>
                             </div>
@@ -1084,7 +1084,7 @@
 
                         // Show confirm button only for orders with status "New" (0)
                         if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
-                            confirmButton = '<button onclick="confirmPurchaseOrder(' + dataItem.id + ')" title="Xác nhận đơn hàng" class="btn-action btn-confirm _permission_" data-enum="33">' +
+                            confirmButton = '<button onclick="confirmPurchaseOrder(' + dataItem.id + ')" title="Xác nhận đơn hàng" class="btn-action btn-confirm _permission_" data-enum="42">' +
                                 '<i class="fas fa-check"></i>' +
                                 '</button>';
                         }
@@ -1092,7 +1092,7 @@
                         // Show cancel button only for orders with New (0) and Confirmed (1) statuses
                         if ((dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) ||
                             (dataItem.status === "Confirmed" || dataItem.status === "1" || dataItem.status === 1)) {
-                            cancelButton = '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="33">' +
+                            cancelButton = '<button onclick="cancelPurchaseOrder(' + dataItem.id + ')" title="Hủy đơn hàng" class="btn-action btn-cancel _permission_" data-enum="42">' +
                                 '<i class="fas fa-ban"></i>' +
                                 '</button>';
                         }
@@ -1100,7 +1100,7 @@
                         // Show delete button only for orders with New (0) status
                         var deleteButton = '';
                         if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
-                            deleteButton = '<button onclick="deletePurchaseOrder(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="34">' +
+                            deleteButton = '<button onclick="deletePurchaseOrder(' + dataItem.id + ')" title="Xoá" class="btn-action btn-delete _permission_" data-enum="43">' +
                                 '<i class="fas fa-trash"></i>' +
                                 '</button>';
                         }
@@ -1108,7 +1108,7 @@
                         // Show edit button only for orders with New (0) status
                         var editButton = '';
                         if (dataItem.status === "New" || dataItem.status === "0" || dataItem.status === 0) {
-                            editButton = '<button onclick="editPurchaseOrder(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="33">' +
+                            editButton = '<button onclick="editPurchaseOrder(' + dataItem.id + ')" title="Chỉnh sửa" class="btn-action btn-edit _permission_" data-enum="42">' +
                                 '<i class="fas fa-edit"></i>' +
                                 '</button>';
                         }

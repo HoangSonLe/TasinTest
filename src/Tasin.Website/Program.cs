@@ -311,7 +311,8 @@ try
 
     app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=PurchaseOrder}/{action=Index}/{id?}"
+            );//PurchaseOrder/Index
     //app.MapHub<ChatHub>("/chatHub");
     app.MapRazorPages();
     // Start the Telegram service

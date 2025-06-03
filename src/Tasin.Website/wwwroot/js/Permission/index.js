@@ -1,15 +1,15 @@
 function CheckPermission() {
     let permission = "._permission_";
-    //setTimeout(() => {
-    //    $(permission).toArray().forEach(e => {
-    //        let _enum = e?.dataset?.enum;
-    //        if (_enum) {
-    //            let findPermission = Userdata?.enumActionList?.find(i => i == _enum);
-    //            if (!findPermission) e.remove();
+    setTimeout(() => {
+        $(permission).toArray().forEach(e => {
+            let _enum = e?.dataset?.enum;
+            if (_enum) {
+                let findPermission = Userdata?.enumActionList?.find(i => i == _enum);
+                if (!(findPermission >= 0)) e.remove();
 
-    //        }
-    //    })
-    //},200);
+            }
+        })
+    },200);
 }
 
 function checkPermissionGroupExist(list, listPermission) { //["1","2"],["1","2","3","4"]
