@@ -292,6 +292,20 @@ try
         app.UseHsts();
     }
 
+
+    app.Use(async (context, next) =>
+    {
+        var path = context.Request.Path.Value?.ToLower();
+
+        if (path == "/" || path == "/home")
+        {
+            context.Response.Redirect("/PurchaseOrder/Index");
+            return;
+        }
+
+        await next();
+    });
+
     app.UseHttpsRedirection();
     app.UseStaticFiles();
 
@@ -312,7 +326,7 @@ try
     app.MapControllerRoute(
             name: "default",
             pattern: "{controller=PurchaseOrder}/{action=Index}/{id?}"
-            );//PurchaseOrder/Index
+    );
     //app.MapHub<ChatHub>("/chatHub");
     app.MapRazorPages();
     // Start the Telegram service
