@@ -84,6 +84,8 @@ namespace Tasin.Website.Common.Services
             get
             {
                 //TODO
+
+                return [];
                 try
                 {
                     if (!IsAuthenticated)
