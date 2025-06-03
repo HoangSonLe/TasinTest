@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
@@ -13,6 +14,7 @@ namespace Tasin.Website.Controllers
     /// <summary>
     /// Controller for managing special product tax rates
     /// </summary>
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class SpecialProductTaxRateController : BaseController<SpecialProductTaxRateController>

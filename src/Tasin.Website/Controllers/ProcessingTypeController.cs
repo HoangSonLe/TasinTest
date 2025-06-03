@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
 using Tasin.Website.Common.CommonModels.BaseModels;
@@ -13,6 +14,7 @@ namespace Tasin.Website.Controllers
     /// <summary>
     /// Controller for managing processing types
     /// </summary>
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class ProcessingTypeController : BaseController<ProcessingTypeController>

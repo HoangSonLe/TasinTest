@@ -293,18 +293,6 @@ try
     }
 
 
-    app.Use(async (context, next) =>
-    {
-        var path = context.Request.Path.Value?.ToLower();
-
-        if (path == "/" || path == "/home")
-        {
-            context.Response.Redirect("/PurchaseOrder/Index");
-            return;
-        }
-
-        await next();
-    });
 
     app.UseHttpsRedirection();
     app.UseStaticFiles();
@@ -322,6 +310,30 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.Use(async (context, next) =>
+    {
+        var path = context.Request.Path.Value?.ToLower();
+
+        if (path == "/" || path == "/home")
+        {
+            // Check if user is authenticated before redirecting
+            if (context.User.Identity?.IsAuthenticated == true)
+            {
+                context.Response.Redirect("/PurchaseOrder/Index");
+                return;
+            }
+            else
+            {
+                // If not authenticated, redirect to login with return URL
+                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                context.Response.Redirect($"/Account/Login?returnUrl={returnUrl}");
+                return;
+            }
+        }
+
+        await next();
+    });
 
     app.MapControllerRoute(
             name: "default",

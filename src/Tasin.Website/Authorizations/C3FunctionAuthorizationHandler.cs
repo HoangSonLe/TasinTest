@@ -14,6 +14,15 @@ namespace Tasin.Website.Authorizations
         }
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, C3FunctionAuthorizationRequirement requirement)
         {
+            // Check if user is authenticated first
+            if (context.User.Identity.IsAuthenticated == false)
+            {
+                // User is not authenticated, fail the requirement
+                // Let the BasicAuthorize attribute handle the login redirect
+                context.Fail();
+                return Task.CompletedTask;
+            }
+
             bool Succeed = false;
             var claim = context.User.FindFirst("Actions");
             var a = _httpContextAccessor.HttpContext.User.Claims;

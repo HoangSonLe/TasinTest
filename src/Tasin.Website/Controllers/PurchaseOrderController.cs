@@ -9,12 +9,14 @@ using Tasin.Website.DAL.Services.Interfaces;
 using Tasin.Website.DAL.Services.WebInterfaces;
 using Tasin.Website.Models.SearchModels;
 using Tasin.Website.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Tasin.Website.Controllers
 {
     /// <summary>
     /// Controller for managing purchase orders
     /// </summary>
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class PurchaseOrderController : BaseController<PurchaseOrderController>

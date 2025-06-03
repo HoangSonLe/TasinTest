@@ -17,6 +17,7 @@ namespace Tasin.Website.Controllers
     /// <summary>
     /// Controller for managing users
     /// </summary>
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class UserController : BaseController<UserController>

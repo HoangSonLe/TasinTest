@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
@@ -12,6 +13,7 @@ namespace Tasin.Website.Controllers
     /// <summary>
     /// Controller for managing product-vendor relationships
     /// </summary>
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     public class ProductVendorController : ControllerBase

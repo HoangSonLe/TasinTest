@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tasin.Website.Authorizations;
 using Tasin.Website.Common.CommonModels;
@@ -14,6 +15,7 @@ namespace Tasin.Website.Controllers
     /// Controller for product order statistics and reporting
     /// </summary>
     [ApiController]
+    [Authorize]
     [Produces("application/json")]
     public class ProductOrderStatisticsController : BaseController<ProductOrderStatisticsController>
     {

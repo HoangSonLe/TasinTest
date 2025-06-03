@@ -13,6 +13,7 @@ using Tasin.Website.Models.ViewModels;
 
 namespace Tasin.Website.Controllers
 {
+    [Authorize]
     [ApiController]
     public class ProductController : BaseController<ProductController>
     {
