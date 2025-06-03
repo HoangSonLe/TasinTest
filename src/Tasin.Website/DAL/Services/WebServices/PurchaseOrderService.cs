@@ -627,6 +627,39 @@ namespace Tasin.Website.DAL.Services.WebServices
             return ack;
         }
 
+        public async Task<Acknowledgement<int>> CountConfirmedPurchaseOrders()
+        {
+            var ack = new Acknowledgement<int>();
+            try
+            {
+                var predicate = PredicateBuilder.New<Purchase_Order>(true);
+
+                // Only get active purchase orders
+                predicate = predicate.And(p => p.IsActive);
+
+                // Only get confirmed purchase orders
+                predicate = predicate.And(p => p.Status == EPOStatus.Confirmed.ToString());
+
+                // Apply author predicate for user authorization
+                predicate = PurchaseOrderAuthorPredicate.GetPurchaseOrderAuthorPredicate(predicate, CurrentUserRoles, CurrentUserId);
+
+                // Get the list of confirmed purchase orders and count them
+                var confirmedOrders = await _purchaseOrderRepository.ReadOnlyRespository.GetAsync(
+                    filter: predicate
+                );
+
+                ack.Data = confirmedOrders.Count;
+                ack.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CountConfirmedPurchaseOrders failed: {ErrorMessage}", ex.Message);
+                ack.AddMessage(ex.Message);
+            }
+
+            return ack;
+        }
+
         public new void Dispose()
         {
             base.Dispose();

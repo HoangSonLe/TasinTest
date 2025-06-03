@@ -47,7 +47,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Product/GetProductList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<ProductViewModel>>>), 200)]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> GetProductList([FromQuery] ProductSearchModel searchModel, [FromQuery] int? excludeProductId = null)
         {
             try
@@ -74,7 +74,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Product/GetProductById/{productId}")]
         [ProducesResponseType(typeof(Acknowledgement<ProductViewModel>), 200)]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> GetProductById([FromRoute] int productId)
         {
             try
@@ -179,7 +179,7 @@ namespace Tasin.Website.Controllers
         /// <returns>List of products for dropdown</returns>
         [HttpGet]
         [Route("Product/GetProductDropdownList")]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         [ProducesResponseType(typeof(Acknowledgement<List<KendoDropdownListModel<string>>>), 200)]
         public async Task<IActionResult> GetProductDropdownList(string? searchString)
         {
@@ -207,7 +207,7 @@ namespace Tasin.Website.Controllers
         [HttpPost]
         [Route("Product/ImportExcel")]
         [ProducesResponseType(typeof(Acknowledgement<ProductExcelImportResult>), 200)]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PRODUCT])]
         public async Task<IActionResult> ImportExcel(IFormFile file)
         {
             try

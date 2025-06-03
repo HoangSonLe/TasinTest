@@ -28,7 +28,7 @@ namespace Tasin.Website.Controllers
             _customerService = customerService;
         }
 
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_USER])]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
         [HttpGet]
         [Route("Customer/Index")]
         public IActionResult Index()
@@ -47,7 +47,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Customer/GetCustomerList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<CustomerViewModel>>>), 200)]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
         public async Task<IActionResult> GetCustomerList([FromQuery] CustomerSearchModel searchModel)
         {
             var result = await _customerService.GetCustomerList(searchModel);
@@ -89,7 +89,7 @@ namespace Tasin.Website.Controllers
         [ProducesResponseType(typeof(Acknowledgement<CustomerViewModel>), 200)]
         [ProducesResponseType(404)]
         [Route("Customer/GetCustomerById/{userId}")]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_CUSTOMER])]
         public async Task<Acknowledgement<CustomerViewModel>> GetCustomerById(int userId)
         {
             var ack = await _customerService.GetCustomerById(userId);

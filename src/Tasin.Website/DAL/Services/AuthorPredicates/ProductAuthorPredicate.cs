@@ -12,24 +12,24 @@ namespace Tasin.Website.DAL.Services.AuthorPredicates
             var predicateInner = PredicateBuilder.New<Product>(predicate);
             
             // Phân quyền theo role
-            if (roleList.Contains(ERoleType.SystemAdmin) || roleList.Contains(ERoleType.Admin))
-            {
-                // Admin có thể xem tất cả
-                return predicateInner;
-            }
+            //if (roleList.Contains(ERoleType.SystemAdmin) || roleList.Contains(ERoleType.Admin))
+            //{
+            //    // Admin có thể xem tất cả
+            //    return predicateInner;
+            //}
             //else if (roleList.Contains(ERoleType.Reporter))
             //{
             //    // Reporter chỉ có thể xem, không thể sửa
             //    return predicateInner;
             //}
-            else if (roleList.Contains(ERoleType.User))
-            {
-                // User chỉ có thể xem những sản phẩm do mình tạo
-                if (currentUserId > 0)
-                {
-                    predicateInner = predicateInner.And(i => i.CreatedBy == currentUserId);
-                }
-            }
+            //else if (roleList.Contains(ERoleType.User))
+            //{
+            //    // User chỉ có thể xem những sản phẩm do mình tạo
+            //    if (currentUserId > 0)
+            //    {
+            //        predicateInner = predicateInner.And(i => i.CreatedBy == currentUserId);
+            //    }
+            //}
             
             return predicateInner;
         }

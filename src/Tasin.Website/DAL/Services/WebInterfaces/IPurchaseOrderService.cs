@@ -14,5 +14,6 @@ namespace Tasin.Website.DAL.Services.WebInterfaces
         Task<Acknowledgement> CreateOrUpdatePurchaseOrder(PurchaseOrderViewModel postData);
         Task<Acknowledgement> DeletePurchaseOrderById(int purchaseOrderId);
         Task<Acknowledgement> CancelPurchaseOrderById(int purchaseOrderId);
+        Task<Acknowledgement<int>> CountConfirmedPurchaseOrders();
     }
 }

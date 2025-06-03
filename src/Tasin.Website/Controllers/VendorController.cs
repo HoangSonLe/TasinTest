@@ -44,7 +44,7 @@ namespace Tasin.Website.Controllers
         [HttpGet]
         [Route("Vendor/GetVendorList")]
         [ProducesResponseType(typeof(Acknowledgement<JsonResultPaging<List<VendorViewModel>>>), 200)]
-        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_VENDOR])]
+        //[C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_VENDOR])]
         public async Task<IActionResult> GetVendorList([FromQuery] VendorSearchModel searchModel)
         {
             var result = await _vendorService.GetVendorList(searchModel);

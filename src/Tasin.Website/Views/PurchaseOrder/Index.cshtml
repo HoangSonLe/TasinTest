@@ -183,6 +183,7 @@
                         if (updateResponse.isSuccess) {
                             showSuccessMessages(["Xác nhận đơn hàng thành công!"]);
                             $(gridId).data("kendoGrid").dataSource.filter({});
+                            CountPO();
                         } else {
                             showErrorMessages(updateResponse.errorMessageList);
                         }

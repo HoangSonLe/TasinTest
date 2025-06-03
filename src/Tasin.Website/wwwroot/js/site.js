@@ -1,4 +1,37 @@
-﻿function filterCustom(item, input) {
+﻿function CountPO() {
+    $.ajax({
+        url: "/PurchaseOrder/CountPO",
+
+        success: function (response) {
+            if (response.data > 0) {
+                $("#count_PO").text(response.data);
+                $("#count_PO").attr("title", "Số đơn có thể tổng hợp là " + response.data);
+                $("#count_PO").css("display", "block")
+            } else {
+                $("#count_PO").text("");
+
+                $("#count_PO").attr("title", "");
+                $("#count_PO").css("display", "none");
+            }
+        }
+    });
+    //ajax("GET", "/PurchaseOrder/CountPO", null, (response) => {
+
+    //    if (response.data > 0) {
+    //        $("#count_PO").text(response.data);
+    //        $("#count_PO").attr("title", "Số đơn có thể tổng hợp là " + response.data);
+    //        $("#count_PO").css("display", "block")
+    //    } else {
+    //        $("#count_PO").text("");
+
+    //        $("#count_PO").attr("title", "");
+    //        $("#count_PO").css("display", "none");
+    //    }
+    //});
+}
+
+
+function filterCustom(item, input) {
     
     let nonUnicode = removeVietnameseTones(item);
     input = removeVietnameseTones(input);

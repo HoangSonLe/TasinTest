@@ -144,6 +144,21 @@ namespace Tasin.Website.Controllers
         }
 
         /// <summary>
+        /// Count confirmed purchase orders
+        /// </summary>
+        /// <returns>Count of confirmed purchase orders</returns>
+        /// <response code="200">Returns the count of confirmed purchase orders</response>
+        [HttpGet]
+        [Route("PurchaseOrder/CountPO")]
+        [ProducesResponseType(typeof(Acknowledgement<int>), 200)]
+        [C3FunctionAuthorization(true, functionIdList: [(int)EActionRole.READ_PURCHASE_ORDER])]
+        public async Task<IActionResult> CountPO()
+        {
+            var result = await _purchaseOrderService.CountConfirmedPurchaseOrders();
+            return Json(result);
+        }
+
+        /// <summary>
         /// Generate invoice from purchase order
         /// </summary>
         /// <param name="purchaseOrderId">Purchase order ID</param>
