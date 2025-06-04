@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Tasin Web Application
+  tasin-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tasin-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__TasinDB=Server=host.docker.internal;Port=5434;Database=Tasin;User Id=postgres;Password=123456;
+      - JWT__SecretKey=${JWT_SECRET_KEY:-$2a$10$v9n9Osb00.qmmslF0FOboOO4PP4NG5Cv8lDIFgOnLsyvCPpQUKaUG}
+      - TelegramToken=${TELEGRAM_TOKEN:-}
+      - EmailSettings__SmtpUser=${SMTP_USER:-}
+      - EmailSettings__SmtpPass=${SMTP_PASS:-}
+      - UrlWeb=${APP_URL:-http://localhost:8080/}
+      - FolderPathImage=/app/Files
+    volumes:
+      - app_files:/app/Files
+      - app_files_low_quality:/app/FilesWithLowQuality
+      - app_logs:/app/logs
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  app_files:
+    driver: local
+  app_files_low_quality:
+    driver: local
+  app_logs:
+    driver: local

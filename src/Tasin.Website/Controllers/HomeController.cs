@@ -44,9 +44,32 @@ namespace Tasin.Website.Controllers
         {
             return View();
         }
+
+        [AllowAnonymous]
+        public IActionResult TestStaticFiles()
+        {
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "test-static-files.html");
+            if (System.IO.File.Exists(filePath))
+            {
+                var content = System.IO.File.ReadAllText(filePath);
+                return Content(content, "text/html");
+            }
+            return NotFound("Test file not found");
+        }
+
+
+        [AllowAnonymous]
         public string Values()
         {
             return "Server is running";
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/health")]
+        public IActionResult Health()
+        {
+            return Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
         }
         public IActionResult QRCode()
         {

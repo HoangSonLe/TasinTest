@@ -294,8 +294,28 @@ try
 
 
 
-    app.UseHttpsRedirection();
-    app.UseStaticFiles();
+    // Configure static files with proper options for production
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            // Add cache headers for static files in production
+            if (!app.Environment.IsDevelopment())
+            {
+                ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+            }
+        }
+    });
+
+    // Ensure static files are served before HTTPS redirection in production
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
+    else
+    {
+        app.UseHttpsRedirection();
+    }
 
     // Allow Swagger without authorization
     app.MapSwagger();

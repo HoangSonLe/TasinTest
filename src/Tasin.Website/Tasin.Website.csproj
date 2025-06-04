@@ -47,10 +47,22 @@
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Views\**\*.cshtml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.Production.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\js\kendoGridResize\" />
     <Folder Include="wwwroot\js\Permission\" />
-	<Folder Include="wwwroot\js\NotificationForUser\" />
+    <Folder Include="wwwroot\js\NotificationForUser\" />
   </ItemGroup>
 
   <ItemGroup>
