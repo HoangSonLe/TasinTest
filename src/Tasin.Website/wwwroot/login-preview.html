@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login Form Preview</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- FontAwesome -->
+    <link href="lib/fontawesome-free-6.5.2-web/css/all.min.css" rel="stylesheet" />
+    <!-- Custom Login CSS -->
+    <link href="css/login/main.css" rel="stylesheet">
+    <link href="css/login/responsive.css" rel="stylesheet">
+    
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+</head>
+
+<body>
+    <!-- Begin page content -->
+    <div class="top-content" style="height: 100vh;">
+        <div class="inner-bg">
+            <div class="container">
+                <div class="row row-no-margin">
+                    <div class="empty"></div>
+                    <div class="login-form">
+                        <div class="form-top">
+                            <div class="form-top-left">
+                                <img src="https://via.placeholder.com/80x80/096b73/ffffff?text=LOGO" alt="Logo">
+                                <h3>Tasin Management System</h3>
+                            </div>
+                        </div>
+                        <div class="form-bottom">
+                            <form>
+                                <div class="form-group">
+                                    <label class="label" for="username">Tên đăng nhập</label>
+                                    <input type="text" placeholder="Tài khoản" 
+                                           class="form-user-name form-control w-100" 
+                                           id="username" name="username">
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="password">Mật khẩu</label>
+                                    <input type="password" placeholder="Mật khẩu" 
+                                           class="form-user-pass form-control w-100" 
+                                           id="password" name="password">
+                                    <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                                </div>
+                                
+                                <!-- Demo validation error -->
+                                <div class="validation-summary-errors" style="display: none;">
+                                    <ul>
+                                        <li>Sai tên đăng nhập hoặc mật khẩu. Bạn còn 2 lần đăng nhập</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Demo captcha (when login failed) -->
+                                <div class="form-group" style="display: none;" id="captcha-group">
+                                    <label class="label" for="captcha">Mã bảo mật</label>
+                                    <div class="row">
+                                        <div class="col-xs-7">
+                                            <input class="form-control" placeholder="Mã bảo mật" name="captcha" />
+                                        </div>
+                                        <div class="col-xs-5" style="padding-left: 0">
+                                            <img src="https://via.placeholder.com/120x35/e1e5e9/374151?text=CAPTCHA" />
+                                            <i class="fa fa-refresh" id="refreshCaptcha"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-login">Đăng Nhập</button>
+                                
+                                <!-- Demo buttons for testing states -->
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <button type="button" class="btn btn-sm" style="background: #6b7280; color: white; margin: 5px;" onclick="showError()">Show Error</button>
+                                    <button type="button" class="btn btn-sm" style="background: #6b7280; color: white; margin: 5px;" onclick="showCaptcha()">Show Captcha</button>
+                                    <button type="button" class="btn btn-sm" style="background: #6b7280; color: white; margin: 5px;" onclick="reset()">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        $(".toggle-password").click(function () {
+            $(this).toggleClass("fa-eye fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+        
+        // Demo functions
+        function showError() {
+            $('.validation-summary-errors').show();
+        }
+        
+        function showCaptcha() {
+            $('#captcha-group').show();
+        }
+        
+        function reset() {
+            $('.validation-summary-errors').hide();
+            $('#captcha-group').hide();
+            $('input').val('');
+        }
+        
+        // Refresh captcha demo
+        $("#refreshCaptcha").on("click", function () {
+            var img = $(this).parent().children("img")[0];
+            img.src = "https://via.placeholder.com/120x35/e1e5e9/374151?text=NEW" + Math.random();
+        });
+    </script>
+</body>
+</html>

@@ -55,10 +55,51 @@
 
 @media (max-width: 480px) {
 	.login-form {
-		width: 80%;
-		height: 70%;
+		width: 90%;
+		min-width: 280px;
+		padding: 30px 20px;
+		border-radius: 16px;
 	}
-	.insertImage{
-		display:none;
+
+	.form-top h3 {
+		font-size: 20px;
+	}
+
+	.form-top img {
+		width: 60px;
+		height: 60px;
+	}
+
+	.form-user-name,
+	.form-user-pass {
+		height: 48px !important;
+		font-size: 16px !important;
+		padding: 0 16px !important;
+	}
+
+	.btn-login {
+		height: 48px;
+		font-size: 16px;
+	}
+
+	.toggle-password {
+		right: 16px;
+		bottom: 16px;
+	}
+
+	.insertImage {
+		display: none;
+	}
+}
+
+/* Additional responsive improvements */
+@media (max-width: 320px) {
+	.login-form {
+		width: 95%;
+		padding: 25px 15px;
+	}
+
+	.form-top h3 {
+		font-size: 18px;
 	}
 }

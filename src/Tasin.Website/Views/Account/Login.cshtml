@@ -106,22 +106,15 @@
                 <div class="row row-no-margin">
                     <div class="empty">
                     </div>
-                    <div class="col-sm-5 col-md-3 col-4 form-box wow login-form pull-right" style="
-                            backdrop-filter:blur(5px);background-color: rgba(255, 255, 255, 0.9);align-items: center;
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: center;">
+                    <div class="login-form">
 
                         <div class="form-top">
-                            <div class="form-top-left" style="width: 100%; text-align: center;">
-                                <img src="@AppSettings.WebsiteInfo.SiteUILogin" style="height: 80px;">
-                                <h3 style="margin: 0; padding: 10px 0;">@AppSettings.WebsiteInfo.NameWebsite</h3>
-                            </div>
-                            <div class="form-top-right">
-                                <span aria-hidden="true" class="typcn typcn-pencil"></span>
+                            <div class="form-top-left">
+                                <img src="@AppSettings.WebsiteInfo.SiteUILogin">
+                                <h3>@AppSettings.WebsiteInfo.NameWebsite</h3>
                             </div>
                         </div>
-                        <div class="form-bottom w-sm-75 w-xs-75 w-100">
+                        <div class="form-bottom">
                             @if (isLock)
                             {
                                 <div class="validation-summary-warning">
@@ -140,8 +133,7 @@
                                     <input type="text" maxlength="50" placeholder="Tài khoản"
                                         class="form-user-name form-control w-100" name="UserName" id="username"
                                         value="@ViewBag.Username">
-                                    <span asp-validation-for="UserName" class="text-danger"
-                                        style="font-size:12px !important"></span>
+                                    <span asp-validation-for="UserName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label class="label" for="password">Mật khẩu</label>
@@ -149,8 +141,7 @@
                                         class="form-user-pass form-control w-100" name="Password" id="password"
                                         value="@ViewBag.Password">
                                     <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                                    <span asp-validation-for="Password" class="text-danger"
-                                        style="font-size:12px !important"></span>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
                                 </div>
                                 <input hidden name="IsMobile" id="isMobile" />
 
@@ -170,8 +161,7 @@
                                         </div>
                                     </div>
                                 }
-                                <div asp-validation-summary="ModelOnly" class="text-danger  mt-2"
-                                    style="font-size: 14px;"></div>
+                                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
                                 @*  <div class="form-links">
                                 <div class="form-check">
                                 @if (ViewBag.Rememberme == true)
@@ -497,25 +487,7 @@
     </script>
     @if (numOfLoginFailed > 0)
     {
-        <style type="text/css">
-            #refreshCaptcha {
-                margin-left: 5px;
-            }
 
-            #refreshCaptcha:hover {
-                cursor: pointer;
-                color: blue;
-            }
-
-            .validation-summary-errors ul,
-            .validation-summary-warning ul {
-                padding-left: 15px;
-            }
-
-            .validation-summary-warning ul {
-                color: #6f6200;
-            }
-        </style>
 
 
 

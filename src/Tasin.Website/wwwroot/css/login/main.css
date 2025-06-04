@@ -1,5 +1,5 @@
-/*********** This is CSS for main site ****************************************************************************
-* - 1. General 
+/*********** Modern Login Form CSS ****************************************************************************
+* - 1. General
 * - 2. Header
 * - 3. Main Body
 * - 4. Footer
@@ -9,16 +9,72 @@
 
 /**** 1. General *****
 **********/
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #414141;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #096b73 0%, #0c98a2 50%, #14b8c4 100%);
     margin: 0;
     padding: 0;
     height: 100vh;
     width: 100vw;
     box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Background overlay pattern */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    animation: backgroundShift 20s ease-in-out infinite;
+}
+
+/* Floating animation for background */
+@keyframes backgroundShift {
+    0%, 100% {
+        transform: translateX(0) translateY(0);
+    }
+    25% {
+        transform: translateX(10px) translateY(-10px);
+    }
+    50% {
+        transform: translateX(-5px) translateY(10px);
+    }
+    75% {
+        transform: translateX(-10px) translateY(-5px);
+    }
+}
+
+/* Form entrance animation */
+@keyframes formSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0) scale(1);
+    }
+}
+
+/* Input focus animation */
+@keyframes inputFocus {
+    from {
+        box-shadow: 0 0 0 0 rgba(9, 107, 115, 0.1);
+    }
+    to {
+        box-shadow: 0 0 0 3px rgba(9, 107, 115, 0.1);
+    }
 }
 
 /**** 2. Header *****
@@ -86,106 +142,184 @@ body {
 }
 
 .login-form {
-    border-radius: 4px;
-    box-shadow: 0px 0.5px 60px 0px rgba(63, 69, 87, 0.15);
-    background-color: rgba(255, 255, 255, 1);
-    /* margin-top: 30px;*/
-    padding: 0 2px 30px;
-    /*width: 25%;*/
-    height: 50%;
-    min-width: 300px;
-    max-width: 800px;
+    border-radius: 20px;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 10px 20px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 30px;
+    min-width: 320px;
+    max-width: 420px;
+    width: 90%;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    z-index: 10;
+    animation: formSlideIn 0.6s ease-out;
+}
+
+.login-form:hover {
+    transform: translate(-50%, -50%) translateY(-5px);
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 15px 30px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .form-top {
-    /*padding-bottom: 20px;*/
-    /*border-bottom: 3px solid #fdb500;*/
-    /*margin-bottom: 32px;*/
-    padding: 0 28px;
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0;
 }
 
-    .form-top h3 {
-        color: #222A47;
-        /*color: #000;*/
-        font-size: 20px;
-        font-weight: 800;
-        /*text-transform: uppercase;*/
-        padding-top: 24px;
-    }
+.form-top img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.form-top h3 {
+    color: #096b73;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    letter-spacing: -0.5px;
+}
 
 .form-bottom {
-    padding: 0 28px;
+    padding: 0;
 }
 
 .form-group {
     position: relative;
-    margin-bottom: 0px !important;
+    margin-bottom: 20px !important;
 }
 
 .form-control {
-    border: 1px solid #d6d7e2 !important;
-    border-radius: 2px !important;
+    border: 2px solid #e1e5e9 !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+.form-control:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 3px rgba(9, 107, 115, 0.1) !important;
+    background: rgba(255, 255, 255, 1) !important;
+    outline: none !important;
+    animation: inputFocus 0.3s ease-out;
 }
 
 .toggle-password {
-    bottom: 14px;
-    color: #000000;
+    bottom: 18px;
+    color: #6b7280;
     position: absolute;
-    right: 15px;
-    font-size: 12px;
-    letter-spacing: .5px;
-    scale: 1.25;
+    right: 18px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    z-index: 5;
 }
 
-    .toggle-password img {
-        margin-right: 14px;
-    }
+.toggle-password:hover {
+    color: #096b73;
+}
+
+.toggle-password img {
+    margin-right: 14px;
+}
 
 .label {
-    /*color: #ffffff;*/
-    color: #000;
+    color: #374151;
     display: block;
     font-size: 14px;
     font-weight: 500;
-    margin-top: 20px;
-    padding: 0 0 8px;
+    margin-bottom: 8px;
+    margin-top: 0;
+    padding: 0;
     text-align: left;
 }
 
 .form-user-name,
 .form-user-pass {
-    background-color: #ffffff !important;
-    border-radius: 2px;
-    border: solid 1px #5E5E5E;
-    height: 36px;
-    font-size: 12px;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 12px !important;
+    border: 2px solid #e1e5e9 !important;
+    height: 50px !important;
+    font-size: 16px !important;
+    padding: 0 18px !important;
+    transition: all 0.3s ease !important;
 }
 
-input[type=text] {
-    color: #000;
-    font-size: 14px;
+.form-user-name:focus,
+.form-user-pass:focus {
+    border-color: #096b73 !important;
+    box-shadow: 0 0 0 3px rgba(9, 107, 115, 0.1) !important;
+    background-color: rgba(255, 255, 255, 1) !important;
+}
+
+input[type=text],
+input[type=password] {
+    color: #374151;
+    font-size: 16px;
 }
 
 .btn-login {
-    background: rgba(35, 48, 82, 1);
-    border-radius: 2px;
+    background: linear-gradient(135deg, #096b73 0%, #0c98a2 100%);
+    border: none;
+    border-radius: 12px;
     color: #ffffff;
-    font-size: 14px;
-    font-weight: bold;
-    height: 36px;
-    letter-spacing: .5px;
+    font-size: 16px;
+    font-weight: 600;
+    height: 50px;
+    letter-spacing: 0.5px;
     margin-top: 25px;
-    text-transform: uppercase;
     width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-    .btn-login:hover {
-        color: #fff;
-    }
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-login:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(9, 107, 115, 0.3);
+}
+
+.btn-login:hover::before {
+    left: 100%;
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+.btn-login:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 
 .form-links {
     margin-top: 20px;
@@ -207,11 +341,67 @@ input[type=text] {
     font-size: 13px;
 }
 
+/* Placeholder styling */
 ::-webkit-input-placeholder,
 :-ms-input-placeholder,
 ::placeholder {
-    color: #9b9b9b;
-    letter-spacing: .5px;
+    color: #9ca3af;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* Validation styling */
+.text-danger {
+    color: #ef4444 !important;
+    font-size: 13px !important;
+    margin-top: 5px;
+    display: block;
+}
+
+.validation-summary-errors,
+.validation-summary-warning {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.validation-summary-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.validation-summary-errors ul,
+.validation-summary-warning ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.validation-summary-warning ul {
+    color: #d97706;
+}
+
+/* Captcha styling */
+.form-group .row {
+    align-items: center;
+}
+
+.form-group img {
+    border-radius: 8px;
+    border: 2px solid #e1e5e9;
+}
+
+#refreshCaptcha {
+    margin-left: 10px;
+    color: #096b73;
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+#refreshCaptcha:hover {
+    color: #0c98a2;
 }
 
 /**** 4. Footer *****
