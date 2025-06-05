@@ -9,12 +9,12 @@ COPY src/Tasin.Website/Tasin.Website.csproj ./src/Tasin.Website/
 # Restore dependencies
 RUN dotnet restore
 
-# Copy all source code
-COPY . .
+# Copy all source code (excluding obj and bin folders)
+COPY src/ ./src/
 
 # Build and publish the application
 WORKDIR /src/src/Tasin.Website
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN rm -rf obj bin && dotnet restore && dotnet publish -c Release -o /app/publish
 
 # Use the official .NET 8.0 runtime image for running
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime

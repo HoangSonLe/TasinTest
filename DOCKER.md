@@ -42,7 +42,7 @@ This document provides instructions for building and running the Tasin.Website a
 
 ### Build Image
 ```bash
-docker build -f src/Tasin.Website/Dockerfile -t tasin-website:latest .
+docker build -f src/Tasin.Website/Dockerfile -t tasin-website:latest . --no-cache
 ```
 
 ### Run Container
