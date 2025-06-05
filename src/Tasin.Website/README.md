@@ -34,12 +34,17 @@ dotnet run --project src/Tasin.Website/
 ```bash
 # Build Docker image
 docker build -t tasin-web .
+# Sử dụng Dockerfile trong thư mục src/Tasin.Website/
+docker build -f src/Tasin.Website/Dockerfile -t tasin-web .
 
 # Chạy container (cần PostgreSQL external)
-docker run -d --name tasin-web -p 8080:8080 \
-  -e ASPNETCORE_ENVIRONMENT=Production \
-  -e "ConnectionStrings__TasinDB=Server=host.docker.internal;Port=5434;Database=Tasin;User Id=postgres;Password=123456;" \
+docker run -d --name tasin-web -p 8080:8080
+  -e ASPNETCORE_ENVIRONMENT=Production
+  -e "ConnectionStrings__TasinDB=Server=host.docker.internal;Port=5434;Database=Tasin;User Id=postgres;Password=123456;"
   tasin-web
+```
+```bash
+docker run -d --name tasin-web -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Production -e "ConnectionStrings__TasinDB=Server=ep-white-leaf-a85po2ip-pooler.eastus2.azure.neon.tech;Port=5432;Database=neondb;User Id=neondb_owner;Password=npg_iZt7zRJPInk3;Ssl Mode=Require;Trust Server Certificate=true;Options=endpoint=ep-white-leaf-a85po2ip-pooler;" tasin-web
 ```
 
 Ứng dụng sẽ chạy tại: http://localhost:8080
@@ -201,6 +206,9 @@ docker-compose logs -f tasin-web
 # Hoặc manual
 docker stop tasin-web && docker rm tasin-web
 docker build -t tasin-web .
+
+docker build -f src/Tasin.Website/Dockerfile -t tasin-web .
+
 docker run -d --name tasin-web -p 8080:8080 \
   -e ASPNETCORE_ENVIRONMENT=Production \
   -e "ConnectionStrings__TasinDB=Server=host.docker.internal;Port=5434;Database=Tasin;User Id=postgres;Password=123456;" \
