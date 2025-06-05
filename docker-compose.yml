@@ -5,7 +5,7 @@ services:
   tasin-web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/Tasin.Website/Dockerfile
     container_name: tasin-web
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
@@ -25,11 +25,33 @@ services:
       - "8080:8080"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+    depends_on:
+      - postgres
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: tasin-postgres
+    environment:
+      - POSTGRES_DB=Tasin
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/Tasin.Website/Database:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   app_files:
@@ -37,4 +59,6 @@ volumes:
   app_files_low_quality:
     driver: local
   app_logs:
+    driver: local
+  postgres_data:
     driver: local
