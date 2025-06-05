@@ -614,7 +614,7 @@ function callbackErrorFunc(response, callbackError) {
     showErrorMessages(response.errorMessageList);
     typeof callbackError == "function" && callbackError(response);
 }
-function ajax(method = "GET", url = "", data, callbackSuccess, callbackError, isShowSuccessAlert = true) {
+function ajax(method = "GET", url = "", data, callbackSuccess, callbackError, isShowSuccessAlert = true, showLoadingIndicator = true) {
     let loadingTimeout;
     return $.ajax({
         url: url,
@@ -623,7 +623,9 @@ function ajax(method = "GET", url = "", data, callbackSuccess, callbackError, is
         contentType: "application/json",
         data: method == "GET" ? data : JSON.stringify(data),
         beforeSend: function () {
-            loadingTimeout = setTimeout(showLoading, 200); 
+            if (showLoadingIndicator) {
+                loadingTimeout = setTimeout(showLoading, 200);
+            }
         },
         success: function (response) {
             if (response.isSuccess) {
@@ -643,12 +645,14 @@ function ajax(method = "GET", url = "", data, callbackSuccess, callbackError, is
                     message: "Lỗi"
                 }, "error");
             }
-           
+
             console.log("response", response);
         },
         complete: function () {
-            clearTimeout(loadingTimeout); // Clear the timeout to prevent the loading indicator from showing
-            hideLoading();
+            if (showLoadingIndicator) {
+                clearTimeout(loadingTimeout); // Clear the timeout to prevent the loading indicator from showing
+                hideLoading();
+            }
         }
     });
 }
